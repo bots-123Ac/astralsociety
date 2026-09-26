@@ -11,6 +11,7 @@ from keyboards.main_menu import back_kb
 from keyboards.study_kb import SUBJECTS
 from utils.permissions import is_admin
 from utils.database import save_material
+from utils.ui import smart_edit
 
 router = Router()
 
@@ -46,7 +47,7 @@ async def admin_add_category(cb: CallbackQuery, state: FSMContext):
     await state.update_data(category=category)
     await state.set_state(AdminUpload.edu)
     text = f"📚 ᴧᴅᴅiηɢ: <b>{category.upper()}</b>\n\nsєʟєᴄᴛ єᴅᴜᴄᴧᴛiση тʏᴩє:"
-    await cb.message.edit_text(text, reply_markup=admin_edu_kb(category))
+    await smart_edit(cb, text, admin_edu_kb(category))
     await cb.answer()
 
 
@@ -55,15 +56,14 @@ async def admin_pick_edu(cb: CallbackQuery, state: FSMContext):
     _, category, edu = cb.data.split(":")
     await state.update_data(edu=edu)
     if edu in ("jee", "neet"):
-        # Skip class
         await state.update_data(cls="na")
         subjects = SUBJECTS.get((edu, "na"), [])
         await state.set_state(AdminUpload.subject)
         text = f"sєʟєᴄᴛ sᴜвᴊєᴄᴛ ({edu.upper()}):"
-        await cb.message.edit_text(text, reply_markup=admin_subject_kb(category, edu, "na", subjects))
+        await smart_edit(cb, text, admin_subject_kb(category, edu, "na", subjects))
     else:
         await state.set_state(AdminUpload.cls)
-        await cb.message.edit_text("sєʟєᴄᴛ ᴄʟᴧss:", reply_markup=admin_class_kb(category, edu))
+        await smart_edit(cb, "sєʟєᴄᴛ ᴄʟᴧss:", admin_class_kb(category, edu))
     await cb.answer()
 
 
@@ -74,7 +74,7 @@ async def admin_pick_class(cb: CallbackQuery, state: FSMContext):
     subjects = SUBJECTS.get((edu, cls), [])
     await state.set_state(AdminUpload.subject)
     text = f"sєʟєᴄᴛ sᴜвᴊєᴄᴛ (ᴄʟᴧss {cls}):"
-    await cb.message.edit_text(text, reply_markup=admin_subject_kb(category, edu, cls, subjects))
+    await smart_edit(cb, text, admin_subject_kb(category, edu, cls, subjects))
     await cb.answer()
 
 
@@ -85,7 +85,7 @@ async def admin_pick_subject(cb: CallbackQuery, state: FSMContext):
     await state.update_data(subject=subject)
     await state.set_state(AdminUpload.chapter)
     text = f"sᴜвᴊєᴄᴛ: <b>{subject}</b>\n\nsєηᴅ ᴄнᴧᴩᴛєʀ ηᴧϻє (тєxт ϻєssᴧɢє):"
-    await cb.message.edit_text(text, reply_markup=back_kb("admin:cancel"))
+    await smart_edit(cb, text, back_kb("admin:cancel"))
     await cb.answer()
 
 
@@ -126,7 +126,7 @@ async def admin_get_file(message: Message, state: FSMContext):
         f"ᴄᴧᴛєɢσʀʏ: {data['category']}\n"
         f"єᴅᴜ: {data['edu'].upper()}\n"
         f"ᴄʟᴧss: {data['cls']}\n"
-        f"sᴜвᴊєᴄᴛ: {data['subject']}\n"
+        f"sᴜʙᴊєᴄᴛ: {data['subject']}\n"
         f"ᴄнᴧᴩᴛєʀ: {data['chapter']}",
         reply_markup=admin_panel_kb()
     )
@@ -135,7 +135,7 @@ async def admin_get_file(message: Message, state: FSMContext):
 @router.callback_query(F.data == "admin:cancel")
 async def admin_cancel(cb: CallbackQuery, state: FSMContext):
     await state.clear()
-    await cb.message.edit_text("❌ ᴄᴧηᴄєʟʟєᴅ.", reply_markup=admin_panel_kb())
+    await smart_edit(cb, "❌ ᴄᴧηᴄєʟʟєᴅ.", admin_panel_kb())
     await cb.answer()
 
 
