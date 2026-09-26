@@ -1,12 +1,10 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
 
-from config import (
-    BOT_NAME, BOT_USERNAME, SUPPORT_GROUP_NAME, SUPPORT_CHANNEL_NAME,
-)
+from config import BOT_NAME, BOT_USERNAME
 from keyboards.main_menu import main_menu_kb, back_kb
 from keyboards.games_kb import game_lb_menu_kb
-from utils.database import get_balance
+from utils.database import get_user_stats
 from utils.ui import smart_edit
 
 router = Router()
@@ -17,6 +15,10 @@ async def back_to_main(cb: CallbackQuery):
     text = (
         f"👋 нi, <b>{cb.from_user.first_name}</b>!\n\n"
         f"ᴡєʟᴄσϻє тσ <b>{BOT_NAME}</b> 🌌\n\n"
+        f"ʏσᴜʀ ᴧʟʟ-iη-σηє ᴛєʟєɢʀᴧϻ ᴄσϻᴩᴧηiση ғσʀ:\n\n"
+        f"🎓 sᴛᴜᴅʏ\n"
+        f"🛡️ ɢʀσᴜᴩ ϻᴧηᴧɢєϻєηᴛ\n"
+        f"🎮 ɢᴧϻєs & єηᴛєʀᴛᴧiηϻєηᴛ\n\n"
         f"ᴄнσσsє ᴧη σᴩᴛiση вєʟσᴡ 👇"
     )
     await smart_edit(cb, text, main_menu_kb())
@@ -73,16 +75,17 @@ async def kidnap_me(cb: CallbackQuery):
 
 @router.callback_query(F.data == "menu:profile")
 async def show_profile(cb: CallbackQuery):
-    bal = await get_balance(cb.from_user.id)
-    coins, points = (bal if bal else (0, 0))
+    coins, points, gp, ts = await get_user_stats(cb.from_user.id)
     text = (
         f"👤 <b>ʏσᴜʀ ᴩʀσғiʟє</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"ηᴧϻє: {cb.from_user.first_name}\n"
         f"ᴜsєʀηᴧϻє: @{cb.from_user.username or 'ησηє'}\n"
         f"iᴅ: <code>{cb.from_user.id}</code>\n\n"
-        f"🪙 ᴄσiηs: <b>{coins}</b>\n"
-        f"⭐ ᴩσiηᴛs: <b>{points}</b>"
+        f"🪙 ᴧsᴛʀᴧʟ ᴄσiηs: <b>{coins}</b>\n"
+        f"⭐ ᴧsᴛʀᴧʟ ᴩσiηᴛs: <b>{points}</b>\n"
+        f"🎮 ɢᴧϻєs ᴩʟᴧʏєᴅ: <b>{gp}</b>\n"
+        f"🏆 ᴛσᴛᴧʟ sᴄσʀє: <b>{ts}</b>"
     )
     await smart_edit(cb, text, back_kb())
     await cb.answer()
@@ -90,6 +93,6 @@ async def show_profile(cb: CallbackQuery):
 
 @router.callback_query(F.data == "menu:leaderboard")
 async def show_lb_menu(cb: CallbackQuery):
-    text = "🏆 <b>ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧ ɢᴧϻє:"
+    text = "🏆 <b>ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧ ɢᴧᴍє:"
     await smart_edit(cb, text, game_lb_menu_kb())
     await cb.answer()
