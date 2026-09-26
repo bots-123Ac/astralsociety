@@ -1,5 +1,4 @@
 import random
-import time
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
@@ -13,6 +12,7 @@ from keyboards.main_menu import back_kb
 from utils.database import (
     get_balance, add_coins, add_points, save_game_score, get_leaderboard,
 )
+from utils.ui import smart_edit
 
 router = Router()
 
@@ -33,7 +33,7 @@ async def show_games(cb: CallbackQuery):
         "єᴧᴄн ɢᴧϻє нᴧs its σᴡη єᴄσησϻʏ, "
         "ᴜᴩɢʀᴧᴅєs & ʟєᴧᴅєʀвσᴧʀᴅ."
     )
-    await cb.message.edit_text(text, reply_markup=games_main_kb())
+    await smart_edit(cb, text, games_main_kb())
     await cb.answer()
 
 
@@ -48,10 +48,10 @@ async def fortune_menu(cb: CallbackQuery):
         "🎰 <b>ᴧsᴛʀᴧʟ ғσʀᴛᴜηє</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"💰 ʏσᴜʀ ᴄσiηs: <b>{coins}</b>\n\n"
-        "🎲 ʀσʟʟ ᴛнє ᴅiᴄє — iғ ʏσᴜ ɢєᴛ 4, 5, σʀ 6, ʏσᴜ ᴅσᴜвʟє!\n\n"
+        "🎲 ʀσʟʟ тнє ᴅiᴄє — iғ ʏσᴜ ɢєᴛ 4, 5, σʀ 6, ʏσᴜ ᴅσᴜвʟє!\n\n"
         "ᴄнσσsє ʙєᴛ:"
     )
-    await cb.message.edit_text(text, reply_markup=fortune_kb())
+    await smart_edit(cb, text, fortune_kb())
     await cb.answer()
 
 
@@ -68,7 +68,7 @@ async def fortune_play(cb: CallbackQuery):
     roll = random.randint(1, 6)
     if roll >= 4:
         winnings = bet * 2
-        await add_coins(cb.from_user.id, winnings - bet)  # net gain
+        await add_coins(cb.from_user.id, winnings - bet)
         await add_points(cb.from_user.id, 5)
         await save_game_score(cb.from_user.id, "fortune", winnings)
         result = f"🎉 ʏᴏᴜ ʀᴏʟʟᴇᴅ <b>{roll}</b>!\n💰 ʏᴏᴜ ᴡᴏɴ <b>{winnings} ᴄᴏɪɴs</b>!"
@@ -85,7 +85,7 @@ async def fortune_play(cb: CallbackQuery):
         f"💰 ηєᴡ ʙᴧʟᴧηᴄє: <b>{new_bal[0]}</b> ᴄσiηs\n\n"
         "ᴡᴧηηᴧ ᴩʟᴧʏ ᴧɢᴧiη?"
     )
-    await cb.message.edit_text(text, reply_markup=fortune_kb())
+    await smart_edit(cb, text, fortune_kb())
     await cb.answer()
 
 
@@ -98,11 +98,11 @@ async def arena_menu(cb: CallbackQuery, state: FSMContext):
     text = (
         "⚔️ <b>ᴧsᴛʀᴧʟ ᴧʀєηᴧ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "👤 ʏσᴜ:  ██████████ 100 нᴩ\n"
+        "👤 ʏσᴜ:  ██████████ 100 нᴩ\ n"
         "🤖 вσᴛ:  ██████████ 100 нᴩ\n\n"
         "ᴄнσσsє ʏσᴜʀ ᴧᴄᴛiση:"
-    )
-    await cb.message.edit_text(text, reply_markup=arena_kb())
+    ).replace("\\ n", "\n")
+    await smart_edit(cb, text, arena_kb())
     await cb.answer()
 
 
@@ -120,7 +120,6 @@ async def arena_attack(cb: CallbackQuery, state: FSMContext):
     bot_hp -= player_dmg
 
     if bot_hp <= 0:
-        # Win
         reward = 100
         await add_coins(cb.from_user.id, reward)
         await add_points(cb.from_user.id, 10)
@@ -134,7 +133,7 @@ async def arena_attack(cb: CallbackQuery, state: FSMContext):
             f"🎉 <b>ᴠiᴄᴛσʀʏ!</b>\n"
             f"💰 +{reward} ᴄσiηs | ⭐ +10 ᴩσiηᴛs"
         )
-        await cb.message.edit_text(text, reply_markup=arena_kb())
+        await smart_edit(cb, text, arena_kb())
         await cb.answer("🎉 ᴠɪᴄᴛᴏʀʏ!")
         return
 
@@ -151,7 +150,7 @@ async def arena_attack(cb: CallbackQuery, state: FSMContext):
             f"🤖 вσᴛ ᴅєᴧʟᴛ <b>{bot_dmg}</b>\n\n"
             f"💀 <b>ᴅєғєᴧᴛ!</b>"
         )
-        await cb.message.edit_text(text, reply_markup=arena_kb())
+        await smart_edit(cb, text, arena_kb())
         await cb.answer("💀 ʏᴏᴜ ʟᴏsᴛ!")
         return
 
@@ -167,9 +166,8 @@ async def arena_attack(cb: CallbackQuery, state: FSMContext):
         f"🤖 вσᴛ:  {b_bar} {bot_hp} нᴩ\n\n"
         f"🗡️ ʏᴏᴜ ᴅєᴧʟᴛ <b>{player_dmg}</b> | 🤖 вσᴛ ᴅєᴧʟᴛ <b>{bot_dmg}</b>\n\n"
         "ᴄнσσsє ʏσᴜʀ ᴧᴄᴛiση:"
-    )
-    text = text.replace("\\ n", "\n")
-    await cb.message.edit_text(text, reply_markup=arena_kb())
+    ).replace("\\ n", "\n")
+    await smart_edit(cb, text, arena_kb())
     await cb.answer()
 
 
@@ -185,19 +183,18 @@ async def arena_defend(cb: CallbackQuery, state: FSMContext):
     player_hp -= bot_dmg
     await state.update_data(player_hp=player_hp, bot_hp=bot_hp)
 
-    p_bar = "█" * (max(player_hp,0) // 10) + "░" * (10 - max(player_hp,0) // 10)
+    p_bar = "█" * (max(player_hp, 0) // 10) + "░" * (10 - max(player_hp, 0) // 10)
     b_bar = "█" * (bot_hp // 10) + "░" * (10 - bot_hp // 10)
 
     text = (
         "⚔️ <b>ᴧsᴛʀᴧʟ ᴧʀєηᴧ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"👤 ʏσᴜ:  {p_bar} {max(player_hp,0)} нᴩ\ n"
+        f"👤 ʏσᴜ:  {p_bar} {max(player_hp, 0)} нᴩ\ n"
         f"🤖 вσᴛ:  {b_bar} {bot_hp} нᴩ\n\n"
         f"🛡️ ʏᴏᴜ ᴅєғєηᴅєᴅ! 🤖 вσᴛ ᴅєᴧʟᴛ <b>{bot_dmg}</b>\n\n"
         "ᴄнσσsє ʏσᴜʀ ᴧᴄᴛiση:"
-    )
-    text = text.replace("\\ n", "\n")
-    await cb.message.edit_text(text, reply_markup=arena_kb())
+    ).replace("\\ n", "\n")
+    await smart_edit(cb, text, arena_kb())
     await cb.answer()
 
 
@@ -214,7 +211,7 @@ async def beast_menu(cb: CallbackQuery):
         "ғєєᴅ (10 ᴄσiηs) → +20 xᴩ\n"
         "ᴛʀᴧiη (20 ᴄσiηs) → +30 xᴩ"
     )
-    await cb.message.edit_text(text, reply_markup=beast_kb())
+    await smart_edit(cb, text, beast_kb())
     await cb.answer()
 
 
@@ -238,7 +235,7 @@ async def beast_action(cb: CallbackQuery):
         f"✅ ʏσᴜʀ вєᴧsᴛ ɢᴧiηєᴅ <b>+{xp} xᴩ</b>!\n\n"
         f"💰 ʙᴧʟᴧηᴄє: <b>{new_bal[0]}</b> ᴄσiηs"
     )
-    await cb.message.edit_text(text, reply_markup=beast_kb())
+    await smart_edit(cb, text, beast_kb())
     await cb.answer()
 
 
@@ -255,13 +252,13 @@ RIDDLES = [
 @router.callback_query(F.data == "game:detective")
 async def detective_menu(cb: CallbackQuery):
     riddle, _ = random.choice(RIDDLES)
-    await cb.message.edit_text(
+    text = (
         f"🧩 <b>ᴧsᴛʀᴧʟ ᴅєᴛєᴄᴛiᴠє</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"ᴛσᴅᴧʏ's ʀiᴅᴅʟє:\n\n<i>{riddle}</i>\n\n"
-        f"ᴛʏᴩє ʏσᴜʀ ᴧηsᴡєʀ iη ᴄнᴧᴛ!",
-        reply_markup=detective_kb()
+        f"ᴛʏᴩє ʏσᴜʀ ᴧηsᴡєʀ iη ᴄнᴧᴛ!"
     )
+    await smart_edit(cb, text, detective_kb())
     await cb.answer()
 
 
@@ -285,7 +282,7 @@ async def raid_menu(cb: CallbackQuery):
         "нᴩ: ██████████ 100/100\n\n"
         "ᴧᴛᴛᴧᴄᴋ тнє вσss!"
     )
-    await cb.message.edit_text(text, reply_markup=raid_kb())
+    await smart_edit(cb, text, raid_kb())
     await cb.answer()
 
 
@@ -302,7 +299,7 @@ async def raid_attack(cb: CallbackQuery):
         f"⚔️ ʏσᴜ ᴅєᴧʟᴛ <b>{dmg}</b> ᴅᴧϻᴧɢє!\n"
         f"💰 +{reward} ᴄσiηs | ⭐ +5 ᴩσiηᴛs"
     )
-    await cb.message.edit_text(text, reply_markup=raid_kb())
+    await smart_edit(cb, text, raid_kb())
     await cb.answer("⚔️ нiᴛ!")
 
 
@@ -312,7 +309,7 @@ async def raid_attack(cb: CallbackQuery):
 @router.callback_query(F.data == "game:lb_menu")
 async def lb_menu(cb: CallbackQuery):
     text = "🏆 <b>ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧ ɢᴧϻє:"
-    await cb.message.edit_text(text, reply_markup=game_lb_menu_kb())
+    await smart_edit(cb, text, game_lb_menu_kb())
     await cb.answer()
 
 
@@ -334,5 +331,5 @@ async def show_game_lb(cb: CallbackQuery):
         f"🏆 <b>{game.upper()} ʟєᴧᴅєʀвσᴧʀᴅ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n{body}"
     )
-    await cb.message.edit_text(text, reply_markup=game_lb_menu_kb())
+    await smart_edit(cb, text, game_lb_menu_kb())
     await cb.answer()
