@@ -1,113 +1,65 @@
-from aiogram import Router, F
-from aiogram.types import CallbackQuery
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
+import logging
+from aiogram import Router
+from aiogram.filters import CommandStart
+from aiogram.types import Message
 
-from keyboards.study_kb import (
-    study_main_kb, education_type_kb, class_kb, subject_kb, chapter_kb,
-    SUBJECTS,
-)
-from keyboards.main_menu import back_kb
-from utils.database import get_materials
-from utils.ui import smart_edit
+from config import BOT_NAME
+from keyboards.main_menu import main_menu_kb
+from utils.database import get_or_create_user
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 
-class StudyFlow(StatesGroup):
-    browsing = State()
-
-
-@router.callback_query(F.data == "menu:study")
-async def show_study(cb: CallbackQuery):
-    text = (
-        "📚 <b>sᴛᴜᴅʏ sєᴄᴛiση</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "ᴡнᴧᴛ ᴅσ ʏσᴜ ᴡᴧηηᴧ sᴛᴜᴅʏ тσᴅᴧʏ?"
+def _welcome_text(first_name: str) -> str:
+    return (
+        f"👋 нi, <b>{first_name}</b>!\n\n"
+        f"ᴡєʟᴄσϻє тσ <b>{BOT_NAME}</b> 🌌\n\n"
+        f"ʏσᴜʀ ᴧʟʟ-iη-σηє ᴛєʟєɢʀᴧϻ ᴄσϻᴩᴧηiση ғσʀ:\n\n"
+        f"🎓 sᴛᴜᴅʏ\n"
+        f"🛡️ ɢʀσᴜᴩ ϻᴧηᴧɢєϻєηᴛ\n"
+        f"🎮 ɢᴧϻєs & єηᴛєʀᴛᴧiηϻєηᴛ\n\n"
+        f"ᴄнσσsє ᴧη σᴩᴛiση вєʟσᴡ 👇"
     )
-    await smart_edit(cb, text, study_main_kb())
-    await cb.answer()
 
 
-@router.callback_query(F.data.startswith("study:cat:"))
-async def choose_category(cb: CallbackQuery):
-    category = cb.data.split(":")[2]
-    labels = {
-        "notes": "📖 ησᴛєs", "dpp": "📝 ᴅᴩᴩ", "modules": "📚 ϻσᴅᴜʟєs",
-        "books": "📕 вσσᴋs", "questions": "❓ ᴩʀᴧᴄᴛiᴄє", "quiz": "🧠 ǫᴜiᴢᴢєs",
-    }
-    text = (
-        f"{labels.get(category, category)}\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"sєʟєᴄᴛ єᴅᴜᴄᴧᴛiση тʏᴩє:"
-    )
-    await smart_edit(cb, text, education_type_kb(category))
-    await cb.answer()
+async def send_start(message: Message):
+    user = message.from_user
+    try:
+        await get_or_create_user(user.id, user.username, user.first_name)
+    except Exception as e:
+        logger.warning(f"DB error: {e}")
+
+    text = _welcome_text(user.first_name)
+    kb = main_menu_kb()
+
+    # Try sending with user's PFP
+    try:
+        photos = await message.bot.get_user_profile_photos(user.id, limit=1)
+        if photos.total_count > 0:
+            file_id = photos.photos[0][-1].file_id
+            await message.answer_photo(photo=file_id, caption=text, reply_markup=kb)
+            return
+    except Exception as e:
+        logger.warning(f"PFP fetch failed: {e}")
+
+    # Fallback: plain text
+    try:
+        await message.answer(text, reply_markup=kb)
+    except Exception as e:
+        logger.error(f"Start message failed: {e}")
+        # Last resort: minimal message
+        await message.answer("👋 нi! ᴜsє /start ᴧɢᴧiη ᴩʟєᴧsє.")
 
 
-@router.callback_query(F.data.startswith("edu:"))
-async def choose_edu(cb: CallbackQuery):
-    _, category, edu = cb.data.split(":")
-    if edu in ("jee", "neet"):
-        key = (edu, "na")
-        subjects = SUBJECTS.get(key, [])
-        text = f"📚 sєʟєᴄᴛ sᴜвᴊєᴄᴛ ({edu.upper()}):"
-        await smart_edit(cb, text, subject_kb(category, edu, "na"))
-        await cb.answer()
-        return
-
-    text = "🏫 sєʟєᴄᴛ ᴄʟᴧss:"
-    await smart_edit(cb, text, class_kb(category, edu))
-    await cb.answer()
-
-
-@router.callback_query(F.data.startswith("cls:"))
-async def choose_class(cb: CallbackQuery):
-    _, category, edu, cls = cb.data.split(":")
-    text = f"📚 sєʟєᴄᴛ sᴜвᴊєᴄᴛ (ᴄʟᴧss {cls}):"
-    await smart_edit(cb, text, subject_kb(category, edu, cls))
-    await cb.answer()
-
-
-@router.callback_query(F.data.startswith("sub:"))
-async def choose_subject(cb: CallbackQuery):
-    parts = cb.data.split(":", 4)
-    _, category, edu, cls, subject = parts
-    text = f"📖 sєʟєᴄᴛ ᴄнᴧᴩᴛєʀ ({subject}):"
-    await smart_edit(cb, text, chapter_kb(category, edu, cls, subject))
-    await cb.answer()
-
-
-@router.callback_query(F.data.startswith("chp:"))
-async def show_chapter(cb: CallbackQuery):
-    parts = cb.data.split(":", 5)
-    _, category, edu, cls, subject, chapter = parts
-    results = await get_materials(category, edu, cls, subject, chapter)
-
-    if not results:
-        text = (
-            f"📭 <b>ησ ϻᴧᴛєʀiᴧʟ ғσᴜηᴅ</b>\n"
-            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"ᴄᴧᴛєɢσʀʏ: {category}\n"
-            f"єᴅᴜ: {edu.upper()}\n"
-            f"ᴄʟᴧss: {cls}\n"
-            f"sᴜвᴊєᴄᴛ: {subject}\n"
-            f"ᴄнᴧᴩᴛєʀ: {chapter}\n\n"
-            f"ᴧᴅϻiηs sє ϻᴧᴛєʀiᴧʟ ᴜᴩʟσᴧᴅ ηнi нᴜᴧ."
-        )
-        await smart_edit(cb, text, back_kb("menu:study"))
-        await cb.answer()
-        return
-
-    # Send files (as new messages) + edit the current message header
-    await smart_edit(
-        cb,
-        f"📁 ϻᴧᴛєʀiᴧʟs ғσᴜηᴅ: <b>{len(results)}</b>",
-        back_kb("menu:study"),
-    )
-    for file_id, caption in results:
+@router.message(CommandStart())
+async def cmd_start(message: Message):
+    """Always respond to /start — never skip, never crash."""
+    try:
+        await send_start(message)
+    except Exception as e:
+        logger.error(f"/start handler error: {e}")
         try:
-            await cb.message.answer_document(document=file_id, caption=caption or "")
+            await message.answer("👋 нi! ᴜsᴇ вᴜᴛᴛσηs тσ ηᴧᴠiɢᴧᴛє.")
         except Exception:
-            await cb.message.answer(f"📄 {caption or 'File'}\nFile ID: {file_id}")
-    await cb.answer()
+            pass
