@@ -1,3 +1,4 @@
+import logging
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
@@ -5,31 +6,50 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
 from keyboards.admin_kb import (
-    admin_panel_kb, admin_edu_kb, admin_class_kb, admin_subject_kb,
+    admin_panel_kb, admin_education_kb, admin_class_kb, admin_category_kb,
+    admin_subject_kb, admin_resource_type_kb, admin_save_kb,
 )
 from keyboards.main_menu import back_kb
-from keyboards.study_kb import SUBJECTS
 from utils.permissions import is_admin
-from utils.database import save_material
+from utils.database import save_resource
 from utils.ui import smart_edit
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 
 class AdminUpload(StatesGroup):
-    category = State()
-    edu = State()
-    cls = State()
-    subject = State()
     chapter = State()
-    file = State()
+    content = State()
 
+
+def _parse_content(message: Message):
+    """Return (content_type, content, caption) or (None, None, None)."""
+    caption = message.caption or ""
+    if message.document:
+        return ("document", message.document.file_id, caption)
+    if message.video:
+        return ("video", message.video.file_id, caption)
+    if message.photo:
+        return ("photo", message.photo[-1].file_id, caption)
+    if message.audio:
+        return ("document", message.audio.file_id, caption)
+    if message.text:
+        text = message.text.strip()
+        if text.startswith("http://") or text.startswith("https://") or text.startswith("tg://"):
+            return ("link", text, "")
+        return ("link", text, "")
+    return (None, None, None)
+
+
+# ─────────────── ENTRY ───────────────
 
 @router.message(Command("admin"))
-async def cmd_admin(message: Message):
+async def cmd_admin(message: Message, state: FSMContext):
     if not is_admin(message.from_user.id):
         await message.answer("❌ sσηʟʏ ᴧᴅϻiηs ᴄᴧη ᴜsє тнis ᴄσϻϻᴧηᴅ.")
         return
+    await state.clear()
     text = (
         "👑 <b>ᴧᴅϻiη ᴩᴧηєʟ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -38,107 +58,172 @@ async def cmd_admin(message: Message):
     await message.answer(text, reply_markup=admin_panel_kb())
 
 
-@router.callback_query(F.data.startswith("adm:add:"))
-async def admin_add_category(cb: CallbackQuery, state: FSMContext):
+@router.callback_query(F.data == "adm:add")
+async def adm_add(cb: CallbackQuery, state: FSMContext):
     if not is_admin(cb.from_user.id):
         await cb.answer("❌ ᴧᴅϻiηs σηʟʏ", show_alert=True)
         return
-    category = cb.data.split(":")[2]
-    await state.update_data(category=category)
-    await state.set_state(AdminUpload.edu)
-    text = f"📚 ᴧᴅᴅiηɢ: <b>{category.upper()}</b>\n\nsєʟєᴄᴛ єᴅᴜᴄᴧᴛiση тʏᴩє:"
-    await smart_edit(cb, text, admin_edu_kb(category))
+    await state.clear()
+    text = (
+        "📚 <b>ᴧᴅᴅ ʀєsσᴜʀᴄє</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "sєʟєᴄᴛ єᴅᴜᴄᴧᴛiση тʏᴩє:"
+    )
+    await smart_edit(cb, text, admin_education_kb())
     await cb.answer()
 
 
-@router.callback_query(F.data.startswith("admedu:"))
-async def admin_pick_edu(cb: CallbackQuery, state: FSMContext):
-    _, category, edu = cb.data.split(":")
-    await state.update_data(edu=edu)
+@router.callback_query(F.data == "adm:manage")
+async def adm_manage(cb: CallbackQuery):
+    await cb.answer("🚧 ϻᴧηᴧɢє ғєᴧᴛᴜʀє ᴄσϻiηɢ sσση", show_alert=True)
+
+
+# ─────────────── EDUCATION ───────────────
+
+@router.callback_query(F.data.startswith("adm:edu:"))
+async def adm_edu(cb: CallbackQuery, state: FSMContext):
+    edu = cb.data.split(":")[2]
+    await state.update_data(edu=edu, pending=[])
     if edu in ("jee", "neet"):
         await state.update_data(cls="na")
-        subjects = SUBJECTS.get((edu, "na"), [])
-        await state.set_state(AdminUpload.subject)
-        text = f"sєʟєᴄᴛ sᴜвᴊєᴄᴛ ({edu.upper()}):"
-        await smart_edit(cb, text, admin_subject_kb(category, edu, "na", subjects))
+        await smart_edit(cb, "🔬 sєʟєᴄᴛ ᴄᴧᴛєɢσʀʏ:", admin_category_kb())
     else:
-        await state.set_state(AdminUpload.cls)
-        await smart_edit(cb, "sєʟєᴄᴛ ᴄʟᴧss:", admin_class_kb(category, edu))
+        await smart_edit(cb, "🏫 sєʟєᴄᴛ ᴄʟᴧss:", admin_class_kb())
     await cb.answer()
 
 
-@router.callback_query(F.data.startswith("admcls:"))
-async def admin_pick_class(cb: CallbackQuery, state: FSMContext):
-    _, category, edu, cls = cb.data.split(":")
+@router.callback_query(F.data.startswith("adm:cls:"))
+async def adm_cls(cb: CallbackQuery, state: FSMContext):
+    cls = cb.data.split(":")[2]
     await state.update_data(cls=cls)
-    subjects = SUBJECTS.get((edu, cls), [])
-    await state.set_state(AdminUpload.subject)
-    text = f"sєʟєᴄᴛ sᴜвᴊєᴄᴛ (ᴄʟᴧss {cls}):"
-    await smart_edit(cb, text, admin_subject_kb(category, edu, cls, subjects))
+    await smart_edit(cb, "🔬 sєʟєᴄᴛ ᴄᴧᴛєɢσʀʏ:", admin_category_kb())
     await cb.answer()
 
 
-@router.callback_query(F.data.startswith("admsub:"))
-async def admin_pick_subject(cb: CallbackQuery, state: FSMContext):
-    parts = cb.data.split(":", 4)
-    _, category, edu, cls, subject = parts
-    await state.update_data(subject=subject)
+@router.callback_query(F.data.startswith("adm:cat:"))
+async def adm_cat(cb: CallbackQuery, state: FSMContext):
+    cat = cb.data.split(":")[2]
+    await state.update_data(cat=cat)
+    await smart_edit(cb, "📚 sєʟєᴄᴛ sᴜвᴊєᴄᴛ:", admin_subject_kb(cat))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("adm:sub:"))
+async def adm_sub(cb: CallbackQuery, state: FSMContext):
+    sub = cb.data.split(":", 2)[2]
+    await state.update_data(sub=sub)
     await state.set_state(AdminUpload.chapter)
-    text = f"sᴜвᴊєᴄᴛ: <b>{subject}</b>\n\nsєηᴅ ᴄнᴧᴩᴛєʀ ηᴧϻє (тєxт ϻєssᴧɢє):"
-    await smart_edit(cb, text, back_kb("admin:cancel"))
+    text = (
+        f"📚 sᴜвᴊєᴄᴛ: <b>{sub}</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"sєηᴅ тнє ᴄнᴧᴩᴛєʀ ηᴧϻє (тєxт ϻєssᴧɢє):"
+    )
+    await smart_edit(cb, text, back_kb("adm:cancel"))
     await cb.answer()
 
+
+# ─────────────── CHAPTER (text) ───────────────
 
 @router.message(AdminUpload.chapter)
-async def admin_get_chapter(message: Message, state: FSMContext):
-    await state.update_data(chapter=message.text.strip())
-    await state.set_state(AdminUpload.file)
-    await message.answer(
-        f"ᴄнᴧᴩᴛєʀ: <b>{message.text}</b>\n\n"
-        f"ησω sєηᴅ тнє ғiʟє (PDF / ᴅᴏᴄ / ᴠiᴅєᴏ) ᴡiᴛн σᴩᴛiσηᴧʟ ᴄᴧᴩᴛiση."
-    )
-
-
-@router.message(AdminUpload.file)
-async def admin_get_file(message: Message, state: FSMContext):
+async def adm_chapter(message: Message, state: FSMContext):
     if not is_admin(message.from_user.id):
         return
-    file_id = None
-    if message.document:
-        file_id = message.document.file_id
-    elif message.video:
-        file_id = message.video.file_id
-    elif message.photo:
-        file_id = message.photo[-1].file_id
-    else:
-        await message.answer("❌ sєηᴅ ᴧ ғiʟє (ᴩᴅғ / ᴅσᴄ / ᴠiᴅєσ / ᴩнσᴛσ).")
+    chapter = message.text.strip()
+    await state.update_data(chapter=chapter)
+    text = (
+        f"ᴄнᴧᴩᴛєʀ: <b>{chapter}</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ᴡнᴧᴛ ᴅσ ʏσᴜ ᴡᴧηηᴧ ᴧᴅᴅ?"
+    )
+    await message.answer(text, reply_markup=admin_resource_type_kb())
+
+
+# ─────────────── RESOURCE TYPE ───────────────
+
+@router.callback_query(F.data.startswith("adm:rt:"))
+async def adm_rt(cb: CallbackQuery, state: FSMContext):
+    rt = cb.data.split(":")[2]
+    await state.update_data(current_rt=rt)
+    await state.set_state(AdminUpload.content)
+    text = (
+        "📤 <b>sєηᴅ тнє ʀєsσᴜʀᴄє</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "sєηᴅ ᴧ ʟiηᴋ, ᴩᴅғ, ᴠiᴅєσ, iϻᴧɢє σʀ ᴅσᴄᴜϻєηᴛ."
+    )
+    await smart_edit(cb, text, back_kb("adm:cancel"))
+    await cb.answer()
+
+
+# ─────────────── CONTENT (file / link) ───────────────
+
+@router.message(AdminUpload.content)
+async def adm_content(message: Message, state: FSMContext):
+    if not is_admin(message.from_user.id):
+        return
+    content_type, content, caption = _parse_content(message)
+    if not content:
+        await message.answer("❌ sєηᴅ ᴧ ʟiηᴋ σʀ ғiʟє.")
         return
 
     data = await state.get_data()
-    await save_material(
-        data["category"], data["edu"], data["cls"],
-        data["subject"], data["chapter"], file_id,
-        message.caption or "", message.from_user.id
+    rt = data.get("current_rt")
+    pending = data.get("pending", [])
+    pending.append({
+        "resource_type": rt,
+        "content_type": content_type,
+        "content": content,
+        "caption": caption,
+    })
+    await state.update_data(pending=pending)
+
+    text = (
+        f"✅ ɪᴛєϻ ᴧᴅᴅєᴅ: <b>{rt}</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"sσ ғᴧʀ ᴧᴅᴅєᴅ: <b>{len(pending)}</b> ɪᴛєϻ(s)\n\n"
+        f"ᴡнᴧᴛ ηєxᴛ?"
     )
-    await state.clear()
-    await message.answer(
-        f"✅ <b>ᴜᴩʟσᴧᴅєᴅ!</b>\n\n"
-        f"ᴄᴧᴛєɢσʀʏ: {data['category']}\n"
-        f"єᴅᴜ: {data['edu'].upper()}\n"
-        f"ᴄʟᴧss: {data['cls']}\n"
-        f"sᴜʙᴊєᴄᴛ: {data['subject']}\n"
-        f"ᴄнᴧᴩᴛєʀ: {data['chapter']}",
-        reply_markup=admin_panel_kb()
-    )
+    await message.answer(text, reply_markup=admin_save_kb())
 
 
-@router.callback_query(F.data == "admin:cancel")
-async def admin_cancel(cb: CallbackQuery, state: FSMContext):
+# ─────────────── SAVE / ADD MORE / CANCEL ───────────────
+
+@router.callback_query(F.data == "adm:save")
+async def adm_save(cb: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    pending = data.get("pending", [])
+    if not pending:
+        await cb.answer("ησ ɪᴛєϻs тσ sᴧᴠє.", show_alert=True)
+        return
+
+    for item in pending:
+        await save_resource(
+            data["edu"], data["cls"], data["cat"], data["sub"], data["chapter"],
+            item["resource_type"], item["content_type"], item["content"],
+            item["caption"], cb.from_user.id,
+        )
+
+    count = len(pending)
     await state.clear()
-    await smart_edit(cb, "❌ ᴄᴧηᴄєʟʟєᴅ.", admin_panel_kb())
+    text = (
+        f"✅ <b>sᴧᴠєᴅ {count} ʀєsσᴜʀᴄє(s)!</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ᴄнᴧᴩᴛєʀ: <b>{data['chapter']}</b>\n"
+        f"sᴜвᴊєᴄᴛ: <b>{data['sub']}</b>\n\n"
+        f"ɴᴏᴡ ᴜsєʀs ᴄᴀɴ sᴇᴇ ᴛʜᴇᴍ ɪɴ sᴛᴜᴅʏ sᴇᴄᴛɪᴏɴ."
+    )
+    await smart_edit(cb, text, admin_panel_kb())
     await cb.answer()
 
 
-@router.callback_query(F.data == "adm:delete")
-async def admin_delete(cb: CallbackQuery):
-    await cb.answer("🚧 ᴅєʟєᴛє ғєᴧᴛᴜʀє ᴄσϻiηɢ sσση", show_alert=True)
+@router.callback_query(F.data == "adm:addmore")
+async def adm_addmore(cb: CallbackQuery, state: FSMContext):
+    text = "ᴡнᴧᴛ ᴅσ ʏσᴜ ᴡᴧηηᴧ ᴧᴅᴅ?"
+    await smart_edit(cb, text, admin_resource_type_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data == "adm:cancel")
+async def adm_cancel(cb: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await smart_edit(cb, "❌ ᴄᴧηᴄєʟʟєᴅ.", admin_panel_kb())
+    await cb.answer()
