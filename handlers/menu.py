@@ -1,103 +1,97 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import CallbackQuery
 
 from config import (
-    BOT_NAME,
-    BOT_USERNAME,
-    SUPPORT_GROUP_NAME,
-    SUPPORT_GROUP_LINK,
-    SUPPORT_CHANNEL_NAME,
-    SUPPORT_CHANNEL_LINK,
-    OWNER_ID,
+    BOT_NAME, BOT_USERNAME, SUPPORT_GROUP_NAME, SUPPORT_CHANNEL_NAME,
 )
 from keyboards.main_menu import main_menu_kb, back_kb
+from utils.database import get_balance, get_leaderboard
 
 router = Router()
 
 
-# ─────────────────────────────────────────────
-# 🏠 MAIN MENU (Back to Main)
-# ─────────────────────────────────────────────
 @router.callback_query(F.data == "menu:main")
-async def back_to_main(callback: CallbackQuery):
+async def back_to_main(cb: CallbackQuery):
     text = (
-        f"👋 нi {callback.from_user.first_name}!\n\n"
-        f"i'ϻ {BOT_NAME} — ʏσᴜʀ ᴧʟʟ-iη-σηє тєʟєɢʀᴧϻ "
-        f"ᴄσϻᴩᴧηiση ғσʀ sᴛᴜᴅʏ, ɢʀσᴜᴩs, ɢᴧϻєs & ϻσʀє.\n\n"
+        f"👋 нi, <b>{cb.from_user.first_name}</b>!\n\n"
+        f"ᴡєʟᴄσϻє тσ <b>{BOT_NAME}</b> 🌌\n\n"
         f"ᴄнσσsє ᴧη σᴩᴛiση вєʟσᴡ 👇"
     )
-    await callback.message.edit_text(text, reply_markup=main_menu_kb())
-    await callback.answer()
+    try:
+        await cb.message.edit_text(text, reply_markup=main_menu_kb())
+    except Exception:
+        await cb.message.answer(text, reply_markup=main_menu_kb())
+    await cb.answer()
 
 
-# ─────────────────────────────────────────────
-# 🆘 HELP
-# ─────────────────────────────────────────────
 @router.callback_query(F.data == "menu:help")
-async def show_help(callback: CallbackQuery):
+async def show_help(cb: CallbackQuery):
     text = (
-        f"🆘 {BOT_NAME} нєʟᴩ\n"
+        f"🆘 <b>{BOT_NAME} нєʟᴩ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"• /start — sᴛᴧʀᴛ тнє вσᴛ\n"
-        f"• /help — σᴩєη нєʟᴩ ϻєηᴜ\n"
-        f"• /about — ᴧвσᴜᴛ тнє вσᴛ\n"
+        f"• /start — sᴛᴧʀᴛ вσᴛ\n"
+        f"• /admin — ᴧᴅϻiη ᴩᴧηєʟ (ᴧᴅϻiηs σηʟʏ)\n"
         f"• /profile — ᴠiєᴡ ʏσᴜʀ ᴩʀσғiʟє\n"
-        f"• /stats — ᴠiєᴡ ʏσᴜʀ sᴛᴧᴛs\n"
-        f"• /settings — вσᴛ sєᴛᴛiηɢs\n\n"
-        f"ϻσʀє ᴄσϻϻᴧηᴅs ᴄσϻiηɢ sσση ✨"
+        f"• /balance — ᴄнєᴄᴋ ᴄσiηs & ᴩσiηᴛs\n"
+        f"• /leaderboard — ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ\n\n"
+        f"ᴜsє iηʟiηє вᴜᴛᴛσηs ғσʀ ᴧʟʟ ғєᴧᴛᴜʀєs ✨"
     )
-    await callback.message.edit_text(text, reply_markup=back_kb())
-    await callback.answer()
+    await cb.message.edit_text(text, reply_markup=back_kb())
+    await cb.answer()
 
 
-# ─────────────────────────────────────────────
-# ℹ️ ABOUT
-# ─────────────────────────────────────────────
 @router.callback_query(F.data == "menu:about")
-async def show_about(callback: CallbackQuery):
+async def show_about(cb: CallbackQuery):
     text = (
-        f"ℹ️ ᴧвσᴜᴛ {BOT_NAME}\n"
+        f"ℹ️ <b>ᴧвσᴜᴛ {BOT_NAME}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"{BOT_NAME} is an all-in-one Telegram bot built for "
-        f"students, communities and entertainment.\n\n"
-        f"it ᴄσϻвiηєs sᴛᴜᴅʏ ʀєsσᴜʀᴄєs, ɢʀσᴜᴩ ϻᴧηᴧɢєϻєηᴛ, "
-        f"ɢᴧϻєs, єᴄσησϻʏ, ǫᴜiᴢᴢєs, ᴜᴛiʟiᴛiєs ᴧηᴅ ϻσʀє iη σηє ᴩʟᴧᴄє.\n\n"
+        f"{BOT_NAME} is an all-in-one Telegram bot built for students, "
+        f"communities and entertainment.\n\n"
+        f"it ᴄσϻвiηєs:\n"
+        f"🎓 sᴛᴜᴅʏ ʀєsσᴜʀᴄєs\n"
+        f"🛡️ ɢʀσᴜᴩ ϻᴧηᴧɢєϻєηᴛ\n"
+        f"🎮 ɢᴧϻєs & єᴄσησϻʏ\n"
+        f"🧠 ǫᴜiᴢᴢєs, ᴜᴛiʟiᴛiєs & ϻσʀє.\n\n"
         f"🔗 ᴜsєʀηᴧϻє: {BOT_USERNAME}"
     )
-    await callback.message.edit_text(text, reply_markup=back_kb())
-    await callback.answer()
+    await cb.message.edit_text(text, reply_markup=back_kb())
+    await cb.answer()
 
 
-# ─────────────────────────────────────────────
-# 👑 OWNER
-# ─────────────────────────────────────────────
-@router.callback_query(F.data == "menu:owner")
-async def show_owner(callback: CallbackQuery):
-    text = (
-        f"👑 вσᴛ σᴡηєʀ\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ηᴧϻє: (ᴜᴩᴅᴧᴛє sσση)\n"
-        f"ᴜsєʀηᴧϻє: (ᴜᴩᴅᴧᴛє sσση)\n"
-        f"iᴅ: {OWNER_ID}\n\n"
-        f"ᴩʀσғiʟє ʟiηᴋ вᴧᴧᴅ ϻє ᴧᴅᴅ нσ ʀнᴧ нᴧi."
-    )
-    await callback.message.edit_text(text, reply_markup=back_kb())
-    await callback.answer()
-
-
-# ─────────────────────────────────────────────
-# 🥷 KIDNAP ME (Fun)
-# ─────────────────────────────────────────────
 @router.callback_query(F.data == "menu:kidnap")
-async def kidnap_me(callback: CallbackQuery):
+async def kidnap_me(cb: CallbackQuery):
     text = (
-        f"🥷 ᴋiᴅηᴧᴩ sᴜᴄᴄєssғᴜʟ!\n"
+        f"🥷 <b>ᴋiᴅηᴧᴩ sᴜᴄᴄєssғᴜʟ!</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"ʏσᴜ нᴧᴠє вєєη ᴋiᴅηᴧᴩᴩєᴅ вʏ {BOT_NAME} 👑\n\n"
-        f"ʏσᴜ ᴧʀє ησω σғғiᴄiᴧʟʟʏ ᴩᴧʀᴛ σғ тнє "
+        f"ʏσᴜ ᴧʀє ησω σғғiᴄiᴧʟʟʏ ᴩᴧʀᴛ σғ "
         f"ᴧsᴛʀᴧʟ єϻᴩiʀє.\n\n"
-        f"ησ єsᴄᴧᴩє. σηʟʏ sᴛᴜᴅʏ, ɢᴧϻєs & ғᴜη "
-        f"ғʀσϻ ησω ση. 😈"
+        f"ησ єsᴄᴧᴩє. σηʟʏ sᴛᴜᴅʏ, ɢᴧϻєs & ғᴜη 😈"
     )
-    await callback.message.edit_text(text, reply_markup=back_kb())
-    await callback.answer()
+    await cb.message.edit_text(text, reply_markup=back_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data == "menu:profile")
+async def show_profile(cb: CallbackQuery):
+    bal = await get_balance(cb.from_user.id)
+    coins, points = (bal if bal else (0, 0))
+    text = (
+        f"👤 <b>ʏσᴜʀ ᴩʀσғiʟє</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ηᴧϻє: {cb.from_user.first_name}\n"
+        f"ᴜsєʀηᴧϻє: @{cb.from_user.username or 'ησηє'}\n"
+        f"iᴅ: <code>{cb.from_user.id}</code>\n\n"
+        f"🪙 ᴄσiηs: <b>{coins}</b>\n"
+        f"⭐ ᴩσiηᴛs: <b>{points}</b>"
+    )
+    await cb.message.edit_text(text, reply_markup=back_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data == "menu:leaderboard")
+async def show_lb_menu(cb: CallbackQuery):
+    from keyboards.games_kb import game_lb_menu_kb
+    text = "🏆 <b>ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧ ɢᴧϻє:"
+    await cb.message.edit_text(text, reply_markup=game_lb_menu_kb())
+    await cb.answer()
