@@ -15,14 +15,16 @@ async def init_db():
             )
         """)
         await db.execute("""
-            CREATE TABLE IF NOT EXISTS study_materials (
+            CREATE TABLE IF NOT EXISTS study_resources (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                category TEXT,
                 education_type TEXT,
                 class_name TEXT,
+                category TEXT,
                 subject TEXT,
                 chapter TEXT,
-                file_id TEXT,
+                resource_type TEXT,
+                content_type TEXT,
+                content TEXT,
                 caption TEXT,
                 uploaded_by INTEGER,
                 uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -40,7 +42,9 @@ async def init_db():
         await db.commit()
 
 
-async def get_or_create_user(user_id: int, username: str, first_name: str):
+# ─────────── USERS ───────────
+
+async def get_or_create_user(user_id, username, first_name):
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT * FROM users WHERE user_id=?", (user_id,)) as cur:
             row = await cur.fetchone()
@@ -54,47 +58,109 @@ async def get_or_create_user(user_id: int, username: str, first_name: str):
             return await cur.fetchone()
 
 
-async def add_coins(user_id: int, amount: int):
+async def add_coins(user_id, amount):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("UPDATE users SET coins = coins + ? WHERE user_id=?", (amount, user_id))
         await db.commit()
 
 
-async def add_points(user_id: int, amount: int):
+async def add_points(user_id, amount):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("UPDATE users SET points = points + ? WHERE user_id=?", (amount, user_id))
         await db.commit()
 
 
-async def get_balance(user_id: int):
+async def get_balance(user_id):
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT coins, points FROM users WHERE user_id=?", (user_id,)) as cur:
-            return await cur.fetchone()
+            row = await cur.fetchone()
+            return row if row else (0, 0)
 
 
-async def save_material(category, education_type, class_name, subject, chapter, file_id, caption, uploaded_by):
+async def get_user_stats(user_id):
+    """Returns (coins, points, games_played, total_score)."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            "SELECT coins, points FROM users WHERE user_id=?", (user_id,)
+        ) as cur:
+            row = await cur.fetchone()
+        coins, points = (row if row else (0, 0))
+        async with db.execute(
+            "SELECT COUNT(*), COALESCE(SUM(score),0) FROM game_scores WHERE user_id=?",
+            (user_id,)
+        ) as cur:
+            gp, ts = await cur.fetchone()
+    return coins, points, gp or 0, ts or 0
+
+
+# ─────────── STUDY ───────────
+
+async def save_resource(education_type, class_name, category, subject,
+                        chapter, resource_type, content_type, content,
+                        caption, uploaded_by):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
-            """INSERT INTO study_materials 
-            (category, education_type, class_name, subject, chapter, file_id, caption, uploaded_by)
-            VALUES (?,?,?,?,?,?,?,?)""",
-            (category, education_type, class_name, subject, chapter, file_id, caption, uploaded_by)
+            """INSERT INTO study_resources
+            (education_type, class_name, category, subject, chapter,
+             resource_type, content_type, content, caption, uploaded_by)
+            VALUES (?,?,?,?,?,?,?,?,?,?)""",
+            (education_type, class_name, category, subject, chapter,
+             resource_type, content_type, content, caption, uploaded_by)
         )
         await db.commit()
 
 
-async def get_materials(category, education_type, class_name, subject, chapter):
+async def get_resource_type_counts(education_type, class_name, category, subject):
+    """Return list of (resource_type, count)."""
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            """SELECT file_id, caption FROM study_materials 
-            WHERE category=? AND education_type=? AND class_name=? 
-            AND subject=? AND chapter=?""",
-            (category, education_type, class_name, subject, chapter)
+            """SELECT resource_type, COUNT(*) FROM study_resources
+            WHERE education_type=? AND class_name=? AND category=? AND subject=?
+            GROUP BY resource_type""",
+            (education_type, class_name, category, subject)
         ) as cur:
             return await cur.fetchall()
 
 
-async def save_game_score(user_id: int, game: str, score: int):
+async def get_chapters(education_type, class_name, category, subject, resource_type):
+    """Return list of (chapter, count)."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            """SELECT chapter, COUNT(*) FROM study_resources
+            WHERE education_type=? AND class_name=? AND category=? AND subject=?
+            AND resource_type=?
+            GROUP BY chapter ORDER BY chapter""",
+            (education_type, class_name, category, subject, resource_type)
+        ) as cur:
+            return await cur.fetchall()
+
+
+async def get_resources(education_type, class_name, category, subject,
+                        chapter, resource_type):
+    """Return list of (content_type, content, caption)."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            """SELECT content_type, content, caption FROM study_resources
+            WHERE education_type=? AND class_name=? AND category=? AND subject=?
+            AND chapter=? AND resource_type=?""",
+            (education_type, class_name, category, subject, chapter, resource_type)
+        ) as cur:
+            return await cur.fetchall()
+
+
+async def delete_resources(education_type, class_name, category, subject):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """DELETE FROM study_resources
+            WHERE education_type=? AND class_name=? AND category=? AND subject=?""",
+            (education_type, class_name, category, subject)
+        )
+        await db.commit()
+
+
+# ─────────── GAMES ───────────
+
+async def save_game_score(user_id, game, score):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             "INSERT INTO game_scores (user_id, game, score) VALUES (?,?,?)",
@@ -103,7 +169,7 @@ async def save_game_score(user_id: int, game: str, score: int):
         await db.commit()
 
 
-async def get_leaderboard(game: str, limit: int = 10):
+async def get_leaderboard(game, limit=10):
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
             """SELECT u.first_name, u.username, MAX(g.score) as best
