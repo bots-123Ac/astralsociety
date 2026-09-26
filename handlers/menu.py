@@ -5,7 +5,9 @@ from config import (
     BOT_NAME, BOT_USERNAME, SUPPORT_GROUP_NAME, SUPPORT_CHANNEL_NAME,
 )
 from keyboards.main_menu import main_menu_kb, back_kb
-from utils.database import get_balance, get_leaderboard
+from keyboards.games_kb import game_lb_menu_kb
+from utils.database import get_balance
+from utils.ui import smart_edit
 
 router = Router()
 
@@ -17,10 +19,7 @@ async def back_to_main(cb: CallbackQuery):
         f"ᴡєʟᴄσϻє тσ <b>{BOT_NAME}</b> 🌌\n\n"
         f"ᴄнσσsє ᴧη σᴩᴛiση вєʟσᴡ 👇"
     )
-    try:
-        await cb.message.edit_text(text, reply_markup=main_menu_kb())
-    except Exception:
-        await cb.message.answer(text, reply_markup=main_menu_kb())
+    await smart_edit(cb, text, main_menu_kb())
     await cb.answer()
 
 
@@ -36,7 +35,7 @@ async def show_help(cb: CallbackQuery):
         f"• /leaderboard — ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ\n\n"
         f"ᴜsє iηʟiηє вᴜᴛᴛσηs ғσʀ ᴧʟʟ ғєᴧᴛᴜʀєs ✨"
     )
-    await cb.message.edit_text(text, reply_markup=back_kb())
+    await smart_edit(cb, text, back_kb())
     await cb.answer()
 
 
@@ -54,7 +53,7 @@ async def show_about(cb: CallbackQuery):
         f"🧠 ǫᴜiᴢᴢєs, ᴜᴛiʟiᴛiєs & ϻσʀє.\n\n"
         f"🔗 ᴜsєʀηᴧϻє: {BOT_USERNAME}"
     )
-    await cb.message.edit_text(text, reply_markup=back_kb())
+    await smart_edit(cb, text, back_kb())
     await cb.answer()
 
 
@@ -68,7 +67,7 @@ async def kidnap_me(cb: CallbackQuery):
         f"ᴧsᴛʀᴧʟ єϻᴩiʀє.\n\n"
         f"ησ єsᴄᴧᴩє. σηʟʏ sᴛᴜᴅʏ, ɢᴧϻєs & ғᴜη 😈"
     )
-    await cb.message.edit_text(text, reply_markup=back_kb())
+    await smart_edit(cb, text, back_kb())
     await cb.answer()
 
 
@@ -85,13 +84,12 @@ async def show_profile(cb: CallbackQuery):
         f"🪙 ᴄσiηs: <b>{coins}</b>\n"
         f"⭐ ᴩσiηᴛs: <b>{points}</b>"
     )
-    await cb.message.edit_text(text, reply_markup=back_kb())
+    await smart_edit(cb, text, back_kb())
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:leaderboard")
 async def show_lb_menu(cb: CallbackQuery):
-    from keyboards.games_kb import game_lb_menu_kb
     text = "🏆 <b>ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧ ɢᴧϻє:"
-    await cb.message.edit_text(text, reply_markup=game_lb_menu_kb())
+    await smart_edit(cb, text, game_lb_menu_kb())
     await cb.answer()
