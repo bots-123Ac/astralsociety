@@ -250,4 +250,70 @@ async def detective_menu(cb: CallbackQuery):
 
 @router.callback_query(F.data == "detective:investigate")
 async def detective_investigate(cb: CallbackQuery):
-    await
+    await add_coins(cb.from_user.id, 5)
+    await add_points(cb.from_user.id, 3)
+    await save_game_score(cb.from_user.id, "detective", 5)
+    await cb.answer("🔍 iηνєsᴛiɢᴧᴛiση ᴄσϻᴩʟєᴛє! +5 ᴄσiηs, +3 ᴩσiηᴛs", show_alert=True)
+
+
+# ─────────── 🏹 RAID ───────────
+
+@router.callback_query(F.data == "game:raid")
+async def raid_menu(cb: CallbackQuery):
+    text = (
+        "🏹 <b>ᴧsᴛʀᴧʟ ʀᴧiᴅ</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "🐲 ʙσss: ᴅʀᴧɢση\n"
+        "нᴩ: ██████████ 100/100\n\n"
+        "ᴧᴛᴛᴧᴄᴋ тнє вσss!"
+    )
+    await smart_edit(cb, text, raid_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data == "raid:attack")
+async def raid_attack(cb: CallbackQuery):
+    dmg = random.randint(10, 25)
+    reward = dmg
+    await add_coins(cb.from_user.id, reward)
+    await add_points(cb.from_user.id, 5)
+    await save_game_score(cb.from_user.id, "raid", dmg)
+    text = (
+        "🏹 <b>ᴧsᴛʀᴧʟ ʀᴧiᴅ</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"⚔️ ʏσᴜ ᴅєᴧʟᴛ <b>{dmg}</b> ᴅᴧϻᴧɢє!\n"
+        f"💰 +{reward} ᴄσiηs | ⭐ +5 ᴩσiηᴛs"
+    )
+    await smart_edit(cb, text, raid_kb())
+    await cb.answer("⚔️ нiᴛ!")
+
+
+# ─────────── 🏆 LEADERBOARDS ───────────
+
+@router.callback_query(F.data == "game:lb_menu")
+async def lb_menu(cb: CallbackQuery):
+    text = "🏆 <b>ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧ ɢᴧϻє:"
+    await smart_edit(cb, text, game_lb_menu_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("lb:"))
+async def show_game_lb(cb: CallbackQuery):
+    game = cb.data.split(":")[1]
+    rows = await get_leaderboard(game, 10)
+    medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+
+    if not rows:
+        body = "ησ sᴄσʀєs ʏєᴛ. вє тнє ғiʀsᴛ!"
+    else:
+        body = "\n".join(
+            f"{medals[i]} {name} — <b>{score}</b>"
+            for i, (name, uname, score) in enumerate(rows)
+        )
+
+    text = (
+        f"🏆 <b>{game.upper()} ʟєᴧᴅєʀвσᴧʀᴅ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n{body}"
+    )
+    await smart_edit(cb, text, game_lb_menu_kb())
+    await cb.answer()
