@@ -21,9 +21,6 @@ class ArenaFlow(StatesGroup):
     active = State()
 
 
-# ─────────────────────────────────────────────
-# MAIN GAMES MENU
-# ─────────────────────────────────────────────
 @router.callback_query(F.data == "menu:games")
 async def show_games(cb: CallbackQuery):
     text = (
@@ -37,9 +34,8 @@ async def show_games(cb: CallbackQuery):
     await cb.answer()
 
 
-# ─────────────────────────────────────────────
-# 🎰 FORTUNE
-# ─────────────────────────────────────────────
+# ─────────── 🎰 FORTUNE ───────────
+
 @router.callback_query(F.data == "game:fortune")
 async def fortune_menu(cb: CallbackQuery):
     bal = await get_balance(cb.from_user.id)
@@ -60,7 +56,6 @@ async def fortune_play(cb: CallbackQuery):
     bet = int(cb.data.split(":")[2])
     bal = await get_balance(cb.from_user.id)
     coins = bal[0] if bal else 0
-
     if coins < bet:
         await cb.answer(f"❌ ɴᴏᴛ єɴᴏᴜɢʜ ᴄᴏɪɴs! ʏᴏᴜ ʜᴀᴠᴇ {coins}", show_alert=True)
         return
@@ -89,19 +84,18 @@ async def fortune_play(cb: CallbackQuery):
     await cb.answer()
 
 
-# ─────────────────────────────────────────────
-# ⚔️ ARENA
-# ─────────────────────────────────────────────
+# ─────────── ⚔️ ARENA ───────────
+
 @router.callback_query(F.data == "game:arena")
 async def arena_menu(cb: CallbackQuery, state: FSMContext):
     await state.update_data(player_hp=100, bot_hp=100)
     text = (
         "⚔️ <b>ᴧsᴛʀᴧʟ ᴧʀєηᴧ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "👤 ʏσᴜ:  ██████████ 100 нᴩ\ n"
+        "👤 ʏσᴜ:  ██████████ 100 нᴩ\n"
         "🤖 вσᴛ:  ██████████ 100 нᴩ\n\n"
         "ᴄнσσsє ʏσᴜʀ ᴧᴄᴛiση:"
-    ).replace("\\ n", "\n")
+    )
     await smart_edit(cb, text, arena_kb())
     await cb.answer()
 
@@ -112,10 +106,8 @@ async def arena_attack(cb: CallbackQuery, state: FSMContext):
     if not data:
         await cb.answer("sᴛᴧʀᴛ ᴧ ɴєᴡ вᴧᴛᴛʟє", show_alert=True)
         return
-
     bot_hp = data.get("bot_hp", 100)
     player_hp = data.get("player_hp", 100)
-
     player_dmg = random.randint(15, 30)
     bot_hp -= player_dmg
 
@@ -155,10 +147,8 @@ async def arena_attack(cb: CallbackQuery, state: FSMContext):
         return
 
     await state.update_data(player_hp=player_hp, bot_hp=bot_hp)
-
     p_bar = "█" * (player_hp // 10) + "░" * (10 - player_hp // 10)
     b_bar = "█" * (bot_hp // 10) + "░" * (10 - bot_hp // 10)
-
     text = (
         "⚔️ <b>ᴧsᴛʀᴧʟ ᴧʀєηᴧ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -182,10 +172,8 @@ async def arena_defend(cb: CallbackQuery, state: FSMContext):
     bot_dmg = random.randint(5, 10)
     player_hp -= bot_dmg
     await state.update_data(player_hp=player_hp, bot_hp=bot_hp)
-
     p_bar = "█" * (max(player_hp, 0) // 10) + "░" * (10 - max(player_hp, 0) // 10)
     b_bar = "█" * (bot_hp // 10) + "░" * (10 - bot_hp // 10)
-
     text = (
         "⚔️ <b>ᴧsᴛʀᴧʟ ᴧʀєηᴧ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -198,9 +186,8 @@ async def arena_defend(cb: CallbackQuery, state: FSMContext):
     await cb.answer()
 
 
-# ─────────────────────────────────────────────
-# 🐉 BEAST
-# ─────────────────────────────────────────────
+# ─────────── 🐉 BEAST ───────────
+
 @router.callback_query(F.data == "game:beast")
 async def beast_menu(cb: CallbackQuery):
     text = (
@@ -239,9 +226,8 @@ async def beast_action(cb: CallbackQuery):
     await cb.answer()
 
 
-# ─────────────────────────────────────────────
-# 🧩 DETECTIVE
-# ─────────────────────────────────────────────
+# ─────────── 🧩 DETECTIVE ───────────
+
 RIDDLES = [
     ("i sᴩєᴧᴋ ᴡiᴛнσᴜᴛ ᴧ ϻσᴜᴛн, i нєᴧʀ ᴡiᴛнσᴜᴛ єᴧʀs. i нᴧᴠє ησ вσᴅʏ, вᴜᴛ i ᴄσϻє ᴧʟiᴠє ᴡiᴛн ᴡiηᴅ. ᴡнᴧᴛ ᴧϻ i?", "echo"),
     ("тнє ϻσʀє ʏσᴜ тᴧᴋє, тнє ϻσʀє ʏσᴜ ʟєᴧᴠє вєнiηᴅ. ᴡнᴧᴛ ᴧϻ i?", "footsteps"),
@@ -264,72 +250,4 @@ async def detective_menu(cb: CallbackQuery):
 
 @router.callback_query(F.data == "detective:investigate")
 async def detective_investigate(cb: CallbackQuery):
-    await add_coins(cb.from_user.id, 5)
-    await add_points(cb.from_user.id, 3)
-    await save_game_score(cb.from_user.id, "detective", 5)
-    await cb.answer("🔍 iηνєsᴛiɢᴧᴛiση ᴄσϻᴩʟєᴛє! +5 ᴄσiηs, +3 ᴩσiηᴛs", show_alert=True)
-
-
-# ─────────────────────────────────────────────
-# 🏹 RAID
-# ─────────────────────────────────────────────
-@router.callback_query(F.data == "game:raid")
-async def raid_menu(cb: CallbackQuery):
-    text = (
-        "🏹 <b>ᴧsᴛʀᴧʟ ʀᴧiᴅ</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "🐲 ʙσss: ᴅʀᴧɢση\n"
-        "нᴩ: ██████████ 100/100\n\n"
-        "ᴧᴛᴛᴧᴄᴋ тнє вσss!"
-    )
-    await smart_edit(cb, text, raid_kb())
-    await cb.answer()
-
-
-@router.callback_query(F.data == "raid:attack")
-async def raid_attack(cb: CallbackQuery):
-    dmg = random.randint(10, 25)
-    reward = dmg
-    await add_coins(cb.from_user.id, reward)
-    await add_points(cb.from_user.id, 5)
-    await save_game_score(cb.from_user.id, "raid", dmg)
-    text = (
-        "🏹 <b>ᴧsᴛʀᴧʟ ʀᴧiᴅ</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"⚔️ ʏσᴜ ᴅєᴧʟᴛ <b>{dmg}</b> ᴅᴧϻᴧɢє!\n"
-        f"💰 +{reward} ᴄσiηs | ⭐ +5 ᴩσiηᴛs"
-    )
-    await smart_edit(cb, text, raid_kb())
-    await cb.answer("⚔️ нiᴛ!")
-
-
-# ─────────────────────────────────────────────
-# 🏆 LEADERBOARDS (Per Game)
-# ─────────────────────────────────────────────
-@router.callback_query(F.data == "game:lb_menu")
-async def lb_menu(cb: CallbackQuery):
-    text = "🏆 <b>ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧ ɢᴧϻє:"
-    await smart_edit(cb, text, game_lb_menu_kb())
-    await cb.answer()
-
-
-@router.callback_query(F.data.startswith("lb:"))
-async def show_game_lb(cb: CallbackQuery):
-    game = cb.data.split(":")[1]
-    rows = await get_leaderboard(game, 10)
-    medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-
-    if not rows:
-        body = "ησ sᴄσʀєs ʏєᴛ. вє тнє ғiʀsᴛ!"
-    else:
-        body = "\n".join(
-            f"{medals[i]} {name} — <b>{score}</b>"
-            for i, (name, uname, score) in enumerate(rows)
-        )
-
-    text = (
-        f"🏆 <b>{game.upper()} ʟєᴧᴅєʀвσᴧʀᴅ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n{body}"
-    )
-    await smart_edit(cb, text, game_lb_menu_kb())
-    await cb.answer()
+    await
