@@ -4,6 +4,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.types import ErrorEvent
 
 from config import BOT_TOKEN, BOT_NAME
 from handlers import start, menu, study, games, admin, group_mgmt
@@ -26,6 +27,13 @@ async def main():
     )
     dp = Dispatcher()
 
+    # ─── Global error handler (bot ko crash hone se rokta hai) ───
+    @dp.errors()
+    async def global_error_handler(event: ErrorEvent):
+        logging.error(f"⚠️ Unhandled error: {event.exception}")
+        return True
+
+    # ─── Routers ───
     dp.include_router(start.router)
     dp.include_router(menu.router)
     dp.include_router(study.router)
