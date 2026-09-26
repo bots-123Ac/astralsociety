@@ -4,108 +4,170 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
 from keyboards.study_kb import (
-    study_main_kb, education_type_kb, class_kb, subject_kb, chapter_kb,
-    SUBJECTS,
+    study_main_kb, education_kb, class_kb, category_kb, subject_kb,
+    chapters_kb, RESOURCE_TYPE_LABELS,
 )
 from keyboards.main_menu import back_kb
-from utils.database import get_materials
+from utils.database import get_chapters, get_resources
+from utils.ui import smart_edit
 
 router = Router()
 
 
-class StudyFlow(StatesGroup):
-    browsing = State()
+class StudyBrowse(StatesGroup):
+    active = State()
 
 
 @router.callback_query(F.data == "menu:study")
-async def show_study(cb: CallbackQuery):
+async def show_study(cb: CallbackQuery, state: FSMContext):
+    await state.clear()
     text = (
         "📚 <b>sᴛᴜᴅʏ sєᴄᴛiση</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
         "ᴡнᴧᴛ ᴅσ ʏσᴜ ᴡᴧηηᴧ sᴛᴜᴅʏ тσᴅᴧʏ?"
     )
-    await cb.message.edit_text(text, reply_markup=study_main_kb())
+    await smart_edit(cb, text, study_main_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("study:rt:"))
+async def choose_rt(cb: CallbackQuery, state: FSMContext):
+    rt = cb.data.split(":")[2]
+    await state.set_state(StudyBrowse.active)
+    await state.update_data(rt=rt)
+    label = RESOURCE_TYPE_LABELS.get(rt, rt)
+    text = f"{label}\n━━━━━━━━━━━━━━━━━━━━━\n\nsєʟєᴄᴛ єᴅᴜᴄᴧᴛiση тʏᴩє:"
+    await smart_edit(cb, text, education_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("study:edu:"))
+async def choose_edu(cb: CallbackQuery, state: FSMContext):
+    edu = cb.data.split(":")[2]
+    await state.update_data(edu=edu)
+    if edu in ("jee", "neet"):
+        await state.update_data(cls="na")
+        text = "🔬 sєʟєᴄᴛ ᴄᴧᴛєɢσʀʏ:"
+        await smart_edit(cb, text, category_kb())
+    else:
+        text = "🏫 sєʟєᴄᴛ ᴄʟᴧss:"
+        await smart_edit(cb, text, class_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("study:cls:"))
+async def choose_cls(cb: CallbackQuery, state: FSMContext):
+    cls = cb.data.split(":")[2]
+    await state.update_data(cls=cls)
+    text = "🔬 sєʟєᴄᴛ ᴄᴧᴛєɢσʀʏ:"
+    await smart_edit(cb, text, category_kb())
     await cb.answer()
 
 
 @router.callback_query(F.data.startswith("study:cat:"))
-async def choose_category(cb: CallbackQuery):
-    category = cb.data.split(":")[2]
-    labels = {
-        "notes": "📖 ησᴛєs", "dpp": "📝 ᴅᴩᴩ", "modules": "📚 ϻσᴅᴜʟєs",
-        "books": "📕 вσσᴋs", "questions": "❓ ᴩʀᴧᴄᴛiᴄє", "quiz": "🧠 ǫᴜiᴢᴢєs",
-    }
-    text = (
-        f"{labels.get(category, category)}\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"sєʟєᴄᴛ єᴅᴜᴄᴧᴛiση тʏᴩє:"
+async def choose_cat(cb: CallbackQuery, state: FSMContext):
+    cat = cb.data.split(":")[2]
+    await state.update_data(cat=cat)
+    text = "📚 sєʟєᴄᴛ sᴜвᴊєᴄᴛ:"
+    await smart_edit(cb, text, subject_kb(cat))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("study:sub:"))
+async def choose_sub(cb: CallbackQuery, state: FSMContext):
+    sub = cb.data.split(":", 2)[2]
+    await state.update_data(sub=sub)
+    data = await state.get_data()
+
+    chapters = await get_chapters(
+        data["edu"], data["cls"], data["cat"], sub, data["rt"]
     )
-    await cb.message.edit_text(text, reply_markup=education_type_kb(category))
-    await cb.answer()
+    await state.update_data(chapter_list=[ch for ch, _ in chapters])
 
-
-@router.callback_query(F.data.startswith("edu:"))
-async def choose_edu(cb: CallbackQuery):
-    _, category, edu = cb.data.split(":")
-    if edu in ("jee", "neet"):
-        # Skip class, go to subject
-        key = (edu, "na")
-        subjects = SUBJECTS.get(key, [])
-        text = f"📚 sєʟєᴄᴛ sᴜвᴊєᴄᴛ ({edu.upper()}):"
-        await cb.message.edit_text(text, reply_markup=subject_kb(category, edu, "na"))
-        await cb.answer()
-        return
-
-    text = "🏫 sєʟєᴄᴛ ᴄʟᴧss:"
-    await cb.message.edit_text(text, reply_markup=class_kb(category, edu))
-    await cb.answer()
-
-
-@router.callback_query(F.data.startswith("cls:"))
-async def choose_class(cb: CallbackQuery):
-    _, category, edu, cls = cb.data.split(":")
-    text = f"📚 sєʟєᴄᴛ sᴜвᴊєᴄᴛ (ᴄʟᴧss {cls}):"
-    await cb.message.edit_text(text, reply_markup=subject_kb(category, edu, cls))
-    await cb.answer()
-
-
-@router.callback_query(F.data.startswith("sub:"))
-async def choose_subject(cb: CallbackQuery):
-    parts = cb.data.split(":", 4)
-    _, category, edu, cls, subject = parts
-    text = f"📖 sєʟєᴄᴛ ᴄнᴧᴩᴛєʀ ({subject}):"
-    await cb.message.edit_text(text, reply_markup=chapter_kb(category, edu, cls, subject))
-    await cb.answer()
-
-
-@router.callback_query(F.data.startswith("chp:"))
-async def show_chapter(cb: CallbackQuery):
-    parts = cb.data.split(":", 5)
-    _, category, edu, cls, subject, chapter = parts
-    results = await get_materials(category, edu, cls, subject, chapter)
-
-    if not results:
+    if not chapters:
         text = (
-            f"📭 <b>ησ ϻᴧᴛєʀiᴧʟ ғσᴜηᴅ</b>\n"
+            f"📭 <b>ησ ʀєsσᴜʀᴄєs ʏєᴛ</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"ᴄᴧᴛєɢσʀʏ: {category}\n"
-            f"єᴅᴜ: {edu.upper()}\n"
-            f"ᴄʟᴧss: {cls}\n"
-            f"sᴜвᴊєᴄᴛ: {subject}\n"
-            f"ᴄнᴧᴩᴛєʀ: {chapter}\n\n"
+            f"sᴜвᴊєᴄᴛ: <b>{sub}</b>\n"
+            f"ᴛʏᴩє: {RESOURCE_TYPE_LABELS.get(data['rt'], data['rt'])}\n\n"
             f"ᴧᴅϻiηs sє ϻᴧᴛєʀiᴧʟ ᴜᴩʟσᴧᴅ ηнi нᴜᴧ."
         )
-        await cb.message.edit_text(text, reply_markup=back_kb("menu:study"))
-        await cb.answer()
+        await smart_edit(cb, text, back_kb("menu:study"))
+    else:
+        text = (
+            f"📖 <b>{sub}</b> — ᴄнᴧᴩᴛєʀs\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"ᴄнσσsє ᴧ ᴄнᴧᴩᴛєʀ:"
+        )
+        await smart_edit(cb, text, chapters_kb(chapters))
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("study:chp:"))
+async def show_chapter(cb: CallbackQuery, state: FSMContext):
+    idx = int(cb.data.split(":")[2])
+    data = await state.get_data()
+    if not data.get("edu") or not data.get("chapter_list"):
+        await cb.answer("sєssiση єxᴩiʀєᴅ. sᴛᴧʀᴛ ᴧɢᴧiη.", show_alert=True)
         return
 
-    await cb.message.edit_text(
-        f"📁 ᴍᴧᴛєʀiᴧʟs ғσᴜηᴅ: {len(results)}",
-        reply_markup=back_kb("menu:study")
+    try:
+        chapter = data["chapter_list"][idx]
+    except IndexError:
+        await cb.answer("ᴄнᴧᴩᴛєʀ ησᴛ ғσᴜηᴅ.", show_alert=True)
+        return
+
+    files = await get_resources(
+        data["edu"], data["cls"], data["cat"], data["sub"], chapter, data["rt"]
     )
-    for file_id, caption in results:
+
+    await smart_edit(
+        cb,
+        f"📁 <b>{chapter}</b> — {len(files)} ʀєsσᴜʀᴄє(s)",
+        back_kb("menu:study"),
+    )
+
+    for content_type, content, caption in files:
         try:
-            await cb.message.answer_document(document=file_id, caption=caption or "")
+            if content_type == "link":
+                await cb.message.answer(f"🔗 {content}\n{caption or ''}")
+            elif content_type == "video":
+                await cb.message.answer_video(video=content, caption=caption or "")
+            elif content_type == "photo":
+                await cb.message.answer_photo(photo=content, caption=caption or "")
+            else:
+                await cb.message.answer_document(document=content, caption=caption or "")
         except Exception:
-            await cb.message.answer(f"📄 {caption or 'File'}\nFile ID: {file_id}")
+            try:
+                await cb.message.answer(f"📄 {caption or 'Resource'}\n{content}")
+            except Exception:
+                pass
+    await cb.answer()
+
+
+# ─── Back navigation ───
+
+@router.callback_query(F.data == "study:back:edu")
+async def back_edu(cb: CallbackQuery):
+    await smart_edit(cb, "sєʟєᴄᴛ єᴅᴜᴄᴧᴛiση тʏᴩє:", education_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data == "study:back:cls")
+async def back_cls(cb: CallbackQuery):
+    await smart_edit(cb, "sєʟєᴄᴛ ᴄʟᴧss:", class_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data == "study:back:cat")
+async def back_cat(cb: CallbackQuery):
+    await smart_edit(cb, "sєʟєᴄᴛ ᴄᴧᴛєɢσʀʏ:", category_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data == "study:back:sub")
+async def back_sub(cb: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    cat = data.get("cat", "general")
+    await smart_edit(cb, "sєʟєᴄᴛ sᴜвᴊєᴄᴛ:", subject_kb(cat))
     await cb.answer()
