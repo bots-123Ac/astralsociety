@@ -19,19 +19,13 @@ from utils.ui import smart_edit
 router = Router()
 logger = logging.getLogger(__name__)
 
-# ═══════════════════════════════════════════════
-# IN-MEMORY SESSIONS (per user)
-# ═══════════════════════════════════════════════
-SESSIONS = {}   # user_id -> {"step": str, "data": {...}}
+SESSIONS = {}
 
 
 def _clear(user_id):
     SESSIONS.pop(user_id, None)
 
 
-# ═══════════════════════════════════════════════
-# KEYBOARDS
-# ═══════════════════════════════════════════════
 def admin_panel_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📤 ᴧᴅᴅ sᴛᴜᴅʏ ϻᴧᴛєʀiᴧʟ", callback_data="adm:add")],
@@ -70,9 +64,6 @@ def section_1112_kb():
     ])
 
 
-# ═══════════════════════════════════════════════
-# /admin
-# ═══════════════════════════════════════════════
 @router.message(Command("admin"))
 async def cmd_admin(message: Message):
     if not is_bot_admin(message.from_user.id):
@@ -80,8 +71,7 @@ async def cmd_admin(message: Message):
     _clear(message.from_user.id)
     await message.answer(
         f"👑 <b>{BOT_NAME} — ᴧᴅϻiη ᴩᴧηєʟ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴄнσσsє ᴧη ᴧᴄᴛiση:",
+        f"━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧη ᴧᴄᴛiση:",
         reply_markup=admin_panel_kb()
     )
 
@@ -89,7 +79,7 @@ async def cmd_admin(message: Message):
 @router.callback_query(F.data == "adm:cancel")
 async def adm_cancel(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
-        return await cb.answer("❌ ᴧᴅϻiηs σηʟʏ", show_alert=True)
+        return await cb.answer("❌", show_alert=True)
     _clear(cb.from_user.id)
     await smart_edit(cb, "❌ ᴄᴧηᴄєʟʟєᴅ.", admin_panel_kb())
     await cb.answer()
@@ -98,7 +88,7 @@ async def adm_cancel(cb: CallbackQuery):
 @router.callback_query(F.data == "adm:stats")
 async def adm_stats(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
-        return await cb.answer("❌ ᴧᴅϻiηs σηʟʏ", show_alert=True)
+        return await cb.answer("❌", show_alert=True)
     import aiosqlite
     from config import DB_PATH
     async with aiosqlite.connect(DB_PATH) as db:
@@ -108,28 +98,23 @@ async def adm_stats(cb: CallbackQuery):
             users = (await cur.fetchone())[0]
     await smart_edit(
         cb,
-        f"📊 <b>sᴛᴧᴛs</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"📊 <b>sᴛᴧᴛs</b>\n━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"📚 sᴛᴜᴅʏ ϻᴧᴛєʀiᴧʟs: <b>{materials}</b>\n"
-        f"👥 ᴛσᴛᴧʟ ᴜsєʀs: <b>{users}</b>",
+        f"👥 ᴜsєʀs: <b>{users}</b>",
         admin_panel_kb()
     )
     await cb.answer()
 
 
-# ═══════════════════════════════════════════════
-# ADD STUDY — STEP 1: Class
-# ═══════════════════════════════════════════════
 @router.callback_query(F.data == "adm:add")
 async def adm_add(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
-        return await cb.answer("❌ ᴧᴅϻiηs σηʟʏ", show_alert=True)
+        return await cb.answer("❌", show_alert=True)
     SESSIONS[cb.from_user.id] = {"step": "class", "data": {}}
     await smart_edit(
         cb,
-        f"📤 <b>ᴧᴅᴅ sᴛᴜᴅʏ ϻᴧᴛєʀiᴧʟ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"sᴛєᴩ 1/5 — ᴄнσσsє ᴄʟᴧss:",
+        "📤 <b>ᴧᴅᴅ sᴛᴜᴅʏ ϻᴧᴛєʀiᴧʟ</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n\nsᴛєᴩ 1/5 — ᴄнσσsє ᴄʟᴧss:",
         class_kb()
     )
     await cb.answer()
@@ -138,31 +123,23 @@ async def adm_add(cb: CallbackQuery):
 @router.callback_query(F.data.startswith("adm:cls:"))
 async def adm_class(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
-        return await cb.answer("❌ ᴧᴅϻiηs σηʟʏ", show_alert=True)
+        return await cb.answer("❌", show_alert=True)
     cls = cb.data.split(":")[2]
     sess = SESSIONS.setdefault(cb.from_user.id, {"step": "class", "data": {}})
     sess["data"]["class_name"] = cls
     sess["step"] = "section"
 
     if cls == "10":
-        await smart_edit(
-            cb,
-            f"📤 <b>ᴄʟᴧss 10</b>\n\nsᴛєᴩ 2/5 — ᴄнσσsє sєᴄᴛiση:",
-            section_10_kb()
-        )
+        await smart_edit(cb, f"📤 <b>ᴄʟᴧss 10</b>\n\nsᴛєᴩ 2/5 — ᴄнσσsє sєᴄᴛiση:", section_10_kb())
     else:
-        await smart_edit(
-            cb,
-            f"📤 <b>ᴄʟᴧss {cls}</b>\n\nsᴛєᴩ 2/5 — ᴄнσσsє sєᴄᴛiση:",
-            section_1112_kb()
-        )
+        await smart_edit(cb, f"📤 <b>ᴄʟᴧss {cls}</b>\n\nsᴛєᴩ 2/5 — ᴄнσσsє sєᴄᴛiση:", section_1112_kb())
     await cb.answer()
 
 
 @router.callback_query(F.data.startswith("adm:sec:"))
 async def adm_section(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
-        return await cb.answer("❌ ᴧᴅϻiηs σηʟʏ", show_alert=True)
+        return await cb.answer("❌", show_alert=True)
     section = cb.data.split(":")[2]
     sess = SESSIONS.setdefault(cb.from_user.id, {"step": "section", "data": {}})
     sess["data"]["section"] = section
@@ -171,60 +148,52 @@ async def adm_section(cb: CallbackQuery):
     if cls == "10" and section in ("science", "maths", "sst", "english"):
         sess["step"] = "subject"
         await cb.message.answer(
-            f"📤 <b>sᴛєᴩ 3/5</b> — sєηᴅ sᴜвᴊєᴄᴛ ηᴧϻє (ᴛєxᴛ):\n"
-            f"ᴇxᴧϻᴩʟє: <code>Biology</code> σʀ <code>Algebra</code>"
+            "📤 <b>sᴛєᴩ 3/5</b> — sєηᴅ sᴜвᴊєᴄᴛ ηᴧϻє (ᴛєxᴛ):\n"
+            "ᴇxᴧϻᴩʟє: <code>Biology</code> σʀ <code>Algebra</code>"
         )
     else:
         sess["data"]["subject"] = ""
         sess["step"] = "chapter"
         await cb.message.answer(
-            f"📤 <b>sᴛєᴩ 4/5</b> — sєηᴅ ᴄнᴧᴩᴛєʀ ηᴧϻє (ᴛєxᴛ):\n"
-            f"ᴇxᴧϻᴩʟє: <code>Chapter 1: Life Processes</code>"
+            "📤 <b>sᴛєᴩ 4/5</b> — sєηᴅ ᴄнᴧᴩᴛєʀ ηᴧϻє (ᴛєxᴛ):\n"
+            "ᴇxᴧϻᴩʟє: <code>Chapter 1: Life Processes</code>"
         )
     await cb.answer()
 
 
-# ═══════════════════════════════════════════════
-# STEP 3/4/5 — Handle admin's text/photo/doc
-# ═══════════════════════════════════════════════
 @router.message(F.text | F.photo | F.document | F.video)
 async def adm_content_handler(message: Message):
     user_id = message.from_user.id
     sess = SESSIONS.get(user_id)
 
-    # No session → pass to next router
     if not sess:
         raise SkipHandler()
-
     if not is_bot_admin(user_id):
         _clear(user_id)
         raise SkipHandler()
 
     step = sess.get("step")
 
-    # ─── Step 3: Subject ───
     if step == "subject":
         if not message.text:
             return await message.reply("❌ sєηᴅ тєxᴛ σηʟʏ.")
         sess["data"]["subject"] = message.text.strip()
         sess["step"] = "chapter"
         return await message.answer(
-            f"📤 <b>sᴛєᴩ 4/5</b> — sєηᴅ ᴄнᴧᴩᴛєʀ ηᴧϻє (ᴛєxᴛ):\n"
-            f"ᴇxᴧϻᴩʟє: <code>Chapter 1: Life Processes</code>"
+            "📤 <b>sᴛєᴩ 4/5</b> — sєηᴅ ᴄнᴧᴩᴛєʀ ηᴧϻє (ᴛєxᴛ):\n"
+            "ᴇxᴧϻᴩʟє: <code>Chapter 1: Life Processes</code>"
         )
 
-    # ─── Step 4: Chapter ───
     if step == "chapter":
         if not message.text:
             return await message.reply("❌ sєηᴅ тєxᴛ σηʟʏ.")
         sess["data"]["chapter"] = message.text.strip()
         sess["step"] = "content"
         return await message.answer(
-            f"📤 <b>sᴛєᴩ 5/5</b> — sєηᴅ тнє ϻᴧᴛєʀiᴧʟ:\n"
-            f"📄 PDF | 🎥 ᴠiᴅєσ | 🖼️ ᴩнσᴛσ | 🔗 ʟiηᴋ"
+            "📤 <b>sᴛєᴩ 5/5</b> — sєηᴅ тнє ϻᴧᴛєʀiᴧʟ:\n"
+            "📄 PDF | 🎥 ᴠiᴅєσ | 🖼️ ᴩнσᴛσ | 🔗 ʟiηᴋ"
         )
 
-    # ─── Step 5: Content (file/link) ───
     if step == "content":
         ctype, content = None, None
         if message.document:
@@ -240,11 +209,15 @@ async def adm_content_handler(message: Message):
             return await message.reply("❌ sєηᴅ PDF/ᴠiᴅєσ/ᴩнσᴛσ σʀ ᴠᴧʟiᴅ ʟiηᴋ.")
 
         data = sess["data"]
+        # Merge subject into chapter name so user UX is clean
+        subj = data.get("subject", "")
+        chapter_final = f"{subj} — {data['chapter']}" if subj else data["chapter"]
+
         await save_study_material(
             data["class_name"],
             data["section"],
-            data.get("subject", ""),
-            data["chapter"],
+            "",  # subject left empty
+            chapter_final,
             ctype,
             content,
             message.caption or "",
@@ -256,11 +229,9 @@ async def adm_content_handler(message: Message):
             f"━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"📘 ᴄʟᴧss: <b>{data['class_name']}</b>\n"
             f"📂 sєᴄᴛiση: <b>{data['section']}</b>\n"
-            f"📚 sᴜвᴊєᴄᴛ: <b>{data.get('subject') or '—'}</b>\n"
-            f"📄 ᴄнᴧᴩᴛєʀ: <b>{data['chapter']}</b>\n\n"
+            f"📄 ᴄнᴧᴩᴛєʀ: <b>{chapter_final}</b>\n\n"
             f"ᴜsєʀs ᴄᴧη ησω ᴧᴄᴄєss iᴛ ᴠiᴧ /study.",
             reply_markup=admin_panel_kb()
         )
 
-    # Unknown step → skip
     raise SkipHandler()
