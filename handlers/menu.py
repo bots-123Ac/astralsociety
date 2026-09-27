@@ -1,9 +1,11 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import (
+    CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton,
+)
 
 from config import BOT_NAME, BOT_USERNAME
 from keyboards.main_menu import main_menu_kb, back_kb
-from utils.database import get_user_stats
+from utils.database import get_user_stats, get_quiz_stats
 from utils.ui import smart_edit
 
 router = Router()
@@ -87,7 +89,6 @@ async def profile_menu(cb: CallbackQuery):
 
 @router.callback_query(F.data == "menu:perf")
 async def perf_menu(cb: CallbackQuery):
-    from utils.database import get_quiz_stats
     total, correct, subjects = await get_quiz_stats(cb.from_user.id)
     acc = round((correct / total) * 100, 1) if total else 0
     lines = [f"📊 <b>ᴍʏ ᴘᴇʀғᴏʀᴍᴀηᴄᴇ</b>\n━━━━━━━━━━━━━━━━━━━━━\n"]
