@@ -29,13 +29,12 @@ async def main():
     )
     dp = Dispatcher()
 
-    # ─── Global error handler ───
     @dp.errors()
     async def on_error(event: ErrorEvent):
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    # ─── Routers (order matters) ───
+    # Order matters — group_mgmt LAST so its catch-all doesn't block games
     dp.include_router(start.router)
     dp.include_router(menu.router)
     dp.include_router(study.router)
