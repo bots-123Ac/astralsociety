@@ -2,12 +2,8 @@ from aiogram.types import CallbackQuery, InlineKeyboardMarkup
 from aiogram.exceptions import TelegramBadRequest
 
 
-async def smart_edit(
-    callback: CallbackQuery,
-    text: str,
-    reply_markup: InlineKeyboardMarkup | None = None,
-):
-    """Safely edit caption/text depending on message type."""
+async def smart_edit(callback: CallbackQuery, text: str,
+                     reply_markup: InlineKeyboardMarkup | None = None):
     msg = callback.message
     try:
         if msg.photo or msg.video or msg.document or msg.animation or msg.audio:
