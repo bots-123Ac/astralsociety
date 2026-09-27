@@ -28,17 +28,25 @@ BOT_ADMIN_IDS = [
 ]
 
 # ═══════════════════════════════════════════════
-# 👨‍💻 CREATOR CREDITS
+# 👨‍💻 CREATOR CREDITS (Clickable links)
 # ═══════════════════════════════════════════════
 CREATOR_1_NAME = "⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐"
 CREATOR_1_USERNAME = "@OfficialCrazyBoy07"
+CREATOR_1_LINK = "https://t.me/OfficialCrazyBoy07"
 CREATOR_1_ID = 7790607144
 
 CREATOR_2_NAME = "𝓚𝓪𝓷𝓱𝓪࿐✨🤟"
 CREATOR_2_USERNAME = "@Lunar_kanha_4572"
+CREATOR_2_LINK = "https://t.me/Lunar_kanha_4572"
 CREATOR_2_ID = 8165863254
 
-CREDIT_LINE = f"ᴩσωєʀєᴅ вʏ {CREATOR_1_NAME} & {CREATOR_2_NAME}"
+# HTML clickable credit line
+CREDIT_HTML = (
+    f'ᴩσωєʀєᴅ вʏ '
+    f'<a href="{CREATOR_1_LINK}">{CREATOR_1_NAME}</a> '
+    f'& '
+    f'<a href="{CREATOR_2_LINK}">{CREATOR_2_NAME}</a>'
+)
 
 DB_PATH = os.getenv("DB_PATH", "astral.db")
 
@@ -56,6 +64,7 @@ WORD_MAX_REWARD = 100
 ROB_NORMAL_PERCENT = 10
 ROB_PREMIUM_PERCENT = 5
 SHIELD_FREE_DAYS = 2
+GIVE_DEDUCTION_PERCENT = 10
 
 PREMIUM_PLANS = {
     "1m": {"days": 30, "stars": 90, "label": "1 Month"},
