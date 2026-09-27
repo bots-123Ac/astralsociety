@@ -1,9 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message
 
-from config import (
-    BOT_NAME, BOT_USERNAME, CREDIT_HTML,
-)
+from config import BOT_NAME, BOT_USERNAME, CREDIT_HTML
 from keyboards.main_menu import main_menu_kb, back_main_kb
 from utils.ui import smart_edit
 
@@ -12,7 +10,7 @@ router = Router()
 
 def help_text() -> str:
     return (
-        f"🆘 <b>{BOT_NAME} — нєʟᴩ</b>\n"
+        f"🆘 <b>{BOT_NAME} — ʜᴇʟᴘ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"<b>📚 ꜱᴛᴜᴅʏ</b>\n"
         f"/study — ʙʀᴏᴡꜱᴇ ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ (ᴅᴍ)\n\n"
@@ -27,7 +25,7 @@ def help_text() -> str:
         f"<b>🪙 ᴇᴄᴏɴᴏᴍʏ</b>\n"
         f"/profile — ᴠɪᴇᴡ ᴘʀᴏꜰɪʟᴇ\n"
         f"/convert 100c — ᴄᴏɪɴꜱ → ɢᴇᴍꜱ\n"
-        f"/give — ꜱᴇɴᴅ ᴄᴏɪɴꜱ (ʀᴇᴘʟʏ)\n"
+        f"/give 10000 — ꜱᴇɴᴅ ᴄᴏɪɴꜱ (ʀᴇᴘʟʏ)\n"
         f"/robs — ʀᴏʙ ᴜꜱᴇʀ (ʀᴇᴘʟʏ)\n"
         f"/shield 2 — ᴀᴄᴛɪᴠᴀᴛᴇ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ\n"
         f"/premium — ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ\n"
@@ -36,14 +34,6 @@ def help_text() -> str:
         f"<b>🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n"
         f"/aleaderboard — ɢʟᴏʙᴀʟ ʀᴀɴᴋɪɴɢ\n"
         f"/performance — ʏᴏᴜʀ ꜱᴛᴀᴛꜱ (ᴅᴍ)\n\n"
-        f"<b>🛡️ ɢʀᴏᴜᴘ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ</b> <i>(ᴀᴅᴍɪɴ ᴏɴʟʏ)</i>\n"
-        f"/mute /unmute — ᴍᴜᴛᴇ ᴜꜱᴇʀ\n"
-        f"/ban /unban — ʙᴀɴ ᴜꜱᴇʀ\n"
-        f"/kick — ᴋɪᴄᴋ ᴜꜱᴇʀ\n"
-        f"/warn /unwarn — ᴡᴀʀɴ ᴜꜱᴇʀ\n"
-        f"/lock /unlock — ʟᴏᴄᴋ ᴄᴏɴᴛᴇɴᴛ\n"
-        f"/settings — ɢʀᴏᴜᴘ ꜱᴇᴛᴛɪɴɢꜱ\n"
-        f"/purge — ᴅᴇʟᴇᴛᴇ ᴍᴇꜱꜱᴀɢᴇꜱ\n\n"
         f"<b>👑 ᴀᴅᴍɪɴ</b>\n"
         f"/admin — ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ\n\n"
         f"🌠 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ʀɪꜱᴇ"
@@ -56,17 +46,17 @@ def about_text() -> str:
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"🤖 <b>ʙᴏᴛ ɴᴀᴍᴇ:</b> {BOT_NAME}\n"
         f"🔗 <b>ᴜꜱᴇʀɴᴀᴍᴇ:</b> {BOT_USERNAME}\n\n"
-        f"<b>✨ ᴛʜɪꜱ ʙᴏᴛ ɪɴᴄʟᴜᴅᴇꜱ:</b>\n"
+        f"<b>✨ ꜰᴇᴀᴛᴜʀᴇꜱ:</b>\n"
         f"📚 ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ ꜱʏꜱᴛᴇᴍ\n"
         f"📝 ǫᴜɪᴢ ꜱʏꜱᴛᴇᴍ\n"
         f"🎮 ᴛ-ɢᴀᴍᴇꜱ (ǫᴜɪᴢ, ᴡᴏʀᴅ, ɴᴜᴍʙᴇʀ)\n"
+        f"🎯 ᴀᴜᴛᴏ ᴇᴠᴇɴᴛꜱ (ᴇᴠᴇʀʏ ʜᴏᴜʀ)\n"
         f"🪙 ᴄᴏɪɴꜱ & ɢᴇᴍꜱ ᴇᴄᴏɴᴏᴍʏ\n"
         f"🏆 ɢʟᴏʙᴀʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅꜱ\n"
         f"⭐ ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀꜱʜɪᴘ\n"
         f"🛡️ ꜱʜɪᴇʟᴅ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ\n\n"
         f"⚠️ <b>ᴅɪꜱᴄʟᴀɪᴍᴇʀ:</b>\n"
-        f"ᴀʟʟ ʀᴇᴡᴀʀᴅꜱ ᴀʀᴇ ᴠɪʀᴛᴜᴀʟ. ɴᴏ ʀᴇᴀʟ-ᴡᴏʀʟᴅ ᴠᴀʟᴜᴇ.\n"
-        f"ᴏɴʟʏ ᴍᴇᴀɴᴛ ғᴏʀ ɢᴀᴍᴇᴘʟᴀʏ ᴀɴᴅ ᴇɴᴛᴇʀᴛᴀɪɴᴍᴇɴᴛ.\n\n"
+        f"ᴀʟʟ ʀᴇᴡᴀʀᴅꜱ ᴀʀᴇ ᴠɪʀᴛᴜᴀʟ. ɴᴏ ʀᴇᴀʟ-ᴡᴏʀʟᴅ ᴠᴀʟᴜᴇ.\n\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n"
         f"👨‍💻 <b>ᴘᴏᴡᴇʀᴇᴅ ʙʏ:</b>\n"
         f"{CREDIT_HTML}\n"
