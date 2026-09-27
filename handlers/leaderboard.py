@@ -1,37 +1,46 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import Message, CallbackQuery
 
-from keyboards.game_kb import leaderboard_menu_kb
-from keyboards.main_menu import back_kb
-from utils.database import get_word_leaderboard, get_quiz_stats
-from utils.ui import smart_edit
+from keyboards.main_menu import leaderboard_kb, back_main_kb
+from utils.database import get_global_leaderboard, get_user_rank
+from utils.styler import fancy
 
 router = Router()
 
+MEDALS = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
-@router.callback_query(F.data == "lb:word")
-async def lb_word(cb: CallbackQuery):
-    rows = await get_word_leaderboard(10)
-    medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+
+def _format_lb(rows, title):
+    lines = [f"{title}\n━━━━━━━━━━━━━━━━━━━━━\n"]
     if not rows:
-        body = "ηᴏ sᴄᴏʀᴇs ʏᴇᴛ."
+        lines.append("ησ ᴜsєʀs ʏєт.")
     else:
-        body = "\n".join(
-            f"{medals[i]} {name} — <b>{score}</b>"
-            for i, (name, uname, score) in enumerate(rows)
-        )
-    text = f"🏆 <b>ᴡᴏʀᴅ ɢᴀᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\n{body}"
-    await smart_edit(cb, text, leaderboard_menu_kb())
-    await cb.answer()
+        for i, (name, uname, astral_id, coins) in enumerate(rows):
+            display = f"@{uname}" if uname else (name or f"ID {astral_id}")
+            lines.append(f"{MEDALS[i]} {display} — <b>{coins:,}</b> 🪙")
+    return "\n".join(lines)
 
 
-@router.callback_query(F.data == "lb:quiz")
-async def lb_quiz(cb: CallbackQuery):
-    text = (
-        f"🏆 <b>ǫᴜɪᴢ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴜsᴇ /profile ᴛᴏ sᴇᴇ ʏᴏᴜʀ ᴏᴡɴ sᴛᴀᴛs.\n"
-        f"sᴜʙᴊᴇᴄᴛ-ᴡɪsᴇ ʀᴀɴᴋɪɴɢ ᴄᴏᴍɪɴɢ sᴏᴏɴ."
-    )
-    await smart_edit(cb, text, leaderboard_menu_kb())
+@router.message(F.text.regexp(r"^/aleaderboard(\s|$)"))
+async def cmd_aleaderboard(message: Message):
+    rows = await get_global_leaderboard(10)
+    text = _format_lb(rows, "🌐 <b>ɢʟσвᴧʟ ʟєᴧᴅєʀвσᴧʀᴅ</b>")
+
+    # Rank info
+    rank = await get_user_rank(message.from_user.id)
+    if rank:
+        text += f"\n\n👤 ʏσᴜʀ ʀᴧηᴋ: <b>#{rank}</b>"
+
+    if message.chat.type == "private":
+        await message.answer(text, reply_markup=back_main_kb())
+    else:
+        await message.answer(text, reply_markup=leaderboard_kb())
+
+
+@router.callback_query(F.data == "lb:group")
+async def cb_group_lb(cb: CallbackQuery):
+    # Group top 10 = all users (simplified — no per-group tracking implemented)
+    rows = await get_global_leaderboard(10)
+    text = _format_lb(rows, "👥 <b>ɢʀσᴜᴩ тσᴩ 10</b>")
+    await cb.message.edit_text(text, reply_markup=leaderboard_kb())
     await cb.answer()
