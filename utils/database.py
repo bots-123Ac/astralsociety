@@ -1,103 +1,87 @@
 import aiosqlite
-from config import DB_PATH
+import random
+import string
+from datetime import datetime, timedelta
+from config import DB_PATH, COINS_PER_GEM
+
+
+def _gen_astral_id() -> str:
+    return "".join(random.choices(string.digits, k=6))
+
+
+def _now():
+    return datetime.utcnow()
+
+
+def _to_str(dt):
+    return dt.strftime("%Y-%m-%d %H:%M:%S") if dt else None
+
+
+def _parse(s):
+    if not s:
+        return None
+    try:
+        return datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+    except Exception:
+        return None
 
 
 async def init_db():
     async with aiosqlite.connect(DB_PATH) as db:
-        # Users
         await db.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY,
                 username TEXT,
                 first_name TEXT,
-                coins INTEGER DEFAULT 100,
-                points INTEGER DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                astral_id TEXT UNIQUE,
+                coins INTEGER DEFAULT 2000,
+                gems INTEGER DEFAULT 0,
+                xp INTEGER DEFAULT 0,
+                quiz_attempted INTEGER DEFAULT 0,
+                quiz_solved INTEGER DEFAULT 0,
+                word_attempted INTEGER DEFAULT 0,
+                word_solved INTEGER DEFAULT 0,
+                number_attempted INTEGER DEFAULT 0,
+                number_guess INTEGER DEFAULT 0,
+                premium_until TEXT,
+                shield_until TEXT,
+                last_daily TEXT,
+                streak INTEGER DEFAULT 0,
+                created_at TEXT
             )
         """)
-        # Study material
         await db.execute("""
-            CREATE TABLE IF NOT EXISTS study_resources (
+            CREATE TABLE IF NOT EXISTS study_materials (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                board TEXT, class_name TEXT, subject TEXT,
-                chapter TEXT, material_type TEXT,
+                class_name TEXT, section TEXT, subject TEXT, chapter TEXT,
                 content_type TEXT, content TEXT, caption TEXT,
                 uploaded_by INTEGER,
-                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                uploaded_at TEXT
             )
         """)
-        # Quiz
         await db.execute("""
             CREATE TABLE IF NOT EXISTS quiz_questions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                exam TEXT, subject TEXT, topic TEXT,
-                question TEXT,
+                category TEXT, question TEXT,
                 option_a TEXT, option_b TEXT, option_c TEXT, option_d TEXT,
-                correct TEXT, difficulty TEXT DEFAULT 'medium',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                correct TEXT
             )
         """)
         await db.execute("""
-            CREATE TABLE IF NOT EXISTS quiz_attempts (
+            CREATE TABLE IF NOT EXISTS powers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER, question_id INTEGER,
-                selected TEXT, is_correct INTEGER,
-                exam TEXT, subject TEXT, topic TEXT,
-                attempted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                user_id INTEGER, power_type TEXT, expires_at TEXT
             )
         """)
-        # Word game (per user per chat)
         await db.execute("""
-            CREATE TABLE IF NOT EXISTS word_games (
+            CREATE TABLE IF NOT EXISTS mission_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER, chat_id INTEGER,
-                word TEXT, word_length INTEGER,
-                attempts INTEGER DEFAULT 0,
-                max_attempts INTEGER DEFAULT 30,
-                status TEXT DEFAULT 'active',
-                guessed_json TEXT DEFAULT '[]',
-                started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(user_id, chat_id)
-            )
-        """)
-        await db.execute("""
-            CREATE TABLE IF NOT EXISTS word_game_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER, word TEXT,
-                attempts INTEGER, won INTEGER,
-                score INTEGER,
-                played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        # Warnings
-        await db.execute("""
-            CREATE TABLE IF NOT EXISTS warnings (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER, group_id INTEGER,
-                reason TEXT, warned_by INTEGER,
-                warned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        # Group settings
-        await db.execute("""
-            CREATE TABLE IF NOT EXISTS group_settings (
-                group_id INTEGER PRIMARY KEY,
-                welcome_enabled INTEGER DEFAULT 1,
-                goodbye_enabled INTEGER DEFAULT 1,
-                antilink INTEGER DEFAULT 0,
-                antiflood INTEGER DEFAULT 0,
-                antiforward INTEGER DEFAULT 0,
-                captcha INTEGER DEFAULT 0,
-                welcome_text TEXT DEFAULT '',
-                rules TEXT DEFAULT ''
-            )
-        """)
-        # Group locks (per type)
-        await db.execute("""
-            CREATE TABLE IF NOT EXISTS group_locks (
-                group_id INTEGER, lock_type TEXT,
-                is_locked INTEGER DEFAULT 0,
-                PRIMARY KEY (group_id, lock_type)
+                user_id INTEGER, date TEXT,
+                quizzes_required INTEGER,
+                quiz_done INTEGER DEFAULT 0,
+                word_played INTEGER DEFAULT 0,
+                pyq_downloaded INTEGER DEFAULT 0,
+                claimed INTEGER DEFAULT 0
             )
         """)
         await db.commit()
@@ -111,41 +95,44 @@ async def get_or_create_user(user_id, username, first_name):
         async with db.execute("SELECT * FROM users WHERE user_id=?", (user_id,)) as cur:
             row = await cur.fetchone()
         if not row:
+            astral_id = _gen_astral_id()
+            # ensure unique
+            while True:
+                async with db.execute("SELECT 1 FROM users WHERE astral_id=?", (astral_id,)) as cur:
+                    if not await cur.fetchone():
+                        break
+                astral_id = _gen_astral_id()
             await db.execute(
-                "INSERT INTO users (user_id, username, first_name) VALUES (?,?,?)",
-                (user_id, username or "", first_name or "")
+                """INSERT INTO users
+                (user_id, username, first_name, astral_id, created_at)
+                VALUES (?,?,?,?,?)""",
+                (user_id, username or "", first_name or "", astral_id, _to_str(_now()))
+            )
+            await db.commit()
+        else:
+            # update name/username if changed
+            await db.execute(
+                "UPDATE users SET username=?, first_name=? WHERE user_id=?",
+                (username or "", first_name or "", user_id)
             )
             await db.commit()
         async with db.execute("SELECT * FROM users WHERE user_id=?", (user_id,)) as cur:
             return await cur.fetchone()
 
 
-async def get_user_stats(user_id):
+async def get_user_by_astral_id(astral_id):
     async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute("SELECT coins, points FROM users WHERE user_id=?", (user_id,)) as cur:
-            row = await cur.fetchone()
-        coins, points = row if row else (0, 0)
-        async with db.execute(
-            "SELECT COUNT(*), COALESCE(SUM(is_correct),0) FROM quiz_attempts WHERE user_id=?",
-            (user_id,)
-        ) as cur:
-            qa, qc = await cur.fetchone()
-        async with db.execute(
-            "SELECT COUNT(*), COALESCE(SUM(won),0), COALESCE(SUM(score),0) FROM word_game_history WHERE user_id=?",
-            (user_id,)
-        ) as cur:
-            wg, ww, ws = await cur.fetchone()
-    return {
-        "coins": coins, "points": points,
-        "quiz_attempted": qa or 0, "quiz_correct": qc or 0,
-        "word_games": wg or 0, "word_won": ww or 0, "word_score": ws or 0,
-    }
+        async with db.execute("SELECT * FROM users WHERE astral_id=?", (astral_id,)) as cur:
+            return await cur.fetchone()
 
 
-async def add_points(user_id, amount):
+async def get_user_by_username(username):
+    username = username.lstrip("@").lower()
     async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute("UPDATE users SET points = points + ? WHERE user_id=?", (amount, user_id))
-        await db.commit()
+        async with db.execute(
+            "SELECT * FROM users WHERE LOWER(username)=?", (username,)
+        ) as cur:
+            return await cur.fetchone()
 
 
 async def add_coins(user_id, amount):
@@ -154,318 +141,310 @@ async def add_coins(user_id, amount):
         await db.commit()
 
 
-# ═══════════════════════════════════════════════
-# STUDY
-# ═══════════════════════════════════════════════
-async def save_resource(board, class_name, subject, chapter, material_type,
-                       content_type, content, caption, uploaded_by):
+async def add_gems(user_id, amount):
     async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            """SELECT id FROM study_resources
-               WHERE board=? AND class_name=? AND subject=? AND chapter=?
-               AND material_type=? AND content=?""",
-            (board, class_name, subject, chapter, material_type, content)
-        ) as cur:
-            if await cur.fetchone():
-                return False
+        await db.execute("UPDATE users SET gems = gems + ? WHERE user_id=?", (amount, user_id))
+        await db.commit()
+
+
+async def add_xp(user_id, amount):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE users SET xp = xp + ? WHERE user_id=?", (amount, user_id))
+        await db.commit()
+
+
+async def convert_coins_to_gems(user_id, coins_amount):
+    if coins_amount < COINS_PER_GEM:
+        return False, "min"
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT coins FROM users WHERE user_id=?", (user_id,)) as cur:
+            row = await cur.fetchone()
+        if not row or row[0] < coins_amount:
+            return False, "insufficient"
+        gems = coins_amount // COINS_PER_GEM
         await db.execute(
-            """INSERT INTO study_resources
-            (board, class_name, subject, chapter, material_type,
-             content_type, content, caption, uploaded_by)
-            VALUES (?,?,?,?,?,?,?,?,?)""",
-            (board, class_name, subject, chapter, material_type,
-             content_type, content, caption, uploaded_by)
+            "UPDATE users SET coins = coins - ?, gems = gems + ? WHERE user_id=?",
+            (gems * COINS_PER_GEM, gems, user_id)
         )
         await db.commit()
-        return True
+    return True, gems
 
 
-async def get_subjects(board, class_name):
+# ═══════════════════════════════════════════════
+# PREMIUM
+# ═══════════════════════════════════════════════
+async def is_premium(user_id) -> bool:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT premium_until FROM users WHERE user_id=?", (user_id,)) as cur:
+            row = await cur.fetchone()
+    if not row or not row[0]:
+        return False
+    return _parse(row[0]) > _now()
+
+
+async def set_premium(user_id, days):
+    until = _now() + timedelta(days=days)
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE users SET premium_until=? WHERE user_id=?", (_to_str(until), user_id))
+        await db.commit()
+    return until
+
+
+# ═══════════════════════════════════════════════
+# SHIELD
+# ═══════════════════════════════════════════════
+async def is_shielded(user_id) -> bool:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT shield_until FROM users WHERE user_id=?", (user_id,)) as cur:
+            row = await cur.fetchone()
+    if not row or not row[0]:
+        return False
+    return _parse(row[0]) > _now()
+
+
+async def set_shield(user_id, days):
+    until = _now() + timedelta(days=days)
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE users SET shield_until=? WHERE user_id=?", (_to_str(until), user_id))
+        await db.commit()
+    return until
+
+
+async def shield_remaining(user_id) -> int:
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT shield_until FROM users WHERE user_id=?", (user_id,)) as cur:
+            row = await cur.fetchone()
+    if not row or not row[0]:
+        return 0
+    dt = _parse(row[0])
+    if not dt or dt <= _now():
+        return 0
+    return max(0, (dt - _now()).days)
+
+
+# ═══════════════════════════════════════════════
+# DAILY
+# ═══════════════════════════════════════════════
+async def can_claim_daily(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT last_daily, streak FROM users WHERE user_id=?", (user_id,)) as cur:
+            row = await cur.fetchone()
+    if not row:
+        return True, 0
+    last, streak = row
+    if not last:
+        return True, 0
+    last_dt = _parse(last)
+    today = _now().date()
+    if last_dt.date() == today:
+        return False, streak
+    if (today - last_dt.date()).days == 1:
+        return True, (streak or 0) + 1
+    return True, 1
+
+
+async def mark_daily_claimed(user_id, new_streak):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "UPDATE users SET last_daily=?, streak=? WHERE user_id=?",
+            (_to_str(_now()), new_streak, user_id)
+        )
+        await db.commit()
+
+
+# ═══════════════════════════════════════════════
+# QUIZ STATS
+# ═══════════════════════════════════════════════
+async def inc_quiz_attempt(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE users SET quiz_attempted = quiz_attempted + 1 WHERE user_id=?", (user_id,))
+        await db.commit()
+
+
+async def inc_quiz_solved(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE users SET quiz_solved = quiz_solved + 1 WHERE user_id=?", (user_id,))
+        await db.commit()
+
+
+async def inc_word_attempt(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE users SET word_attempted = word_attempted + 1 WHERE user_id=?", (user_id,))
+        await db.commit()
+
+
+async def inc_word_solved(user_id, score):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "UPDATE users SET word_solved = word_solved + 1, word_score = word_score + ? WHERE user_id=?",
+            (score, user_id)
+        )
+        await db.commit()
+
+
+async def inc_number_attempt(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE users SET number_attempted = number_attempted + 1 WHERE user_id=?", (user_id,))
+        await db.commit()
+
+
+async def inc_number_guess(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("UPDATE users SET number_guess = number_guess + 1 WHERE user_id=?", (user_id,))
+        await db.commit()
+
+
+# ═══════════════════════════════════════════════
+# LEADERBOARD
+# ═══════════════════════════════════════════════
+async def get_global_leaderboard(limit=10):
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            "SELECT DISTINCT subject FROM study_resources WHERE board=? AND class_name=?",
-            (board, class_name)
-        ) as cur:
-            return [r[0] for r in await cur.fetchall()]
-
-
-async def get_chapters(board, class_name, subject):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            """SELECT chapter, COUNT(*) FROM study_resources
-               WHERE board=? AND class_name=? AND subject=?
-               GROUP BY chapter ORDER BY chapter""",
-            (board, class_name, subject)
+            """SELECT first_name, username, astral_id, coins
+               FROM users ORDER BY coins DESC LIMIT ?""", (limit,)
         ) as cur:
             return await cur.fetchall()
 
 
-async def get_material_types(board, class_name, subject, chapter):
+async def get_user_rank(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT coins FROM users WHERE user_id=?", (user_id,)) as cur:
+            row = await cur.fetchone()
+        if not row:
+            return None
+        coins = row[0]
+        async with db.execute("SELECT COUNT(*) FROM users WHERE coins > ?", (coins,)) as cur:
+            ahead = (await cur.fetchone())[0]
+    return ahead + 1
+
+
+# ═══════════════════════════════════════════════
+# POWERS
+# ═══════════════════════════════════════════════
+async def add_power(user_id, power_type, days):
+    until = _now() + timedelta(days=days)
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "INSERT INTO powers (user_id, power_type, expires_at) VALUES (?,?,?)",
+            (user_id, power_type, _to_str(until))
+        )
+        await db.commit()
+    return until
+
+
+async def get_active_powers(user_id):
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            """SELECT material_type, COUNT(*) FROM study_resources
-               WHERE board=? AND class_name=? AND subject=? AND chapter=?
-               GROUP BY material_type""",
-            (board, class_name, subject, chapter)
+            "SELECT power_type, expires_at FROM powers WHERE user_id=? AND expires_at > ?",
+            (user_id, _to_str(_now()))
         ) as cur:
             return await cur.fetchall()
 
 
-async def get_resources(board, class_name, subject, chapter, material_type):
+async def has_xp_boost(user_id) -> bool:
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            """SELECT content_type, content, caption FROM study_resources
-               WHERE board=? AND class_name=? AND subject=? AND chapter=? AND material_type=?""",
-            (board, class_name, subject, chapter, material_type)
+            """SELECT 1 FROM powers WHERE user_id=? AND power_type='xp_boost'
+               AND expires_at > ? LIMIT 1""",
+            (user_id, _to_str(_now()))
         ) as cur:
-            return await cur.fetchall()
-
-
-async def get_study_stats():
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute("SELECT COUNT(*) FROM study_resources") as cur:
-            return (await cur.fetchone())[0]
+            return (await cur.fetchone()) is not None
 
 
 # ═══════════════════════════════════════════════
-# QUIZ
+# MISSION
 # ═══════════════════════════════════════════════
-async def add_quiz_question(exam, subject, topic, question,
-                            a, b, c, d, correct, difficulty="medium"):
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute(
-            """INSERT INTO quiz_questions
-            (exam, subject, topic, question, option_a, option_b, option_c, option_d, correct, difficulty)
-            VALUES (?,?,?,?,?,?,?,?,?,?)""",
-            (exam, subject, topic, question, a, b, c, d, correct, difficulty)
-        )
-        await db.commit()
-
-
-async def get_random_question(exam=None, subject=None, topic=None):
-    q = "SELECT id, exam, subject, topic, question, option_a, option_b, option_c, option_d, correct FROM quiz_questions WHERE 1=1"
-    p = []
-    if exam:
-        q += " AND exam=?"; p.append(exam)
-    if subject:
-        q += " AND subject=?"; p.append(subject)
-    if topic:
-        q += " AND topic=?"; p.append(topic)
-    q += " ORDER BY RANDOM() LIMIT 1"
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(q, p) as cur:
-            return await cur.fetchone()
-
-
-async def save_quiz_attempt(user_id, question_id, selected, is_correct, exam, subject, topic):
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute(
-            """INSERT INTO quiz_attempts
-            (user_id, question_id, selected, is_correct, exam, subject, topic)
-            VALUES (?,?,?,?,?,?,?)""",
-            (user_id, question_id, selected, is_correct, exam, subject, topic)
-        )
-        await db.commit()
-
-
-async def get_quiz_stats(user_id):
+async def get_or_create_mission(user_id):
+    today = _now().strftime("%Y-%m-%d")
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            """SELECT COUNT(*), COALESCE(SUM(is_correct),0)
-               FROM quiz_attempts WHERE user_id=?""", (user_id,)
-        ) as cur:
-            total, correct = await cur.fetchone()
-        async with db.execute(
-            """SELECT subject, COUNT(*), SUM(is_correct)
-               FROM quiz_attempts WHERE user_id=?
-               GROUP BY subject""", (user_id,)
-        ) as cur:
-            subjects = await cur.fetchall()
-    return total or 0, correct or 0, subjects
-
-
-# ═══════════════════════════════════════════════
-# WORD GAME (per user per chat)
-# ═══════════════════════════════════════════════
-async def start_word_game(user_id, chat_id, word, length):
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute(
-            "DELETE FROM word_games WHERE user_id=? AND chat_id=?",
-            (user_id, chat_id)
-        )
-        await db.execute(
-            """INSERT INTO word_games
-            (user_id, chat_id, word, word_length, attempts, status, guessed_json)
-            VALUES (?,?,?,?,0,'active','[]')""",
-            (user_id, chat_id, word, length)
-        )
-        await db.commit()
-
-
-async def get_word_game(user_id, chat_id):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            """SELECT word, word_length, attempts, max_attempts, status, guessed_json
-               FROM word_games WHERE user_id=? AND chat_id=?""",
-            (user_id, chat_id)
-        ) as cur:
-            return await cur.fetchone()
-
-
-async def update_word_game(user_id, chat_id, attempts, status, guessed_json):
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute(
-            """UPDATE word_games SET attempts=?, status=?, guessed_json=?
-               WHERE user_id=? AND chat_id=?""",
-            (attempts, status, guessed_json, user_id, chat_id)
-        )
-        await db.commit()
-
-
-async def end_word_game(user_id, chat_id, word, attempts, won, score):
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute(
-            "DELETE FROM word_games WHERE user_id=? AND chat_id=?",
-            (user_id, chat_id)
-        )
-        await db.execute(
-            """INSERT INTO word_game_history
-            (user_id, word, attempts, won, score) VALUES (?,?,?,?,?)""",
-            (user_id, word, attempts, 1 if won else 0, score)
-        )
-        await db.commit()
-
-
-async def end_all_games_in_chat(chat_id):
-    """End all active games in a group (admin action)."""
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute("DELETE FROM word_games WHERE chat_id=?", (chat_id,))
-        await db.commit()
-
-
-async def get_active_games_in_chat(chat_id):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            "SELECT COUNT(*) FROM word_games WHERE chat_id=? AND status='active'",
-            (chat_id,)
-        ) as cur:
-            return (await cur.fetchone())[0]
-
-
-async def get_word_leaderboard(limit=10):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            """SELECT u.first_name, u.username, COALESCE(SUM(h.score),0) as pts
-               FROM word_game_history h JOIN users u ON u.user_id = h.user_id
-               GROUP BY h.user_id ORDER BY pts DESC LIMIT ?""",
-            (limit,)
-        ) as cur:
-            return await cur.fetchall()
-
-
-# ═══════════════════════════════════════════════
-# WARNINGS
-# ═══════════════════════════════════════════════
-async def add_warning(user_id, group_id, reason, warned_by):
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute(
-            "INSERT INTO warnings (user_id, group_id, reason, warned_by) VALUES (?,?,?,?)",
-            (user_id, group_id, reason, warned_by)
-        )
-        await db.commit()
-
-
-async def get_warnings(user_id, group_id):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            "SELECT COUNT(*) FROM warnings WHERE user_id=? AND group_id=?",
-            (user_id, group_id)
-        ) as cur:
-            return (await cur.fetchone())[0]
-
-
-async def remove_last_warning(user_id, group_id):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            """SELECT id FROM warnings WHERE user_id=? AND group_id=?
-               ORDER BY id DESC LIMIT 1""",
-            (user_id, group_id)
+            "SELECT * FROM mission_log WHERE user_id=? AND date=?", (user_id, today)
         ) as cur:
             row = await cur.fetchone()
         if row:
-            await db.execute("DELETE FROM warnings WHERE id=?", (row[0],))
-            await db.commit()
-            return True
-        return False
-
-
-# ═══════════════════════════════════════════════
-# GROUP SETTINGS
-# ═══════════════════════════════════════════════
-async def get_or_create_group(group_id):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute("SELECT * FROM group_settings WHERE group_id=?", (group_id,)) as cur:
-            row = await cur.fetchone()
-        if not row:
-            await db.execute("INSERT INTO group_settings (group_id) VALUES (?)", (group_id,))
-            await db.commit()
-
-
-async def toggle_group_setting(group_id, setting):
-    allowed = {"welcome_enabled", "goodbye_enabled", "antilink",
-               "antiflood", "antiforward", "captcha"}
-    if setting not in allowed:
-        return None
-    await get_or_create_group(group_id)
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(f"SELECT {setting} FROM group_settings WHERE group_id=?", (group_id,)) as cur:
-            row = await cur.fetchone()
-        new_val = 0 if (row and row[0]) else 1
-        await db.execute(f"UPDATE group_settings SET {setting}=? WHERE group_id=?", (new_val, group_id))
+            return row
+        req = random.randint(0, 5)
+        await db.execute(
+            "INSERT INTO mission_log (user_id, date, quizzes_required) VALUES (?,?,?)",
+            (user_id, today, req)
+        )
         await db.commit()
-        return new_val
+        async with db.execute(
+            "SELECT * FROM mission_log WHERE user_id=? AND date=?", (user_id, today)
+        ) as cur:
+            return await cur.fetchone()
 
 
-async def get_group_setting(group_id, setting):
-    await get_or_create_group(group_id)
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(f"SELECT {setting} FROM group_settings WHERE group_id=?", (group_id,)) as cur:
-            row = await cur.fetchone()
-        return row[0] if row else 0
-
-
-# ═══════════════════════════════════════════════
-# GROUP LOCKS
-# ═══════════════════════════════════════════════
-LOCK_TYPES = ["stickers", "gifs", "photos", "videos", "documents",
-              "links", "audio", "voice", "polls", "games", "contacts", "forwards"]
-
-
-async def set_lock(group_id, lock_type, locked: int):
+async def mission_word_played(user_id):
+    today = _now().strftime("%Y-%m-%d")
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
-            """INSERT INTO group_locks (group_id, lock_type, is_locked)
-               VALUES (?,?,?)
-               ON CONFLICT(group_id, lock_type) DO UPDATE SET is_locked=?""",
-            (group_id, lock_type, locked, locked)
+            "UPDATE mission_log SET word_played=1 WHERE user_id=? AND date=?",
+            (user_id, today)
         )
         await db.commit()
 
 
-async def get_lock(group_id, lock_type) -> int:
+async def mission_pyq_done(user_id):
+    today = _now().strftime("%Y-%m-%d")
     async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            "SELECT is_locked FROM group_locks WHERE group_id=? AND lock_type=?",
-            (group_id, lock_type)
-        ) as cur:
-            row = await cur.fetchone()
-        return row[0] if row else 0
+        await db.execute(
+            "UPDATE mission_log SET pyq_downloaded=1 WHERE user_id=? AND date=?",
+            (user_id, today)
+        )
+        await db.commit()
 
 
-async def get_all_locks(group_id):
+async def mission_claim(user_id):
+    today = _now().strftime("%Y-%m-%d")
     async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            "SELECT lock_type, is_locked FROM group_locks WHERE group_id=?",
-            (group_id,)
-        ) as cur:
-            return dict(await cur.fetchall())
+        await db.execute(
+            "UPDATE mission_log SET claimed=1 WHERE user_id=? AND date=?",
+            (user_id, today)
+        )
+        await db.commit()
+
+
+# ═══════════════════════════════════════════════
+# STUDY
+# ═══════════════════════════════════════════════
+async def save_study_material(class_name, section, subject, chapter,
+                              content_type, content, caption, uploaded_by):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """INSERT INTO study_materials
+            (class_name, section, subject, chapter, content_type, content, caption,
+             uploaded_by, uploaded_at)
+            VALUES (?,?,?,?,?,?,?,?,?)""",
+            (class_name, section, subject, chapter, content_type, content,
+             caption, uploaded_by, _to_str(_now()))
+        )
+        await db.commit()
+
+
+async def get_study_chapters(class_name, section, subject=None):
+    async with aiosqlite.connect(DB_PATH) as db:
+        if subject:
+            q = """SELECT DISTINCT chapter FROM study_materials
+                   WHERE class_name=? AND section=? AND subject=?"""
+            p = (class_name, section, subject)
+        else:
+            q = """SELECT DISTINCT chapter FROM study_materials
+                   WHERE class_name=? AND section=?"""
+            p = (class_name, section)
+        async with db.execute(q, p) as cur:
+            return [r[0] for r in await cur.fetchall()]
+
+
+async def get_study_materials(class_name, section, chapter, subject=None):
+    async with aiosqlite.connect(DB_PATH) as db:
+        if subject:
+            q = """SELECT content_type, content, caption FROM study_materials
+                   WHERE class_name=? AND section=? AND subject=? AND chapter=?"""
+            p = (class_name, section, subject, chapter)
+        else:
+            q = """SELECT content_type, content, caption FROM study_materials
+                   WHERE class_name=? AND section=? AND chapter=?"""
+            p = (class_name, section, chapter)
+        async with db.execute(q, p) as cur:
+            return await cur.fetchall()
