@@ -1,31 +1,21 @@
 from aiogram import Router, F
-from aiogram.types import (
-    CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton,
-)
+from aiogram.types import CallbackQuery
 
 from config import BOT_NAME, BOT_USERNAME
-from keyboards.main_menu import main_menu_kb, back_kb
-from utils.database import get_user_stats, get_quiz_stats
+from keyboards.main_menu import main_menu_kb, back_main_kb
 from utils.ui import smart_edit
+from utils.styler import fancy
 
 router = Router()
-
-
-def leaderboard_menu_kb():
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🔤 ᴡᴏʀᴅ ɢᴀᴍᴇ", callback_data="lb:word")],
-        [InlineKeyboardButton(text="📝 ǫᴜɪᴢ", callback_data="lb:quiz")],
-        [InlineKeyboardButton(text="↩️ вᴀᴄᴋ", callback_data="menu:main")],
-    ])
 
 
 @router.callback_query(F.data == "menu:main")
 async def back_main(cb: CallbackQuery):
     text = (
         f"👋 нi, <b>{cb.from_user.first_name}</b>!\n\n"
-        f"ᴡєʟᴄσϻє тσ <b>{BOT_NAME}</b> 🌌\n\n"
-        f"🎓 sᴛᴜᴅʏ  •  📝 ǫᴜiᴢ  •  🎮 ɢᴧϻєs\n"
-        f"🏆 ʟєᴧᴅєʀвσᴧʀᴅ  •  👤 ᴩʀσғiʟє\n\n"
+        f"ᴡєʟᴄσϻє ᴛσ <b>{BOT_NAME}</b> 🌌\n\n"
+        f"ʏσᴜʀ ᴧʟʟ-iη-σηє ᴛєʟєɢʀᴧϻ ᴄσϻᴩᴧηiση ғσʀ "
+        f"sᴛᴜᴅʏ, ɢᴧϻєs ᴧηᴅ ᴍσʀє.\n\n"
         f"ᴄнσσsє ᴧη σᴩᴛiση вєʟσᴡ 👇"
     )
     await smart_edit(cb, text, main_menu_kb())
@@ -33,81 +23,52 @@ async def back_main(cb: CallbackQuery):
 
 
 @router.callback_query(F.data == "menu:help")
-async def help_menu(cb: CallbackQuery):
+async def menu_help(cb: CallbackQuery):
     text = (
-        f"🆘 <b>{BOT_NAME} нєʟᴩ</b>\n"
+        f"🆘 <b>{BOT_NAME} — нєʟᴩ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"• /start — sᴛᴧʀᴛ вσᴛ\n"
-        f"• /admin — ᴧᴅᴍɪɴ ᴩᴧηєʟ\n"
-        f"• /quiz — sᴛᴧʀᴛ ǫᴜɪᴢ\n"
-        f"• /new — ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ ɢᴧᴍє\n"
-        f"• /profile — ᴠɪᴇᴡ ʏᴏᴜʀ sᴛᴧᴛs\n"
-        f"• /leaderboard — ɢᴧᴍє ʀᴧηᴋɪηɢ\n"
-        f"• /settings — ɢʀᴏᴜᴩ sєᴛᴛɪηɢs\n\n"
-        f"ᴜsє ɪηʟɪηє вᴜᴛᴛσηs ✨"
+        f"<b>📚 sᴛᴜᴅʏ</b>\n"
+        f"/study — вʀσωsє sᴛᴜᴅʏ ϻᴧтєʀiᴧʟ (ᴅᴍ)\n\n"
+        f"<b>🎮 ɢᴧϻєs</b>\n"
+        f"/tgames — ǫᴜiᴢ, ᴡσʀᴅ, ηᴜϻвєʀ ɢᴧϻєs\n"
+        f"/h — ɢᴜєss iη ηᴜϻвєʀ ɢᴧϻє\n\n"
+        f"<b>🚀 ᴅᴧiʟʏ</b>\n"
+        f"/daily — ᴄʟᴧiϻ ᴅᴧiʟʏ ᴄσiηs (ᴅᴍ)\n"
+        f"/mission — ᴅᴧiʟʏ ᴍissiση\n\n"
+        f"<b>🪙 єᴄσησϻʏ</b>\n"
+        f"/convert 100ᴄ — ᴄσiηs → ɢєϻs\n"
+        f"/robs — ʀσв ᴧ ᴜsєʀ (ʀєᴩʟʏ)\n"
+        f"/shield 2 — ᴩʀσтєᴄтiση\n"
+        f"/premium — ᴩʀєϻiᴜϻ ϻєϻвєʀsнiᴩ\n"
+        f"/shop — sнσᴩ (ᴅᴍ)\n"
+        f"/powers — ᴧᴄтiᴠє ᴩσᴡєʀs\n\n"
+        f"<b>🏆 ʟєᴧᴅєʀвσᴧʀᴅ</b>\n"
+        f"/aleaderboard — ɢʟσвᴧʟ ʟєᴧᴅєʀвσᴧʀᴅ\n\n"
+        f"<b>👤 ᴩʀσғiʟє</b>\n"
+        f"/profile — ʏσᴜʀ ᴩʀσғiʟє\n"
+        f"/performance — ᴅєтᴧiʟєᴅ sтᴧтs (ᴅᴍ)\n\n"
+        f"🌠 ʟєᴧʀη • ᴩʟᴧʏ • ᴄσϻᴩєтє • ʀisє"
     )
-    await smart_edit(cb, text, back_kb())
+    await smart_edit(cb, text, back_main_kb())
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:about")
-async def about_menu(cb: CallbackQuery):
+async def menu_about(cb: CallbackQuery):
     text = (
-        f"ℹ️ <b>ᴧʙᴏᴜᴛ {BOT_NAME}</b>\n"
+        f"ℹ️ <b>ᴧвσᴜᴛ {BOT_NAME}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴀɴ ᴀʟʟ-ɪɴ-ᴏɴᴇ ᴛᴇʟᴇɢʀᴀᴍ ʙᴏᴛ ғᴏʀ:\n\n"
-        f"🎓 sᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ\n"
-        f"📝 ǫᴜɪᴢᴢᴇs\n"
-        f"🎮 ɢᴀᴍᴇs\n"
-        f"🛡️ ɢʀᴏᴜᴘ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ\n"
-        f"🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅs\n\n"
-        f"🔗 ᴜsᴇʀηᴧᴍє: {BOT_USERNAME}"
+        f"{BOT_NAME} is ᴧη ᴧʟʟ-iη-σηє ᴛєʟєɢʀᴧϻ вσᴛ ғσʀ "
+        f"sᴛᴜᴅʏ, ɢᴧϻєs, єᴄσησϻʏ ᴧηᴅ ᴄσϻϻᴜηiтʏ.\n\n"
+        f"🎓 sᴛᴜᴅʏ ʀєsσᴜʀᴄєs\n"
+        f"🎮 ɢᴧϻєs & ǫᴜiᴢᴢєs\n"
+        f"🪙 єᴄσησϻʏ (ᴄσiηs + ɢєϻs)\n"
+        f"🏆 ʟєᴧᴅєʀвσᴧʀᴅs\n"
+        f"⭐ ᴩʀєϻiᴜϻ ϻєϻвєʀsнiᴩ\n\n"
+        f"⚠️ <b>ᴅisᴄʟᴧiϻєʀ</b>\n"
+        f"ᴧʟʟ ʀєᴡᴧʀᴅs ᴧʀє ᴠiʀтᴜᴧʟ. ησ ʀєᴧʟ-ᴡσʀʟᴅ "
+        f"ᴠᴧʟᴜє. σηʟʏ ғσʀ ɢᴧϻєᴩʟᴧʏ.\n\n"
+        f"🔗 {BOT_USERNAME}"
     )
-    await smart_edit(cb, text, back_kb())
-    await cb.answer()
-
-
-@router.callback_query(F.data == "menu:profile")
-async def profile_menu(cb: CallbackQuery):
-    s = await get_user_stats(cb.from_user.id)
-    text = (
-        f"👤 <b>ʏᴏᴜʀ ᴘʀᴏғɪʟᴇ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ηᴀᴍᴇ: {cb.from_user.first_name}\n"
-        f"ᴜsᴇʀηᴀᴍᴇ: @{cb.from_user.username or 'ηᴏηᴇ'}\n"
-        f"ɪᴅ: <code>{cb.from_user.id}</code>\n\n"
-        f"🪙 ᴄᴏɪηs: <b>{s['coins']}</b>\n"
-        f"⭐ ᴘᴏɪηᴛs: <b>{s['points']}</b>\n\n"
-        f"📝 ǫᴜɪᴢ ᴀᴛᴛᴇᴍᴘᴛs: <b>{s['quiz_attempted']}</b>\n"
-        f"✅ ᴄᴏʀʀᴇᴄᴛ: <b>{s['quiz_correct']}</b>\n"
-        f"🔤 ᴡᴏʀᴅ ɢᴀᴍᴇs: <b>{s['word_games']}</b>\n"
-        f"🏆 ᴡᴏʀᴅ sᴄᴏʀᴇ: <b>{s['word_score']}</b>"
-    )
-    await smart_edit(cb, text, back_kb())
-    await cb.answer()
-
-
-@router.callback_query(F.data == "menu:perf")
-async def perf_menu(cb: CallbackQuery):
-    total, correct, subjects = await get_quiz_stats(cb.from_user.id)
-    acc = round((correct / total) * 100, 1) if total else 0
-    lines = [f"📊 <b>ᴍʏ ᴘᴇʀғᴏʀᴍᴀηᴄᴇ</b>\n━━━━━━━━━━━━━━━━━━━━━\n"]
-    lines.append(f"📝 ǫᴜɪᴢ ᴀᴛᴛᴇᴍᴘᴛs: <b>{total}</b>")
-    lines.append(f"✅ ᴄᴏʀʀᴇᴄᴛ: <b>{correct}</b>")
-    lines.append(f"🎯 ᴀᴄᴄᴜʀᴀᴄʏ: <b>{acc}%</b>\n")
-    if subjects:
-        lines.append("📚 <b>sᴜʙᴊᴇᴄᴛ-ᴡɪsᴇ:</b>")
-        for sub, cnt, cor in subjects:
-            if not sub:
-                continue
-            sacc = round((cor or 0) / cnt * 100, 1) if cnt else 0
-            lines.append(f"  • {sub}: {cor or 0}/{cnt} ({sacc}%)")
-    await smart_edit(cb, "\n".join(lines), back_kb())
-    await cb.answer()
-
-
-@router.callback_query(F.data == "menu:lb")
-async def lb_menu(cb: CallbackQuery):
-    text = "🏆 <b>ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄʜᴏᴏsᴇ ᴄᴀᴛᴇɢᴏʀʏ:"
-    await smart_edit(cb, text, leaderboard_menu_kb())
+    await smart_edit(cb, text, back_main_kb())
     await cb.answer()
