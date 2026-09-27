@@ -1,12 +1,11 @@
 import json
 from aiogram import Router, F
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import (
+    CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton,
+)
 from aiogram.fsm.context import FSMContext
 
-from keyboards.game_kb import (
-    games_menu_kb, word_length_kb, word_game_kb, leaderboard_menu_kb,
-)
 from keyboards.main_menu import back_kb
 from utils.database import (
     start_word_game, get_word_game, update_word_game, end_word_game,
@@ -21,34 +20,59 @@ MAX_ATTEMPTS = 30
 
 
 # ═══════════════════════════════════════════════
+# INLINE KEYBOARDS (Self-contained — no external file)
+# ═══════════════════════════════════════════════
+def games_menu_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🔤 ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ", callback_data="wg:menu")],
+        [InlineKeyboardButton(text="↩️ вᴀᴄᴋ", callback_data="menu:main")],
+    ])
+
+
+def word_length_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="4️⃣ 4 ʟᴇᴛᴛᴇʀs", callback_data="wg:new:4"),
+         InlineKeyboardButton(text="5️⃣ 5 ʟᴇᴛᴛᴇʀs", callback_data="wg:new:5")],
+        [InlineKeyboardButton(text="6️⃣ 6 ʟᴇᴛᴛᴇʀs", callback_data="wg:new:6")],
+        [InlineKeyboardButton(text="↩️ вᴀᴄᴋ", callback_data="menu:games")],
+    ])
+
+
+def word_game_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📊 sᴛᴀᴛᴜs", callback_data="wg:status"),
+         InlineKeyboardButton(text="🛑 ɢɪᴠᴇ ᴜᴘ", callback_data="wg:giveup")],
+    ])
+
+
+def leaderboard_menu_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🔤 ᴡᴏʀᴅ ɢᴀᴍᴇ", callback_data="lb:word")],
+        [InlineKeyboardButton(text="📝 ǫᴜɪᴢ", callback_data="lb:quiz")],
+        [InlineKeyboardButton(text="↩️ вᴀᴄᴋ", callback_data="menu:main")],
+    ])
+
+
+# ═══════════════════════════════════════════════
 # HELPERS
 # ═══════════════════════════════════════════════
 def score_for_attempt(attempts: int) -> int:
-    """Fewer attempts = more points. Attempt 1 = 300 pts, min 10."""
     if attempts <= 1:
         return 300
     return max(10, 300 // attempts)
 
 
 def evaluate_guess(word: str, guess: str) -> list:
-    """
-    Returns list of colors.
-    'green'  = correct letter + position
-    'yellow' = correct letter, wrong position
-    'grey'   = letter not in word
-    """
     result = ["grey"] * len(word)
     word_chars = list(word)
     guess_chars = list(guess)
 
-    # Pass 1: mark greens
     for i in range(len(word)):
         if guess_chars[i] == word_chars[i]:
             result[i] = "green"
             word_chars[i] = None
             guess_chars[i] = None
 
-    # Pass 2: mark yellows
     for i in range(len(word)):
         if guess_chars[i] and guess_chars[i] in word_chars:
             result[i] = "yellow"
@@ -189,10 +213,6 @@ async def cmd_new(message: Message, state: FSMContext):
 # ═══════════════════════════════════════════════
 @router.message(F.text & ~F.text.startswith("/"))
 async def handle_guess(message: Message, state: FSMContext):
-    """
-    Capture guesses ONLY if user has an active game in PM.
-    Otherwise silently ignore (no conflict with other handlers).
-    """
     if message.chat.type != "private":
         return
 
@@ -217,13 +237,12 @@ async def handle_guess(message: Message, state: FSMContext):
     guesses.append({"word": guess, "colors": colors})
     attempts += 1
 
-    # ─── WIN ───
+    # WIN
     if all(c == "green" for c in colors):
         score = score_for_attempt(attempts)
         await end_word_game(message.from_user.id, word, attempts, True, score)
         await add_points(message.from_user.id, score)
         await add_coins(message.from_user.id, score // 2)
-
         text = (
             f"🎉 <b>ʏᴏᴜ ᴡᴏɴ!</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -235,7 +254,7 @@ async def handle_guess(message: Message, state: FSMContext):
         await message.answer(text)
         return
 
-    # ─── LOSS ───
+    # LOSS
     if attempts >= max_a:
         await end_word_game(message.from_user.id, word, attempts, False, 0)
         await message.answer(
@@ -246,7 +265,7 @@ async def handle_guess(message: Message, state: FSMContext):
         )
         return
 
-    # ─── CONTINUE ───
+    # CONTINUE
     await update_word_game(
         message.from_user.id, attempts, "active", json.dumps(guesses)
     )
