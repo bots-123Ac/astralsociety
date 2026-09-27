@@ -1,5 +1,5 @@
 import json
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.filters import Command
 from aiogram.types import (
     CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton,
@@ -9,9 +9,11 @@ from aiogram.fsm.context import FSMContext
 from keyboards.main_menu import back_kb
 from utils.database import (
     start_word_game, get_word_game, update_word_game, end_word_game,
+    end_all_games_in_chat, get_active_games_in_chat,
     add_points, add_coins, get_word_leaderboard,
 )
 from utils.words import get_random_word, words_count
+from utils.permissions import has_right
 from utils.ui import smart_edit
 
 router = Router()
@@ -20,7 +22,7 @@ MAX_ATTEMPTS = 30
 
 
 # ═══════════════════════════════════════════════
-# INLINE KEYBOARDS (Self-contained — no external file)
+# KEYBOARDS (self-contained)
 # ═══════════════════════════════════════════════
 def games_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -56,28 +58,22 @@ def leaderboard_menu_kb():
 # ═══════════════════════════════════════════════
 # HELPERS
 # ═══════════════════════════════════════════════
-def score_for_attempt(attempts: int) -> int:
+def score_for_attempt(attempts: int, length: int) -> int:
+    base = {4: 200, 5: 300, 6: 400}.get(length, 300)
     if attempts <= 1:
-        return 300
-    return max(10, 300 // attempts)
+        return base
+    return max(10, base // attempts)
 
 
 def evaluate_guess(word: str, guess: str) -> list:
     result = ["grey"] * len(word)
-    word_chars = list(word)
-    guess_chars = list(guess)
-
+    wc = list(word); gc = list(guess)
     for i in range(len(word)):
-        if guess_chars[i] == word_chars[i]:
-            result[i] = "green"
-            word_chars[i] = None
-            guess_chars[i] = None
-
+        if gc[i] == wc[i]:
+            result[i] = "green"; wc[i] = None; gc[i] = None
     for i in range(len(word)):
-        if guess_chars[i] and guess_chars[i] in word_chars:
-            result[i] = "yellow"
-            word_chars[word_chars.index(guess_chars[i])] = None
-
+        if gc[i] and gc[i] in wc:
+            result[i] = "yellow"; wc[wc.index(gc[i])] = None
     return result
 
 
@@ -88,54 +84,50 @@ def render_guess(guess: str, colors: list) -> str:
     return f"<code>{chars}</code>\n{boxes}"
 
 
-def game_status_text(word_length, attempts, max_attempts, history_lines):
+def status_text(length, attempts, max_a, history, mention=None):
+    head = f"🔤 <b>ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ</b>"
+    if mention:
+        head += f" — {mention}"
     return (
-        f"🔤 <b>ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ ɢᴀᴍᴇ</b>\n"
+        f"{head}\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"📏 ʟᴇɴɢᴛʜ: <b>{word_length}</b> ʟᴇᴛᴛᴇʀs\n"
-        f"🎯 ᴀᴛᴛᴇᴍᴘᴛs: <b>{attempts}/{max_attempts}</b>\n"
+        f"📏 ʟᴇɴɢᴛʜ: <b>{length}</b> ʟᴇᴛᴛᴇʀs\n"
+        f"🎯 ᴀᴛᴛᴇᴍᴘᴛs: <b>{attempts}/{max_a}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"{chr(10).join(history_lines)}\n\n"
-        f"ᴛʏᴘᴇ ʏᴏᴜʀ ɢᴜᴇss ({word_length} ʟᴇᴛᴛᴇʀs):"
+        f"{chr(10).join(history)}\n\n"
+        f"ᴛʏᴘᴇ ʏᴏᴜʀ ɢᴜᴇss ({length} ʟᴇᴛᴛᴇʀs):"
     )
 
 
 # ═══════════════════════════════════════════════
-# 🎮 GAMES MENU
+# MENUS
 # ═══════════════════════════════════════════════
 @router.callback_query(F.data == "menu:games")
 async def games_menu(cb: CallbackQuery, state: FSMContext):
     await state.clear()
     text = (
-        "🎮 <b>ɢᴀᴍᴇs sᴇᴄᴛɪᴏɴ</b>\n"
+        "🎮 <b>ɢᴀᴍᴇs</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "ᴄʜᴏᴏsᴇ ᴀ ɢᴀᴍᴇ ᴛᴏ ᴘʟᴀʏ:\n\n"
-        "🔤 ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ — ɢᴜᴇss ᴛʜᴇ ᴡᴏʀᴅ, ᴇᴀʀɴ ᴘᴏɪɴᴛs\n\n"
-        "ᴍᴏʀᴇ ɢᴀᴍᴇs ᴄᴏᴍɪɴɢ sᴏᴏɴ ✨"
+        "ᴄʜᴏᴏsᴇ ᴀ ɢᴀᴍᴇ:\n\n"
+        "🔤 ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ — ᴅᴍ & ɢʀᴏᴜᴘ"
     )
     await smart_edit(cb, text, games_menu_kb())
     await cb.answer()
 
 
-# ═══════════════════════════════════════════════
-# 🔤 WORD GAME
-# ═══════════════════════════════════════════════
 @router.callback_query(F.data == "wg:menu")
 async def wg_menu(cb: CallbackQuery, state: FSMContext):
     counts = words_count()
     text = (
-        "🔤 <b>ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ ɢᴀᴍᴇ</b>\n"
+        "🔤 <b>ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
         "🟩 ᴄᴏʀʀᴇᴄᴛ ʟᴇᴛᴛᴇʀ + ᴘᴏsɪᴛɪᴏɴ\n"
         "🟨 ᴄᴏʀʀᴇᴄᴛ ʟᴇᴛᴛᴇʀ, ᴡʀᴏɴɢ ᴘᴏsɪᴛɪᴏɴ\n"
         "⬛ ʟᴇᴛᴛᴇʀ ɴᴏᴛ ɪɴ ᴡᴏʀᴅ\n\n"
-        "🎯 ᴍᴀx ᴀᴛᴛᴇᴍᴘᴛs: 30\n"
-        "⭐ ғᴇᴡᴇʀ ᴀᴛᴛᴇᴍᴘᴛs = ᴍᴏʀᴇ ᴘᴏɪɴᴛs\n\n"
-        f"📚 ᴡᴏʀᴅ ᴘᴏᴏʟ:\n"
-        f"   • 4 ʟᴇᴛᴛᴇʀs — {counts.get(4, 0)} ᴡᴏʀᴅs\n"
-        f"   • 5 ʟᴇᴛᴛᴇʀs — {counts.get(5, 0)} ᴡᴏʀᴅs\n"
-        f"   • 6 ʟᴇᴛᴛᴇʀs — {counts.get(6, 0)} ᴡᴏʀᴅs\n\n"
-        "ᴄʜᴏᴏsᴇ ᴡᴏʀᴅ ʟᴇɴɢᴛʜ:"
+        f"📚 ᴘᴏᴏʟ: 4L={counts.get(4,0)} | 5L={counts.get(5,0)} | 6L={counts.get(6,0)}\n"
+        f"🎯 ᴍᴀx ᴀᴛᴛᴇᴍᴘᴛs: {MAX_ATTEMPTS}\n"
+        f"⭐ ғᴇᴡᴇʀ ᴀᴛᴛᴇᴍᴘᴛs = ᴍᴏʀᴇ ᴘᴏɪɴᴛs\n\n"
+        f"ᴄʜᴏᴏsᴇ ʟᴇɴɢᴛʜ:"
     )
     await smart_edit(cb, text, word_length_kb())
     await cb.answer()
@@ -146,136 +138,163 @@ async def wg_new(cb: CallbackQuery, state: FSMContext):
     try:
         length = int(cb.data.split(":")[2])
     except (ValueError, IndexError):
-        await cb.answer("ɪɴᴠᴀʟɪᴅ ʟᴇɴɢᴛʜ", show_alert=True)
-        return
-
+        return await cb.answer("ɪɴᴠᴀʟɪᴅ", show_alert=True)
     if length not in (4, 5, 6):
-        await cb.answer("ɪɴᴠᴀʟɪᴅ", show_alert=True)
-        return
+        return await cb.answer("ɪɴᴠᴀʟɪᴅ", show_alert=True)
 
     word = get_random_word(length)
-    await start_word_game(cb.from_user.id, word, length)
-
-    text = game_status_text(length, 0, MAX_ATTEMPTS, ["🎯 sᴛᴀʀᴛ ɢᴜᴇssɪɴɢ!"])
+    await start_word_game(cb.from_user.id, cb.message.chat.id, word, length)
+    text = status_text(length, 0, MAX_ATTEMPTS, ["🎯 sᴛᴀʀᴛ ɢᴜᴇssɪɴɢ!"])
     await smart_edit(cb, text, word_game_kb())
-    await cb.answer(f"🎮 ɢᴀᴍᴇ sᴛᴀʀᴛᴇᴅ! {length} ʟᴇᴛᴛᴇʀs")
+    await cb.answer(f"ɢᴀᴍᴇ sᴛᴀʀᴛᴇᴅ! {length} ʟᴇᴛᴛᴇʀs")
 
 
 @router.callback_query(F.data == "wg:status")
 async def wg_status(cb: CallbackQuery):
-    row = await get_word_game(cb.from_user.id)
+    row = await get_word_game(cb.from_user.id, cb.message.chat.id)
     if not row:
-        await cb.answer("ɴᴏ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ", show_alert=True)
-        return
-    word, length, attempts, max_a, status, guesses_json = row
-    guesses = json.loads(guesses_json or "[]")
-    history = [render_guess(g["word"], g["colors"]) for g in guesses]
-    if not history:
-        history = ["🎯 sᴛᴀʀᴛ ɢᴜᴇssɪɴɢ!"]
-    text = game_status_text(length, attempts, max_a, history)
-    await smart_edit(cb, text, word_game_kb())
+        return await cb.answer("ηᴏ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ", show_alert=True)
+    word, length, attempts, max_a, status, gj = row
+    guesses = json.loads(gj or "[]")
+    history = [render_guess(g["word"], g["colors"]) for g in guesses] or ["🎯 sᴛᴀʀᴛ ɢᴜᴇssɪɴɢ!"]
+    await smart_edit(cb, status_text(length, attempts, max_a, history), word_game_kb())
     await cb.answer()
 
 
 @router.callback_query(F.data == "wg:giveup")
-async def wg_giveup(cb: CallbackQuery):
-    row = await get_word_game(cb.from_user.id)
+async def wg_giveup(cb: CallbackQuery, bot: Bot):
+    chat_id = cb.message.chat.id
+    # In groups — only admins can force-end; in DM — only self
+    if cb.message.chat.type != "private":
+        if not await has_right(bot, chat_id, cb.from_user.id, "can_delete_messages"):
+            return await cb.answer("❌ ᴀᴅᴍɪɴs ᴏɴʟʏ ɪɴ ɢʀᴏᴜᴘs", show_alert=True)
+        # Admin ends all games in group
+        await end_all_games_in_chat(chat_id)
+        text = f"🛑 <b>ᴀʟʟ ɢᴀᴍᴇs ᴇɴᴅᴇᴅ ʙʏ ᴀᴅᴍɪɴ.</b>"
+        await smart_edit(cb, text, games_menu_kb())
+        return await cb.answer()
+
+    row = await get_word_game(cb.from_user.id, chat_id)
     if not row:
-        await cb.answer("ɴᴏ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ", show_alert=True)
-        return
+        return await cb.answer("ηᴏ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ", show_alert=True)
     word, length, attempts, _, _, _ = row
-    await end_word_game(cb.from_user.id, word, attempts, False, 0)
-    text = (
-        f"🛑 <b>ɢᴀᴍᴇ ᴇɴᴅᴇᴅ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴛʜᴇ ᴡᴏʀᴅ ᴡᴀs: <b>{word.upper()}</b>\n"
-        f"ᴀᴛᴛᴇᴍᴘᴛs ᴜsᴇᴅ: <b>{attempts}</b>"
-    )
+    await end_word_game(cb.from_user.id, chat_id, word, attempts, False, 0)
+    text = f"🛑 ᴛʜᴇ ᴡᴏʀᴅ ᴡᴀs: <b>{word.upper()}</b>"
     await smart_edit(cb, text, games_menu_kb())
     await cb.answer()
 
 
 # ═══════════════════════════════════════════════
-# 🎯 /new COMMAND
+# /new COMMAND (DM + Group)
 # ═══════════════════════════════════════════════
 @router.message(Command("new"))
-async def cmd_new(message: Message, state: FSMContext):
+async def cmd_new(message: Message, bot: Bot):
+    args = message.text.split()
+    chat_type = message.chat.type
+
+    # In group — /end to end game
+    if len(args) >= 2 and args[1].lower() in ("end", "stop"):
+        if chat_type == "private":
+            return await message.reply("ᴜsᴇ ᴛʜᴇ 🛑 ɢɪᴠᴇ-ᴜᴘ ʙᴜᴛᴛᴏɴ.")
+        if not await has_right(bot, message.chat.id, message.from_user.id, "can_delete_messages"):
+            return await message.reply("❌ ᴀᴅᴍɪɴs ᴏɴʟʏ.")
+        await end_all_games_in_chat(message.chat.id)
+        return await message.reply("🛑 ᴀʟʟ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇs ᴇɴᴅᴇᴅ.")
+
+    # /new 4 or /new five
+    length_map = {"4": 4, "four": 4, "5": 5, "five": 5, "6": 6, "six": 6}
+    if len(args) >= 2:
+        key = args[1].lower()
+        if key in length_map:
+            length = length_map[key]
+            word = get_random_word(length)
+            await start_word_game(message.from_user.id, message.chat.id, word, length)
+            text = status_text(length, 0, MAX_ATTEMPTS, ["🎯 sᴛᴀʀᴛ ɢᴜᴇssɪɴɢ!"])
+            return await message.answer(text, reply_markup=word_game_kb())
+
+    # No args — show menu
     text = (
-        "🔤 <b>ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ ɢᴀᴍᴇ</b>\n"
+        "🔤 <b>ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "ᴄʜᴏᴏsᴇ ᴡᴏʀᴅ ʟᴇɴɢᴛʜ:"
+        "ᴜsᴀɢᴇ:\n"
+        "• /new 4 — 4 ʟᴇᴛᴛᴇʀ ᴡᴏʀᴅ\n"
+        "• /new 5 — 5 ʟᴇᴛᴛᴇʀ ᴡᴏʀᴅ\n"
+        "• /new 6 — 6 ʟᴇᴛᴛᴇʀ ᴡᴏʀᴅ\n"
+        "• /new end — ᴇɴᴅ ɢᴀᴍᴇs (ɢʀᴏᴜᴘ ᴀᴅᴍɪɴs)\n\n"
+        "ᴏʀ ᴘɪᴄᴋ ʟᴇɴɢᴛʜ ʙᴇʟᴏᴡ:"
     )
     await message.answer(text, reply_markup=word_length_kb())
 
 
 # ═══════════════════════════════════════════════
-# ✏️ GUESS HANDLER
+# GUESS HANDLER (DM + Group)
 # ═══════════════════════════════════════════════
 @router.message(F.text & ~F.text.startswith("/"))
 async def handle_guess(message: Message, state: FSMContext):
-    if message.chat.type != "private":
+    if not message.text:
         return
 
-    row = await get_word_game(message.from_user.id)
+    # Skip command-like or very short
+    guess = message.text.strip().lower()
+    if not guess.isalpha():
+        return
+
+    row = await get_word_game(message.from_user.id, message.chat.id)
     if not row:
         return
-
-    word, length, attempts, max_a, status, guesses_json = row
+    word, length, attempts, max_a, status, gj = row
     if status != "active":
         return
 
-    guess = (message.text or "").strip().lower()
-
-    if len(guess) != length or not guess.isalpha():
-        await message.answer(
-            f"❌ sᴇɴᴅ ᴀ <b>{length}-ʟᴇᴛᴛᴇʀ</b> ᴡᴏʀᴅ (ᴏɴʟʏ ʟᴇᴛᴛᴇʀs)."
-        )
+    # Length mismatch — ignore in groups, warn in DM
+    if len(guess) != length:
+        if message.chat.type == "private":
+            await message.answer(f"❌ sᴇɴᴅ ᴀ <b>{length}-ʟᴇᴛᴛᴇʀ</b> ᴡᴏʀᴅ.")
         return
 
     colors = evaluate_guess(word, guess)
-    guesses = json.loads(guesses_json or "[]")
+    guesses = json.loads(gj or "[]")
     guesses.append({"word": guess, "colors": colors})
     attempts += 1
 
     # WIN
     if all(c == "green" for c in colors):
-        score = score_for_attempt(attempts)
-        await end_word_game(message.from_user.id, word, attempts, True, score)
+        score = score_for_attempt(attempts, length)
+        await end_word_game(message.from_user.id, message.chat.id, word, attempts, True, score)
         await add_points(message.from_user.id, score)
         await add_coins(message.from_user.id, score // 2)
-        text = (
-            f"🎉 <b>ʏᴏᴜ ᴡᴏɴ!</b>\n"
+        header = f"🎉 <b>{message.from_user.mention_html()} ᴡᴏɴ!</b>"
+        await message.answer(
+            f"{header}\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"ᴛʜᴇ ᴡᴏʀᴅ ᴡᴀs: <b>{word.upper()}</b>\n"
             f"ᴀᴛᴛᴇᴍᴘᴛs: <b>{attempts}</b>\n\n"
             f"⭐ ᴘᴏɪɴᴛs: <b>+{score}</b>\n"
             f"🪙 ᴄᴏɪɴs: <b>+{score // 2}</b>"
         )
-        await message.answer(text)
         return
 
     # LOSS
     if attempts >= max_a:
-        await end_word_game(message.from_user.id, word, attempts, False, 0)
+        await end_word_game(message.from_user.id, message.chat.id, word, attempts, False, 0)
         await message.answer(
-            f"💀 <b>ɢᴀᴍᴇ ᴏᴠᴇʀ</b>\n"
-            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"ᴛʜᴇ ᴡᴏʀᴅ ᴡᴀs: <b>{word.upper()}</b>\n"
-            f"ʙᴇᴛᴛᴇʀ ʟᴜᴄᴋ ɴᴇxᴛ ᴛɪᴍᴇ!"
+            f"💀 <b>{message.from_user.mention_html()} — ɢᴀᴍᴇ ᴏᴠᴇʀ</b>\n"
+            f"ᴛʜᴇ ᴡᴏʀᴅ ᴡᴀs: <b>{word.upper()}</b>"
         )
         return
 
     # CONTINUE
     await update_word_game(
-        message.from_user.id, attempts, "active", json.dumps(guesses)
+        message.from_user.id, message.chat.id, attempts, "active", json.dumps(guesses)
     )
     history = [render_guess(g["word"], g["colors"]) for g in guesses]
-    text = game_status_text(length, attempts, max_a, history)
+    mention = message.from_user.mention_html() if message.chat.type != "private" else None
+    text = status_text(length, attempts, max_a, history, mention=mention)
     await message.answer(text, reply_markup=word_game_kb())
 
 
 # ═══════════════════════════════════════════════
-# 🏆 LEADERBOARD
+# LEADERBOARD
 # ═══════════════════════════════════════════════
 @router.callback_query(F.data == "menu:lb")
 async def lb_menu(cb: CallbackQuery):
@@ -288,21 +307,14 @@ async def lb_menu(cb: CallbackQuery):
 async def lb_word(cb: CallbackQuery):
     rows = await get_word_leaderboard(10)
     medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-
     if not rows:
-        body = "ηᴏ sᴄᴏʀᴇs ʏᴇᴛ.\n\nʙᴇ ᴛʜᴇ ғɪʀsᴛ ᴛᴏ ᴘʟᴀʏ!"
+        body = "ηᴏ sᴄᴏʀᴇs ʏᴇᴛ."
     else:
-        lines = []
-        for i, (name, uname, score) in enumerate(rows):
-            display = f"@{uname}" if uname else name
-            lines.append(f"{medals[i]} {display} — <b>{score}</b> ᴘᴛs")
-        body = "\n".join(lines)
-
-    text = (
-        f"🏆 <b>ᴡᴏʀᴅ ɢᴀᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴛᴏᴘ 10 ᴘʟᴀʏᴇʀs:\n\n{body}"
-    )
+        body = "\n".join(
+            f"{medals[i]} {(f'@{u}' if u else n)} — <b>{s}</b> ᴘᴛs"
+            for i, (n, u, s) in enumerate(rows)
+        )
+    text = f"🏆 <b>ᴡᴏʀᴅ ɢᴀᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\n{body}"
     await smart_edit(cb, text, leaderboard_menu_kb())
     await cb.answer()
 
@@ -312,8 +324,7 @@ async def lb_quiz(cb: CallbackQuery):
     text = (
         f"🏆 <b>ǫᴜɪᴢ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴜsᴇ /profile ᴛᴏ sᴇᴇ ʏᴏᴜʀ ᴏᴡɴ sᴛᴀᴛs.\n\n"
-        f"sᴜʙᴊᴇᴄᴛ-ᴡɪsᴇ ʀᴀɴᴋɪɴɢ ᴄᴏᴍɪɴɢ sᴏᴏɴ ✨"
+        f"ᴜsᴇ /profile ᴛᴏ sᴇᴇ ʏᴏᴜʀ ᴏᴡɴ sᴛᴀᴛs."
     )
     await smart_edit(cb, text, leaderboard_menu_kb())
     await cb.answer()
