@@ -8,11 +8,12 @@ from aiogram.types import ErrorEvent
 
 from config import BOT_TOKEN, BOT_NAME
 from handlers import (
-    start, menu, profile, robs, tgames, leaderboard, daily, study, mission,
-    shop, powers, admin, quiz, events,
+    start, menu, profile, robs, leaderboard, daily, study, mission,
+    shop, powers, admin, quiz, events, tgames,
 )
 from utils.logger import setup_logger
 from utils.database import init_db
+from utils.quiz_loader import background_load
 
 
 async def main():
@@ -35,7 +36,6 @@ async def main():
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    # ═══ ROUTER ORDER (events/tgames LAST for wildcards) ═══
     dp.include_router(start.router)
     dp.include_router(menu.router)
     dp.include_router(profile.router)
@@ -49,10 +49,11 @@ async def main():
     dp.include_router(admin.router)
     dp.include_router(quiz.router)
     dp.include_router(events.router)
-    dp.include_router(tgames.router)   # 👈 LAST
+    dp.include_router(tgames.router)
 
-    # ═══ Event poster task ═══
+    # Background tasks
     asyncio.create_task(events.event_poster_loop(bot))
+    asyncio.create_task(background_load())   # 👈 quiz fetch
 
     logging.info("✅ Bot is running.")
     await bot.delete_webhook(drop_pending_updates=True)
