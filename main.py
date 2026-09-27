@@ -7,7 +7,9 @@ from aiogram.enums import ParseMode
 from aiogram.types import ErrorEvent
 
 from config import BOT_TOKEN, BOT_NAME
-from handlers import start, menu, study, games, admin, group_mgmt
+from handlers import (
+    start, menu, study, admin, quiz, wordgame, leaderboard, group_mgmt,
+)
 from utils.logger import setup_logger
 from utils.database import init_db
 
@@ -27,18 +29,19 @@ async def main():
     )
     dp = Dispatcher()
 
-    # ─── Global error handler (bot ko crash hone se rokta hai) ───
     @dp.errors()
-    async def global_error_handler(event: ErrorEvent):
-        logging.error(f"⚠️ Unhandled error: {event.exception}")
+    async def on_error(event: ErrorEvent):
+        logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    # ─── Routers ───
+    # Order matters: specific handlers first, wildcard message last
     dp.include_router(start.router)
     dp.include_router(menu.router)
     dp.include_router(study.router)
-    dp.include_router(games.router)
     dp.include_router(admin.router)
+    dp.include_router(quiz.router)
+    dp.include_router(wordgame.router)
+    dp.include_router(leaderboard.router)
     dp.include_router(group_mgmt.router)
 
     logging.info("✅ Bot is running.")
