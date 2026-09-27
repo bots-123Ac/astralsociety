@@ -1,8 +1,16 @@
 import logging
+import re
+import time
+import asyncio
+from collections import defaultdict
+
 from aiogram import Router, F, Bot
-from aiogram.filters import Command, ChatMemberUpdatedFilter, IS_NOT_MEMBER, IS_MEMBER
+from aiogram.filters import (
+    Command, ChatMemberUpdatedFilter, IS_NOT_MEMBER, IS_MEMBER,
+)
 from aiogram.types import (
     Message, CallbackQuery, ChatMemberUpdated, ChatPermissions,
+    ChatMemberOwner, ChatMemberAdministrator, User,
 )
 from aiogram.exceptions import TelegramBadRequest
 
@@ -22,6 +30,101 @@ logger = logging.getLogger(__name__)
 
 
 # ═══════════════════════════════════════════════
+# 🎯 TARGET RESOLVER — Reply / @username / User ID
+# ═══════════════════════════════════════════════
+async def resolve_target(
+    message: Message, bot: Bot, arg_index: int = 1
+) -> tuple[User | None, str | None]:
+    """
+    Resolve the target user from a moderation command.
+    Returns (user, error_message).
+    Priority:
+      1. Reply to a message
+      2. @username in args
+      3. Numeric user ID in args
+    """
+    # 1. Reply
+    if message.reply_to_message and message.reply_to_message.from_user:
+        return message.reply_to_message.from_user, None
+
+    # 2. Parse args
+    parts = message.text.split() if message.text else []
+    if len(parts) <= arg_index:
+        return None, (
+            "❌ <b>ᴛᴀʀɢᴇᴛ ɴᴏᴛ ғᴏᴜɴᴅ</b>\n\n"
+            "ᴜsᴇ ᴏɴᴇ ᴏғ ᴛʜᴇsᴇ:\n"
+            "• ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ's ᴍᴇssᴀɢᴇ\n"
+            "• <code>/cmd @username</code>\n"
+            "• <code>/cmd 123456789</code>"
+        )
+
+    arg = parts[arg_index].strip()
+
+    # 3. @username
+    if arg.startswith("@"):
+        try:
+            chat = await bot.get_chat(arg)
+            user = await get_group_member(bot, message.chat.id, chat.id)
+            if user is None:
+                return None, f"❌ <b>{arg}</b> ɴᴏᴛ ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ."
+            # user is a ChatMember; get .user
+            if hasattr(user, "user"):
+                return user.user, None
+            return None, f"❌ ᴄᴀɴ'ᴛ ʀᴇsᴏʟᴠᴇ {arg}."
+        except Exception as e:
+            logger.warning(f"resolve @username failed: {e}")
+            return None, (
+                f"❌ ᴄᴀɴ'ᴛ ғɪɴᴅ <b>{arg}</b>.\n"
+                f"ᴛʀʏ ʀᴇᴘʟʏɪɴɢ ᴛᴏ ᴛʜᴇɪʀ ᴍᴇssᴀɢᴇ ɪɴsᴛᴇᴀᴅ."
+            )
+
+    # 4. Numeric ID
+    clean = arg.lstrip("-").lstrip("+")
+    if clean.isdigit():
+        try:
+            user_id = int(arg)
+            member = await bot.get_chat_member(message.chat.id, user_id)
+            if hasattr(member, "user"):
+                return member.user, None
+            return None, "❌ ᴜsᴇʀ ɴᴏᴛ ғᴏᴜɴᴅ."
+        except Exception as e:
+            logger.warning(f"resolve ID failed: {e}")
+            return None, (
+                f"❌ ᴜsᴇʀ ɪᴅ <code>{arg}</code> ɴᴏᴛ ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ."
+            )
+
+    return None, (
+        f"❌ ɪɴᴠᴀʟɪᴅ ᴛᴀʀɢᴇᴛ: <code>{arg}</code>\n"
+        f"ᴜsᴇ ʀᴇᴘʟʏ, <code>@username</code>, ᴏʀ <code>ᴜsᴇʀ ɪᴅ</code>."
+    )
+
+
+async def check_bot_can_restrict(message: Message, bot: Bot) -> str | None:
+    """Return error string if bot cannot restrict, else None."""
+    try:
+        me = await bot.get_chat_member(message.chat.id, (await bot.me()).id)
+        if isinstance(me, ChatMemberAdministrator):
+            if not me.can_restrict_members:
+                return "❌ ʙᴏᴛ ɴᴇᴇᴅs <b>ʀᴇsᴛʀɪᴄᴛ ᴍᴇᴍʙᴇʀs</b> ᴀᴅᴍɪɴ ʀɪɢʜᴛ."
+        elif isinstance(me, ChatMemberOwner):
+            return None
+        else:
+            return "❌ ʙᴏᴛ ɪs ɴᴏᴛ ᴀɴ ᴀᴅᴍɪɴ ɪɴ ᴛʜɪs ɢʀᴏᴜᴘ."
+    except Exception:
+        pass
+    return None
+
+
+async def verify_not_admin(
+    bot: Bot, chat_id: int, target: User
+) -> str | None:
+    """Return error string if target is admin/owner."""
+    if await is_group_admin(bot, chat_id, target.id):
+        return f"❌ ᴄᴀɴ'ᴛ ᴛᴀʀɢᴇᴛ ᴀɴ ᴀᴅᴍɪɴ."
+    return None
+
+
+# ═══════════════════════════════════════════════
 # WELCOME / GOODBYE
 # ═══════════════════════════════════════════════
 @router.chat_member(ChatMemberUpdatedFilter(IS_NOT_MEMBER >> IS_MEMBER))
@@ -35,7 +138,6 @@ async def welcome_member(event: ChatMemberUpdated):
     user = event.new_chat_member.user
     bot = event.bot
 
-    # PFP
     pfp = None
     try:
         photos = await bot.get_user_profile_photos(user.id, limit=1)
@@ -44,7 +146,6 @@ async def welcome_member(event: ChatMemberUpdated):
     except Exception:
         pass
 
-    # Bio
     bio = "вiσ ησт sєᴛ"
     try:
         chat_info = await bot.get_chat(user.id)
@@ -56,7 +157,6 @@ async def welcome_member(event: ChatMemberUpdated):
     username = f"@{user.username}" if user.username else "ᴜsєʀηᴧᴍє ησт sєᴛ"
     mention = user.mention_html()
 
-    # Live member count
     try:
         members = await bot.get_chat_member_count(event.chat.id)
     except Exception:
@@ -107,32 +207,27 @@ async def goodbye_member(event: ChatMemberUpdated):
 @router.message(Command("settings"))
 async def cmd_settings(message: Message, bot: Bot):
     if message.chat.type == "private":
-        await message.reply("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴡᴏʀᴋs ɪɴ ɢʀᴏᴜᴘs ᴏɴʟʏ.")
-        return
+        return await message.reply("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴡᴏʀᴋs ɪɴ ɢʀᴏᴜᴘs ᴏɴʟʏ.")
     if not await has_right(bot, message.chat.id, message.from_user.id, "can_change_info"):
-        await message.reply("❌ ʏᴏᴜ ɴᴇᴇᴅ ᴄʜᴀɴɢᴇ-ɪɴғᴏ ᴀᴅᴍɪɴ ʀɪɢʜᴛ.")
-        return
+        return await message.reply("❌ ʏᴏᴜ ɴᴇᴇᴅ ᴄʜᴀɴɢᴇ-ɪɴғᴏ ᴀᴅᴍɪɴ ʀɪɢʜᴛ.")
 
     await get_or_create_group(message.chat.id)
     settings = {}
-    for key in ("welcome_enabled", "goodbye_enabled", "antilink", "antiflood", "antiforward", "captcha"):
+    for key in ("welcome_enabled", "goodbye_enabled", "antilink",
+                "antiflood", "antiforward", "captcha"):
         settings[key] = await get_group_setting(message.chat.id, key)
 
-    text = (
-        f"⚙️ <b>ɢʀᴏᴜᴘ sᴇᴛᴛɪɴɢs</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ:"
-    )
+    text = f"⚙️ <b>ɢʀᴏᴜᴘ sᴇᴛᴛɪɴɢs</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ:"
     await message.answer(text, reply_markup=group_settings_kb(message.chat.id, settings))
 
 
 @router.callback_query(F.data == "grp:settings")
 async def cb_settings(cb: CallbackQuery, bot: Bot):
     if not await has_right(bot, cb.message.chat.id, cb.from_user.id, "can_change_info"):
-        await cb.answer("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ", show_alert=True)
-        return
+        return await cb.answer("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ", show_alert=True)
     settings = {}
-    for key in ("welcome_enabled", "goodbye_enabled", "antilink", "antiflood", "antiforward", "captcha"):
+    for key in ("welcome_enabled", "goodbye_enabled", "antilink",
+                "antiflood", "antiforward", "captcha"):
         settings[key] = await get_group_setting(cb.message.chat.id, key)
     text = f"⚙️ <b>ɢʀᴏᴜᴘ sᴇᴛᴛɪɴɢs</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ:"
     await smart_edit(cb, text, group_settings_kb(cb.message.chat.id, settings))
@@ -142,14 +237,14 @@ async def cb_settings(cb: CallbackQuery, bot: Bot):
 @router.callback_query(F.data.startswith("grp:toggle:"))
 async def cb_toggle(cb: CallbackQuery, bot: Bot):
     if not await has_right(bot, cb.message.chat.id, cb.from_user.id, "can_change_info"):
-        await cb.answer("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ", show_alert=True)
-        return
+        return await cb.answer("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ", show_alert=True)
     setting = cb.data.split(":")[2]
     new_val = await toggle_group_setting(cb.message.chat.id, setting)
     await cb.answer(f"{'✅ ᴏɴ' if new_val else '❌ ᴏғғ'}")
 
     settings = {}
-    for key in ("welcome_enabled", "goodbye_enabled", "antilink", "antiflood", "antiforward", "captcha"):
+    for key in ("welcome_enabled", "goodbye_enabled", "antilink",
+                "antiflood", "antiforward", "captcha"):
         settings[key] = await get_group_setting(cb.message.chat.id, key)
     text = f"⚙️ <b>ɢʀᴏᴜᴘ sᴇᴛᴛɪɴɢs</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ:"
     await smart_edit(cb, text, group_settings_kb(cb.message.chat.id, settings))
@@ -161,14 +256,12 @@ async def cb_toggle(cb: CallbackQuery, bot: Bot):
 @router.callback_query(F.data == "grp:locks")
 async def cb_locks(cb: CallbackQuery, bot: Bot):
     if not await has_right(bot, cb.message.chat.id, cb.from_user.id, "can_change_info"):
-        await cb.answer("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ", show_alert=True)
-        return
+        return await cb.answer("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ", show_alert=True)
     locks = await get_all_locks(cb.message.chat.id)
     text = (
         f"🔒 <b>ɢʀᴏᴜᴘ ʟᴏᴄᴋs</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🔒 = ʟᴏᴄᴋᴇᴅ | 🔓 = ᴜɴʟᴏᴄᴋᴇᴅ\n\n"
-        f"ᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ:"
+        f"🔒 = ʟᴏᴄᴋᴇᴅ | 🔓 = ᴜɴʟᴏᴄᴋᴇᴅ\n\nᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ:"
     )
     await smart_edit(cb, text, locks_menu_kb(locks))
     await cb.answer()
@@ -177,8 +270,7 @@ async def cb_locks(cb: CallbackQuery, bot: Bot):
 @router.callback_query(F.data.startswith("grp:lock:"))
 async def cb_lock_toggle(cb: CallbackQuery, bot: Bot):
     if not await has_right(bot, cb.message.chat.id, cb.from_user.id, "can_change_info"):
-        await cb.answer("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ", show_alert=True)
-        return
+        return await cb.answer("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ", show_alert=True)
     lock_type = cb.data.split(":")[2]
     current = await get_lock(cb.message.chat.id, lock_type)
     new_val = 0 if current else 1
@@ -189,13 +281,11 @@ async def cb_lock_toggle(cb: CallbackQuery, bot: Bot):
     text = (
         f"🔒 <b>ɢʀᴏᴜᴘ ʟᴏᴄᴋs</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🔒 = ʟᴏᴄᴋᴇᴅ | 🔓 = ᴜɴʟᴏᴄᴋᴇᴅ\n\n"
-        f"ᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ:"
+        f"🔒 = ʟᴏᴄᴋᴇᴅ | 🔓 = ᴜɴʟᴏᴄᴋᴇᴅ\n\nᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ:"
     )
     await smart_edit(cb, text, locks_menu_kb(locks))
 
 
-# Text commands for locks
 @router.message(Command("lock"))
 async def cmd_lock(message: Message, bot: Bot):
     if not await has_right(bot, message.chat.id, message.from_user.id, "can_change_info"):
@@ -225,23 +315,37 @@ async def cmd_unlock(message: Message, bot: Bot):
 
 
 # ═══════════════════════════════════════════════
-# MODERATION
+# ⚠️ WARN
 # ═══════════════════════════════════════════════
 @router.message(Command("warn"))
 async def cmd_warn(message: Message, bot: Bot):
+    if message.chat.type == "private":
+        return await message.reply("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴡᴏʀᴋs ɪɴ ɢʀᴏᴜᴘs ᴏɴʟʏ.")
     if not await has_right(bot, message.chat.id, message.from_user.id, "can_restrict_members"):
-        return await message.reply("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ.")
-    if not message.reply_to_message:
-        return await message.reply("ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ.")
-    target = message.reply_to_message.from_user
-    if await is_group_admin(bot, message.chat.id, target.id):
-        return await message.reply("❌ ᴄᴀɴ'ᴛ ᴡᴀʀɴ ᴀɴ ᴀᴅᴍɪɴ.")
-    reason = message.text.replace("/warn", "", 1).strip() or "No reason"
+        return await message.reply("❌ ʏᴏᴜ ɴᴇᴇᴅ ʀᴇsᴛʀɪᴄᴛ-ᴍᴇᴍʙᴇʀs ᴀᴅᴍɪɴ ʀɪɢʜᴛ.")
+
+    target, err = await resolve_target(message, bot)
+    if err:
+        return await message.reply(err)
+    if target.id == message.from_user.id:
+        return await message.reply("❌ ᴄᴀɴ'ᴛ ᴡᴀʀɴ ʏᴏᴜʀsᴇʟғ.")
+
+    verify_err = await verify_not_admin(bot, message.chat.id, target)
+    if verify_err:
+        return await message.reply(verify_err)
+
+    # Reason = text after target
+    parts = message.text.split(maxsplit=2)
+    reason = parts[2] if len(parts) > 2 else "No reason"
+
     await add_warning(target.id, message.chat.id, reason, message.from_user.id)
     count = await get_warnings(target.id, message.chat.id)
     await message.reply(
-        f"⚠️ {target.mention_html()} ᴡᴀʀɴᴇᴅ.\nʀᴇᴀsᴏɴ: {reason}\nᴛᴏᴛᴀʟ: <b>{count}/3</b>"
+        f"⚠️ {target.mention_html()} ᴡᴀʀɴᴇᴅ.\n"
+        f"ʀᴇᴀsᴏɴ: {reason}\n"
+        f"ᴛᴏᴛᴀʟ: <b>{count}/3</b>"
     )
+
     if count >= 3:
         try:
             await bot.restrict_chat_member(
@@ -254,10 +358,10 @@ async def cmd_warn(message: Message, bot: Bot):
 
 
 @router.message(Command("warnings"))
-async def cmd_warnings(message: Message):
-    if not message.reply_to_message:
-        return await message.reply("ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ.")
-    target = message.reply_to_message.from_user
+async def cmd_warnings(message: Message, bot: Bot):
+    target, err = await resolve_target(message, bot)
+    if err:
+        return await message.reply(err)
     count = await get_warnings(target.id, message.chat.id)
     await message.reply(f"⚠️ {target.mention_html()} ʜᴀs <b>{count}</b> ᴡᴀʀɴɪɴɢs.")
 
@@ -266,43 +370,65 @@ async def cmd_warnings(message: Message):
 async def cmd_unwarn(message: Message, bot: Bot):
     if not await has_right(bot, message.chat.id, message.from_user.id, "can_restrict_members"):
         return await message.reply("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ.")
-    if not message.reply_to_message:
-        return await message.reply("ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ.")
-    target = message.reply_to_message.from_user
+    target, err = await resolve_target(message, bot)
+    if err:
+        return await message.reply(err)
     ok = await remove_last_warning(target.id, message.chat.id)
     if ok:
         count = await get_warnings(target.id, message.chat.id)
-        await message.reply(f"✅ ʀᴇᴍᴏᴠᴇᴅ ᴏɴᴇ ᴡᴀʀɴɪɴɢ. ɴᴏᴡ: <b>{count}</b>")
+        await message.reply(
+            f"✅ ʀᴇᴍᴏᴠᴇᴅ ᴏɴᴇ ᴡᴀʀɴɪɴɢ ғʀᴏᴍ {target.mention_html()}.\n"
+            f"ɴᴏᴡ: <b>{count}</b>"
+        )
     else:
         await message.reply("ηᴏ ᴡᴀʀɴɪɴɢs ᴛᴏ ʀᴇᴍᴏᴠᴇ.")
 
 
+# ═══════════════════════════════════════════════
+# 🔇 MUTE / 🔊 UNMUTE
+# ═══════════════════════════════════════════════
 @router.message(Command("mute"))
 async def cmd_mute(message: Message, bot: Bot):
+    if message.chat.type == "private":
+        return await message.reply("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴡᴏʀᴋs ɪɴ ɢʀᴏᴜᴘs ᴏɴʟʏ.")
     if not await has_right(bot, message.chat.id, message.from_user.id, "can_restrict_members"):
-        return await message.reply("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ.")
-    if not message.reply_to_message:
-        return await message.reply("ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ.")
-    target = message.reply_to_message.from_user
+        return await message.reply("❌ ʏᴏᴜ ɴᴇᴇᴅ ʀᴇsᴛʀɪᴄᴛ-ᴍᴇᴍʙᴇʀs ᴀᴅᴍɪɴ ʀɪɢʜᴛ.")
+
+    bot_err = await check_bot_can_restrict(message, bot)
+    if bot_err:
+        return await message.reply(bot_err)
+
+    target, err = await resolve_target(message, bot)
+    if err:
+        return await message.reply(err)
+    if target.id == message.from_user.id:
+        return await message.reply("❌ ᴄᴀɴ'ᴛ ᴍᴜᴛᴇ ʏᴏᴜʀsᴇʟғ.")
     if await is_group_admin(bot, message.chat.id, target.id):
         return await message.reply("❌ ᴄᴀɴ'ᴛ ᴍᴜᴛᴇ ᴀɴ ᴀᴅᴍɪɴ.")
+
     try:
         await bot.restrict_chat_member(
             message.chat.id, target.id,
             permissions=ChatPermissions(can_send_messages=False)
         )
         await message.reply(f"🔇 {target.mention_html()} ᴍᴜᴛᴇᴅ.")
+    except TelegramBadRequest as e:
+        await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e.message}")
     except Exception as e:
         await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e}")
 
 
 @router.message(Command("unmute"))
 async def cmd_unmute(message: Message, bot: Bot):
+    if message.chat.type == "private":
+        return await message.reply("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴡᴏʀᴋs ɪɴ ɢʀᴏᴜᴘs ᴏɴʟʏ.")
     if not await has_right(bot, message.chat.id, message.from_user.id, "can_restrict_members"):
         return await message.reply("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ.")
-    if not message.reply_to_message:
-        return await message.reply("ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ.")
-    target = message.reply_to_message.from_user
+
+    target, err = await resolve_target(message, bot)
+    if err:
+        return await message.reply(err)
+
     try:
         await bot.restrict_chat_member(
             message.chat.id, target.id,
@@ -311,60 +437,97 @@ async def cmd_unmute(message: Message, bot: Bot):
                 can_send_media_messages=True,
                 can_send_other_messages=True,
                 can_add_web_page_previews=True,
+                can_send_polls=True,
+                can_change_info=False,
+                can_invite_users=True,
+                can_pin_messages=False,
             )
         )
         await message.reply(f"🔊 {target.mention_html()} ᴜɴᴍᴜᴛᴇᴅ.")
+    except TelegramBadRequest as e:
+        await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e.message}")
     except Exception as e:
         await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e}")
 
 
+# ═══════════════════════════════════════════════
+# 👢 KICK
+# ═══════════════════════════════════════════════
 @router.message(Command("kick"))
 async def cmd_kick(message: Message, bot: Bot):
+    if message.chat.type == "private":
+        return await message.reply("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴡᴏʀᴋs ɪɴ ɢʀᴏᴜᴘs ᴏɴʟʏ.")
     if not await has_right(bot, message.chat.id, message.from_user.id, "can_restrict_members"):
         return await message.reply("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ.")
-    if not message.reply_to_message:
-        return await message.reply("ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ.")
-    target = message.reply_to_message.from_user
+
+    target, err = await resolve_target(message, bot)
+    if err:
+        return await message.reply(err)
+    if target.id == message.from_user.id:
+        return await message.reply("❌ ᴄᴀɴ'ᴛ ᴋɪᴄᴋ ʏᴏᴜʀsᴇʟғ.")
     if await is_group_admin(bot, message.chat.id, target.id):
         return await message.reply("❌ ᴄᴀɴ'ᴛ ᴋɪᴄᴋ ᴀɴ ᴀᴅᴍɪɴ.")
+
     try:
         await bot.ban_chat_member(message.chat.id, target.id)
         await bot.unban_chat_member(message.chat.id, target.id)
         await message.reply(f"👢 {target.mention_html()} ᴋɪᴄᴋᴇᴅ.")
+    except TelegramBadRequest as e:
+        await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e.message}")
     except Exception as e:
         await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e}")
 
 
+# ═══════════════════════════════════════════════
+# 🚫 BAN / ✅ UNBAN
+# ═══════════════════════════════════════════════
 @router.message(Command("ban"))
 async def cmd_ban(message: Message, bot: Bot):
+    if message.chat.type == "private":
+        return await message.reply("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴡᴏʀᴋs ɪɴ ɢʀᴏᴜᴘs ᴏɴʟʏ.")
     if not await has_right(bot, message.chat.id, message.from_user.id, "can_restrict_members"):
         return await message.reply("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ.")
-    if not message.reply_to_message:
-        return await message.reply("ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ.")
-    target = message.reply_to_message.from_user
+
+    target, err = await resolve_target(message, bot)
+    if err:
+        return await message.reply(err)
+    if target.id == message.from_user.id:
+        return await message.reply("❌ ᴄᴀɴ'ᴛ ʙᴀɴ ʏᴏᴜʀsᴇʟғ.")
     if await is_group_admin(bot, message.chat.id, target.id):
         return await message.reply("❌ ᴄᴀɴ'ᴛ ʙᴀɴ ᴀɴ ᴀᴅᴍɪɴ.")
+
     try:
         await bot.ban_chat_member(message.chat.id, target.id)
         await message.reply(f"🚫 {target.mention_html()} ʙᴀɴɴᴇᴅ.")
+    except TelegramBadRequest as e:
+        await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e.message}")
     except Exception as e:
         await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e}")
 
 
 @router.message(Command("unban"))
 async def cmd_unban(message: Message, bot: Bot):
+    if message.chat.type == "private":
+        return await message.reply("ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ ᴡᴏʀᴋs ɪɴ ɢʀᴏᴜᴘs ᴏɴʟʏ.")
     if not await has_right(bot, message.chat.id, message.from_user.id, "can_restrict_members"):
         return await message.reply("❌ ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ.")
-    if not message.reply_to_message:
-        return await message.reply("ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜsᴇʀ.")
-    target = message.reply_to_message.from_user
+
+    target, err = await resolve_target(message, bot)
+    if err:
+        return await message.reply(err)
+
     try:
-        await bot.unban_chat_member(message.chat.id, target.id)
+        await bot.unban_chat_member(message.chat.id, target.id, only_if_banned=True)
         await message.reply(f"✅ {target.mention_html()} ᴜɴʙᴀɴɴᴇᴅ.")
+    except TelegramBadRequest as e:
+        await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e.message}")
     except Exception as e:
         await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e}")
 
 
+# ═══════════════════════════════════════════════
+# 🧹 PURGE
+# ═══════════════════════════════════════════════
 @router.message(Command("purge"))
 async def cmd_purge(message: Message, bot: Bot):
     if not await has_right(bot, message.chat.id, message.from_user.id, "can_delete_messages"):
@@ -383,20 +546,17 @@ async def cmd_purge(message: Message, bot: Bot):
             except Exception:
                 pass
         confirm = await message.answer(f"🧹 ᴅᴇʟᴇᴛᴇᴅ {deleted} ᴍᴇssᴀɢᴇ(s).")
-        import asyncio
         await asyncio.sleep(3)
         await confirm.delete()
+    except TelegramBadRequest as e:
+        await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e.message}")
     except Exception as e:
         await message.reply(f"❌ ғᴀɪʟᴇᴅ: {e}")
 
 
 # ═══════════════════════════════════════════════
-# AUTO-MOD: Locks + Antilink + Antiflood
+# 🛡️ AUTO-MOD: Antilink + Antiforward + Locks + Antiflood
 # ═══════════════════════════════════════════════
-import re
-import time
-from collections import defaultdict
-
 _flood_tracker = defaultdict(list)
 URL_PATTERN = re.compile(r"(https?://|t\.me/|telegram\.me/|www\.)", re.IGNORECASE)
 
@@ -412,33 +572,36 @@ async def auto_mod(message: Message, bot: Bot):
     # Skip admins
     try:
         member = await get_group_member(bot, chat_id, user_id)
-        from aiogram.types import ChatMemberOwner, ChatMemberAdministrator
         if isinstance(member, (ChatMemberOwner, ChatMemberAdministrator)):
             return
     except Exception:
         pass
 
-    # ═══ Antilink ═══
+    # Antilink
     if await get_group_setting(chat_id, "antilink"):
         if message.text and URL_PATTERN.search(message.text):
             try:
                 await message.delete()
-                await message.answer(f"🔗 {message.from_user.mention_html()}, ʟɪɴᴋs ɴᴏᴛ ᴀʟʟᴏᴡᴇᴅ.")
+                await message.answer(
+                    f"🔗 {message.from_user.mention_html()}, ʟɪɴᴋs ɴᴏᴛ ᴀʟʟᴏᴡᴇᴅ."
+                )
             except Exception:
                 pass
             return
 
-    # ═══ Antiforward ═══
+    # Antiforward
     if await get_group_setting(chat_id, "antiforward"):
         if message.forward_date or message.forward_from or message.forward_from_chat:
             try:
                 await message.delete()
-                await message.answer(f"↪️ {message.from_user.mention_html()}, ғᴏʀᴡᴀʀᴅs ɴᴏᴛ ᴀʟʟᴏᴡᴇᴅ.")
+                await message.answer(
+                    f"↪️ {message.from_user.mention_html()}, ғᴏʀᴡᴀʀᴅs ɴᴏᴛ ᴀʟʟᴏᴡᴇᴅ."
+                )
             except Exception:
                 pass
             return
 
-    # ═══ Locks ═══
+    # Locks
     checks = [
         ("stickers", message.sticker is not None),
         ("gifs", message.animation is not None),
@@ -467,7 +630,7 @@ async def auto_mod(message: Message, bot: Bot):
                 pass
             return
 
-    # ═══ Antiflood ═══
+    # Antiflood
     if await get_group_setting(chat_id, "antiflood"):
         now = time.time()
         _flood_tracker[user_id] = [t for t in _flood_tracker[user_id] if now - t < 10]
@@ -479,6 +642,8 @@ async def auto_mod(message: Message, bot: Bot):
                     permissions=ChatPermissions(can_send_messages=False),
                     until_date=int(now) + 300,
                 )
-                await message.answer(f"🌊 {message.from_user.mention_html()} ᴍᴜᴛᴇᴅ 5ᴍ ʙʏ ᴀɴᴛɪғʟᴏᴏᴅ.")
+                await message.answer(
+                    f"🌊 {message.from_user.mention_html()} ᴍᴜᴛᴇᴅ 5ᴍ ʙʏ ᴀɴᴛɪғʟᴏᴏᴅ."
+                )
             except Exception:
                 pass
