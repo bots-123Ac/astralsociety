@@ -3,7 +3,7 @@ from aiogram.types import CallbackQuery
 
 from config import BOT_NAME, BOT_USERNAME
 from keyboards.main_menu import main_menu_kb, back_kb
-from keyboards.games_kb import game_lb_menu_kb
+from keyboards.game_kb import leaderboard_menu_kb
 from utils.database import get_user_stats
 from utils.ui import smart_edit
 
@@ -11,14 +11,12 @@ router = Router()
 
 
 @router.callback_query(F.data == "menu:main")
-async def back_to_main(cb: CallbackQuery):
+async def back_main(cb: CallbackQuery):
     text = (
         f"👋 нi, <b>{cb.from_user.first_name}</b>!\n\n"
         f"ᴡєʟᴄσϻє тσ <b>{BOT_NAME}</b> 🌌\n\n"
-        f"ʏσᴜʀ ᴧʟʟ-iη-σηє ᴛєʟєɢʀᴧϻ ᴄσϻᴩᴧηiση ғσʀ:\n\n"
-        f"🎓 sᴛᴜᴅʏ\n"
-        f"🛡️ ɢʀσᴜᴩ ϻᴧηᴧɢєϻєηᴛ\n"
-        f"🎮 ɢᴧϻєs & єηᴛєʀᴛᴧiηϻєηᴛ\n\n"
+        f"🎓 sᴛᴜᴅʏ  •  📝 ǫᴜiᴢ  •  🎮 ɢᴧϻєs\n"
+        f"🏆 ʟєᴧᴅєʀвσᴧʀᴅ  •  👤 ᴩʀσғiʟє\n\n"
         f"ᴄнσσsє ᴧη σᴩᴛiση вєʟσᴡ 👇"
     )
     await smart_edit(cb, text, main_menu_kb())
@@ -26,73 +24,90 @@ async def back_to_main(cb: CallbackQuery):
 
 
 @router.callback_query(F.data == "menu:help")
-async def show_help(cb: CallbackQuery):
+async def help_menu(cb: CallbackQuery):
     text = (
         f"🆘 <b>{BOT_NAME} нєʟᴩ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"• /start — sᴛᴧʀᴛ вσᴛ\n"
-        f"• /admin — ᴧᴅϻiη ᴩᴧηєʟ (ᴧᴅϻiηs σηʟʏ)\n"
-        f"• /profile — ᴠiєᴡ ʏσᴜʀ ᴩʀσғiʟє\n"
-        f"• /balance — ᴄнєᴄᴋ ᴄσiηs & ᴩσiηᴛs\n"
-        f"• /leaderboard — ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ\n\n"
-        f"ᴜsє iηʟiηє вᴜᴛᴛσηs ғσʀ ᴧʟʟ ғєᴧᴛᴜʀєs ✨"
+        f"<b>📚 sᴛᴜᴅʏ</b>\n"
+        f"• вʀσωsє ησᴛєs, ᴅᴩᴩ, вσσᴋs\n\n"
+        f"<b>📝 ǫᴜiᴢ</b>\n"
+        f"• /quiz — sᴛᴧʀᴛ ǫᴜiᴢ\n"
+        f"• ᴧᴛᴛєϻᴩᴛ ᴍᴄǫs ᴧηᴅ єᴧʀη ᴩσiηᴛs\n\n"
+        f"<b>🎮 ɢᴧϻєs</b>\n"
+        f"• /new — sᴛᴧʀᴛ ᴡσʀᴅ ɢᴜєssiηɢ ɢᴧϻє\n"
+        f"• ᴛʏᴩє ɢᴜєssєs ɪɴ ᴄнᴧᴛ\n\n"
+        f"<b>🏆 ʟєᴧᴅєʀвσᴧʀᴅ</b>\n"
+        f"• /leaderboard — ᴛσᴩ ᴩʟᴧʏєʀs\n\n"
+        f"<b>👑 ᴀᴅᴍɪɴ</b>\n"
+        f"• /admin — ᴧᴅᴍɪɴ ᴩᴧηєʟ\n"
+        f"• /warn /mute /kick /ban\n\n"
+        f"ᴜsє ɪηʟɪηє вᴜᴛᴛσηs ✨"
     )
     await smart_edit(cb, text, back_kb())
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:about")
-async def show_about(cb: CallbackQuery):
+async def about_menu(cb: CallbackQuery):
     text = (
         f"ℹ️ <b>ᴧвσᴜᴛ {BOT_NAME}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"{BOT_NAME} is an all-in-one Telegram bot built for students, "
-        f"communities and entertainment.\n\n"
-        f"it ᴄσϻвiηєs:\n"
-        f"🎓 sᴛᴜᴅʏ ʀєsσᴜʀᴄєs\n"
-        f"🛡️ ɢʀσᴜᴩ ϻᴧηᴧɢєϻєηᴛ\n"
-        f"🎮 ɢᴧϻєs & єᴄσησϻʏ\n"
-        f"🧠 ǫᴜiᴢᴢєs, ᴜᴛiʟiᴛiєs & ϻσʀє.\n\n"
-        f"🔗 ᴜsєʀηᴧϻє: {BOT_USERNAME}"
-    )
-    await smart_edit(cb, text, back_kb())
-    await cb.answer()
-
-
-@router.callback_query(F.data == "menu:kidnap")
-async def kidnap_me(cb: CallbackQuery):
-    text = (
-        f"🥷 <b>ᴋiᴅηᴧᴩ sᴜᴄᴄєssғᴜʟ!</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ʏσᴜ нᴧᴠє вєєη ᴋiᴅηᴧᴩᴩєᴅ вʏ {BOT_NAME} 👑\n\n"
-        f"ʏσᴜ ᴧʀє ησω σғғiᴄiᴧʟʟʏ ᴩᴧʀᴛ σғ "
-        f"ᴧsᴛʀᴧʟ єϻᴩiʀє.\n\n"
-        f"ησ єsᴄᴧᴩє. σηʟʏ sᴛᴜᴅʏ, ɢᴧϻєs & ғᴜη 😈"
+        f"ᴀɴ ᴀʟʟ-ɪɴ-ᴏɴᴇ ᴛᴇʟᴇɢʀᴀᴍ ʙᴏᴛ ғᴏʀ:\n\n"
+        f"🎓 sᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ\n"
+        f"📝 ǫᴜɪᴢᴢᴇs\n"
+        f"🎮 ɢᴀᴍᴇs\n"
+        f"🛡️ ɢʀᴏᴜᴘ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ\n"
+        f"🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅs\n\n"
+        f"🔗 ᴜsᴇʀηᴧᴍє: {BOT_USERNAME}"
     )
     await smart_edit(cb, text, back_kb())
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:profile")
-async def show_profile(cb: CallbackQuery):
-    coins, points, gp, ts = await get_user_stats(cb.from_user.id)
+async def profile_menu(cb: CallbackQuery):
+    s = await get_user_stats(cb.from_user.id)
     text = (
         f"👤 <b>ʏσᴜʀ ᴩʀσғiʟє</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ηᴧϻє: {cb.from_user.first_name}\n"
-        f"ᴜsєʀηᴧϻє: @{cb.from_user.username or 'ησηє'}\n"
-        f"iᴅ: <code>{cb.from_user.id}</code>\n\n"
-        f"🪙 ᴧsᴛʀᴧʟ ᴄσiηs: <b>{coins}</b>\n"
-        f"⭐ ᴧsᴛʀᴧʟ ᴩσiηᴛs: <b>{points}</b>\n"
-        f"🎮 ɢᴧϻєs ᴩʟᴧʏєᴅ: <b>{gp}</b>\n"
-        f"🏆 ᴛσᴛᴧʟ sᴄσʀє: <b>{ts}</b>"
+        f"ηᴧᴍє: {cb.from_user.first_name}\n"
+        f"ᴜsᴇʀηᴧᴍє: @{cb.from_user.username or 'ησηє'}\n"
+        f"ɪᴅ: <code>{cb.from_user.id}</code>\n\n"
+        f"🪙 ᴄᴏɪɴs: <b>{s['coins']}</b>\n"
+        f"⭐ ᴩᴏɪηᴛs: <b>{s['points']}</b>\n\n"
+        f"📝 ǫᴜɪᴢ ᴀᴛᴛᴇᴍᴩᴛs: <b>{s['quiz_attempted']}</b>\n"
+        f"✅ ᴄᴏʀʀᴇᴄᴛ: <b>{s['quiz_correct']}</b>\n"
+        f"🔤 ᴡᴏʀᴅ ɢᴀᴍᴇs: <b>{s['word_games']}</b>\n"
+        f"🏆 ᴡᴏʀᴅ sᴄᴏʀᴇ: <b>{s['word_score']}</b>"
     )
     await smart_edit(cb, text, back_kb())
     await cb.answer()
 
 
-@router.callback_query(F.data == "menu:leaderboard")
-async def show_lb_menu(cb: CallbackQuery):
-    text = "🏆 <b>ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧ ɢᴧᴍє:"
-    await smart_edit(cb, text, game_lb_menu_kb())
+@router.callback_query(F.data == "menu:perf")
+async def perf_menu(cb: CallbackQuery):
+    from utils.database import get_quiz_stats
+    total, correct, subjects = await get_quiz_stats(cb.from_user.id)
+    acc = round((correct / total) * 100, 1) if total else 0
+
+    lines = [f"📊 <b>ϻʏ ᴩєʀғσʀϻᴧηᴄє</b>\n━━━━━━━━━━━━━━━━━━━━━\n"]
+    lines.append(f"📝 ǫᴜɪᴢ ᴀᴛᴛᴇᴍᴩᴛs: <b>{total}</b>")
+    lines.append(f"✅ ᴄᴏʀʀᴇᴄᴛ: <b>{correct}</b>")
+    lines.append(f"🎯 ᴀᴄᴄᴜʀᴀᴄʏ: <b>{acc}%</b>\n")
+    if subjects:
+        lines.append("📚 <b>sᴜʙᴊᴇᴄᴛ-ᴡɪsᴇ:</b>")
+        for sub, cnt, cor in subjects:
+            if not sub:
+                continue
+            sacc = round((cor or 0) / cnt * 100, 1) if cnt else 0
+            lines.append(f"  • {sub}: {cor or 0}/{cnt} ({sacc}%)")
+
+    await smart_edit(cb, "\n".join(lines), back_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data == "menu:lb")
+async def lb_menu(cb: CallbackQuery):
+    text = "🏆 <b>ʟєᴧᴅєʀвσᴧʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴄᴧᴛєɢσʀʏ:"
+    await smart_edit(cb, text, leaderboard_menu_kb())
     await cb.answer()
