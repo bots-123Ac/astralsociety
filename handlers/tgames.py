@@ -1,4 +1,3 @@
-import json
 import random
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
@@ -16,12 +15,18 @@ from utils.database import (
     inc_word_attempt, inc_word_solved, inc_number_attempt, inc_number_guess,
     has_xp_boost, mission_word_played,
 )
+from utils.permissions import is_bot_admin
 
 router = Router()
 
-QUIZ_CACHE = {}
-WORD_CACHE = {}
-NUMBER_CACHE = {}
+# ═══════════════════════════════════════════════
+# SESSION CACHES — keyed by (chat_id, user_id)
+# This ensures DM and Group sessions are isolated
+# ═══════════════════════════════════════════════
+QUIZ_CACHE = {}      # (chat_id, user_id) -> (qid, correct, category)
+WORD_CACHE = {}      # (chat_id, user_id) -> {word, attempts, history}
+NUMBER_CACHE = {}    # (chat_id, user_id) -> {secret, attempts}
+
 
 QUIZ_SPACE = [
     ("Which planet is known as the Red Planet?", "Venus", "Mars", "Jupiter", "Saturn", "B"),
@@ -50,6 +55,9 @@ QUIZ_GENERAL = [
 ]
 
 
+# ═══════════════════════════════════════════════
+# Entry point
+# ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/tgames(\s|$)"))
 async def cmd_tgames(message: Message):
     await message.answer(
@@ -73,10 +81,13 @@ async def quiz_select(cb: CallbackQuery):
 @router.callback_query(F.data.startswith("quiz:"))
 async def quiz_start(cb: CallbackQuery):
     cat = cb.data.split(":")[1]
+    if cat not in ("space", "general"):
+        return await cb.answer()
     pool = QUIZ_SPACE if cat == "space" else QUIZ_GENERAL
     question, a, b, c, d, correct = random.choice(pool)
     qid = random.randint(10000, 99999)
-    QUIZ_CACHE[cb.from_user.id] = (qid, correct, cat)
+    key = (cb.message.chat.id, cb.from_user.id)
+    QUIZ_CACHE[key] = (qid, correct, cat)
 
     await cb.message.edit_text(
         f"🧠 <b>{'sᴩᴧᴄє' if cat == 'space' else 'ɢєηєʀᴧʟ'} ǫᴜiᴢ</b>\n"
@@ -92,7 +103,8 @@ async def quiz_start(cb: CallbackQuery):
 async def quiz_answer(cb: CallbackQuery):
     parts = cb.data.split(":")
     qid, selected = int(parts[1]), parts[2]
-    data = QUIZ_CACHE.get(cb.from_user.id)
+    key = (cb.message.chat.id, cb.from_user.id)
+    data = QUIZ_CACHE.get(key)
     if not data or data[0] != qid:
         return await cb.answer("sєssiση єxᴩiʀєᴅ.", show_alert=True)
     _, correct, cat = data
@@ -109,7 +121,7 @@ async def quiz_answer(cb: CallbackQuery):
         result = f"✅ <b>ᴄσʀʀєᴄт!</b>\n\n🪙 +{coins} ᴄσiηs\n📈 +{xp_gain} xᴩ"
     else:
         result = f"❌ <b>ᴡʀσηɢ!</b>\n\nᴄσʀʀєᴄт: <b>{correct}</b>"
-    QUIZ_CACHE.pop(cb.from_user.id, None)
+    QUIZ_CACHE.pop(key, None)
     await cb.message.edit_text(
         f"🧠 ǫᴜiᴢ ʀєsᴜʟт\n━━━━━━━━━━━━━━━━━━━━━\n\n{result}",
         reply_markup=back_main_kb()
@@ -117,25 +129,78 @@ async def quiz_answer(cb: CallbackQuery):
     await cb.answer("✅" if selected == correct else "❌")
 
 
-# ═══ WORD ═══
+# ═══════════════════════════════════════════════
+# 🔤 WORD GUESSING — isolated per (chat_id, user_id)
+# ═══════════════════════════════════════════════
 @router.callback_query(F.data == "tg:word")
 async def word_start(cb: CallbackQuery):
     word = get_random_5letter_word()
-    WORD_CACHE[cb.from_user.id] = {"word": word, "attempts": 0, "history": []}
+    key = (cb.message.chat.id, cb.from_user.id)
+    WORD_CACHE[key] = {"word": word, "attempts": 0, "history": []}
     await inc_word_attempt(cb.from_user.id)
     try:
         await mission_word_played(cb.from_user.id)
     except Exception:
         pass
-    await cb.message.edit_text(
-        "🔤 <b>ᴡσʀᴅ ɢᴜєssiηɢ</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n"
-        "📏 ʟєηɢтн: <b>5 ʟєттєʀs</b>\n"
-        "🎯 ϻᴧx ᴄнᴧηᴄєs: <b>30</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "ᴛʏᴩє ʏσᴜʀ 5-ʟєттєʀ ωσʀᴅ iη ᴄнᴧт:"
+
+    text = (
+        f"🔤 <b>ᴡσʀᴅ ɢᴜєssiηɢ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📏 ʟєηɢтн: <b>5 ʟєттєʀs</b>\n"
+        f"🎯 ϻᴧx ᴄнᴧηᴄєs: <b>30</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ᴛʏᴩє ʏσᴜʀ 5-ʟєттєʀ ωσʀᴅ iη ᴄнᴧт:"
     )
+    await cb.message.edit_text(text)
     await cb.answer()
+
+
+@router.message(F.text.regexp(r"^/new(\s|$)"))
+async def cmd_new(message: Message):
+    args = message.text.split(maxsplit=1)
+    length = 5  # default
+    if len(args) > 1:
+        arg = args[1].strip().lower()
+        if arg == "end":
+            # Only in group: admin can end all games
+            if message.chat.type == "private":
+                return await message.reply("📩 ᴜsє 🛑 ɢivє ᴜᴩ ʙᴜᴛᴛᴏɴ iη ᴅᴍ.")
+            if not is_bot_admin(message.from_user.id):
+                # Check if group admin
+                try:
+                    member = await message.bot.get_chat_member(message.chat.id, message.from_user.id)
+                    from aiogram.types import ChatMemberOwner, ChatMemberAdministrator
+                    if not isinstance(member, (ChatMemberOwner, ChatMemberAdministrator)):
+                        return await message.reply("❌ sσηʟʏ ɢʀσᴜᴩ ᴧᴅϻiηs ᴄᴧη ᴇηᴅ ɢᴧϻєs.")
+                except Exception:
+                    return await message.reply("❌ sσηʟʏ ɢʀσᴜᴩ ᴧᴅϻiηs ᴄᴧη ᴇηᴅ ɢᴧϻєs.")
+            # Clear all games in this chat
+            to_remove = [k for k in WORD_CACHE if k[0] == message.chat.id]
+            for k in to_remove:
+                WORD_CACHE.pop(k, None)
+            to_remove_n = [k for k in NUMBER_CACHE if k[0] == message.chat.id]
+            for k in to_remove_n:
+                NUMBER_CACHE.pop(k, None)
+            return await message.reply("🛑 ᴧʟʟ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇs ᴇηᴅᴇᴅ ɪη ᴛʜɪs ᴄʜᴀᴛ.")
+
+    word = get_random_5letter_word()
+    key = (message.chat.id, message.from_user.id)
+    WORD_CACHE[key] = {"word": word, "attempts": 0, "history": []}
+    await inc_word_attempt(message.from_user.id)
+    try:
+        await mission_word_played(message.from_user.id)
+    except Exception:
+        pass
+
+    text = (
+        f"🔤 <b>ᴡσʀᴅ ɢᴜєssiηɢ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📏 ʟєηɢтн: <b>5 ʟєттєʀs</b>\n"
+        f"🎯 ϻᴧx ᴄнᴧηᴄєs: <b>30</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ᴛʏᴩє ʏσᴜʀ 5-ʟєттєʀ ωσʀᴅ iη ᴄнᴧт:"
+    )
+    await message.answer(text)
 
 
 def _render_word_history(history):
@@ -164,10 +229,12 @@ def _evaluate(word, guess):
 async def word_guess(message: Message):
     if not message.text:
         raise SkipHandler()
-    user_id = message.from_user.id
-    game = WORD_CACHE.get(user_id)
+
+    # ═══ SESSION KEY: (chat_id, user_id) — this is the fix ═══
+    key = (message.chat.id, message.from_user.id)
+    game = WORD_CACHE.get(key)
     if not game:
-        raise SkipHandler()
+        raise SkipHandler()  # No active game → next router
 
     guess = message.text.strip().lower()
     if len(guess) != 5 or not guess.isalpha():
@@ -180,9 +247,9 @@ async def word_guess(message: Message):
     if all(c == "g" for c in colors):
         attempts = game["attempts"]
         reward = max(10, WORD_MAX_REWARD // attempts) if attempts > 1 else WORD_MAX_REWARD
-        await add_coins(user_id, reward)
-        await inc_word_solved(user_id, reward)
-        WORD_CACHE.pop(user_id, None)
+        await add_coins(message.from_user.id, reward)
+        await inc_word_solved(message.from_user.id, reward)
+        WORD_CACHE.pop(key, None)
         return await message.reply(
             f"🎉 <b>ʏσᴜ ωση!</b>\n\nᴛнє ωσʀᴅ: <b>{game['word'].upper()}</b>\n"
             f"ᴧттєϻᴩтs: <b>{attempts}</b>\n\n🪙 +{reward} ᴄσiηs"
@@ -190,14 +257,14 @@ async def word_guess(message: Message):
 
     if game["attempts"] >= 30:
         word = game["word"]
-        WORD_CACHE.pop(user_id, None)
+        WORD_CACHE.pop(key, None)
         return await message.reply(f"💀 ɢᴧϻє σᴠєʀ! ωσʀᴅ ωᴧs: <b>{word.upper()}</b>")
 
     await message.reply(
         f"🔤 <b>ᴡσʀᴅ ɢᴜєssiηɢ</b>\n"
         f"🎯 ᴧттєϻᴩтs: <b>{game['attempts']}/30</b>\n\n"
         f"{_render_word_history(game['history'])}\n\n"
-        f"ᴛʏᴩє ηєxт ɢᴜєss (5 ʟєᴛᴛєʀs):"
+        f"ᴛʏᴩє ηєxт ɢᴜєss (5 ʟєттєʀs):"
     )
 
 
@@ -205,7 +272,8 @@ async def word_guess(message: Message):
 @router.callback_query(F.data == "tg:number")
 async def number_start(cb: CallbackQuery):
     secret = random.randint(100, 500)
-    NUMBER_CACHE[cb.from_user.id] = {"secret": secret, "attempts": 0}
+    key = (cb.message.chat.id, cb.from_user.id)
+    NUMBER_CACHE[key] = {"secret": secret, "attempts": 0}
     await inc_number_attempt(cb.from_user.id)
     await cb.message.edit_text(
         "🔢 <b>ɢᴜєss тнє ηᴜϻвєʀ</b>\n"
@@ -222,32 +290,32 @@ async def number_guess(message: Message):
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2 or not parts[1].strip().isdigit():
         return await message.reply("ᴜsᴧɢє: <code>/h 250</code>")
-    user_id = message.from_user.id
-    game = NUMBER_CACHE.get(user_id)
+    key = (message.chat.id, message.from_user.id)
+    game = NUMBER_CACHE.get(key)
     if not game:
         return await message.reply("❌ sᴛᴧʀᴛ ɢᴧϻє ᴠiᴧ /tgames.")
     guess = int(parts[1].strip())
     if not (100 <= guess <= 500):
         return await message.reply("❌ ɢᴜєss 100–500.")
     game["attempts"] += 1
-    await inc_number_guess(user_id)
+    await inc_number_guess(message.from_user.id)
     secret = game["secret"]
     if guess == secret:
         coins = NUMBER_REWARD_COINS
         xp_gain = random.randint(0, 12)
-        if await has_xp_boost(user_id):
+        if await has_xp_boost(message.from_user.id):
             xp_gain *= 2
-        await add_coins(user_id, coins)
-        await add_xp(user_id, xp_gain)
-        NUMBER_CACHE.pop(user_id, None)
+        await add_coins(message.from_user.id, coins)
+        await add_xp(message.from_user.id, xp_gain)
+        NUMBER_CACHE.pop(key, None)
         return await message.reply(
             f"🎉 <b>ᴄσʀʀєᴄт!</b>\n\nsєᴄʀєт: <b>{secret}</b>\n"
             f"ᴧттєϻᴩтs: <b>{game['attempts']}</b>\n\n"
             f"🪙 +{coins} | 📈 +{xp_gain} xᴩ"
         )
     if game["attempts"] >= 12:
-        NUMBER_CACHE.pop(user_id, None)
-        return await message.reply(f"💀 ɢᴧᴍє σᴠєʀ! sєᴄʀєт ωᴧs <b>{secret}</b>")
+        NUMBER_CACHE.pop(key, None)
+        return await message.reply(f"💀 ɢᴧᴍє σᴠєʀ! sєᴄʀєᴛ ωᴧs <b>{secret}</b>")
     if guess < secret:
         await message.reply(f"⬆️ <b>{guess} is ᴠєʀʏ ʟσω</b>\nʀᴧηɢє: {guess}–500\nᴀᴛᴛᴇᴍᴘᴛs: {game['attempts']}/12")
     else:
