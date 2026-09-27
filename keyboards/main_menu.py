@@ -4,17 +4,17 @@ from config import SUPPORT_GROUP_LINK, SUPPORT_CHANNEL_LINK, BOT_ADD_LINK
 
 def main_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🆘 нєʟᴩ", callback_data="menu:help"),
-         InlineKeyboardButton(text="ℹ️ ᴧвσᴜᴛ", callback_data="menu:about")],
-        [InlineKeyboardButton(text="👥 sᴜᴩᴩσʀᴛiᴠє ɢᴄ", url=SUPPORT_GROUP_LINK)],
-        [InlineKeyboardButton(text="📢 sᴜᴩᴩσʀᴛiᴠє ᴄнᴧηηєʟ", url=SUPPORT_CHANNEL_LINK)],
-        [InlineKeyboardButton(text="🥷 ᴋiᴅηᴧᴩ ϻє", url=BOT_ADD_LINK)],
+        [InlineKeyboardButton(text="🆘 ʜᴇʟᴘ", callback_data="menu:help"),
+         InlineKeyboardButton(text="ℹ️ ᴀʙᴏᴜᴛ", callback_data="menu:about")],
+        [InlineKeyboardButton(text="👥 ꜱᴜᴘᴘᴏʀᴛɪᴠᴇ ɢᴄ", url=SUPPORT_GROUP_LINK)],
+        [InlineKeyboardButton(text="📢 ꜱᴜᴘᴘᴏʀᴛɪᴠᴇ ᴄʜᴀɴɴᴇʟ", url=SUPPORT_CHANNEL_LINK)],
+        [InlineKeyboardButton(text="🥷 ᴋɪᴅɴᴀᴘ ᴍᴇ", url=BOT_ADD_LINK)],
     ])
 
 
 def back_kb(target="menu:main"):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data=target)]
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data=target)]
     ])
 
 
@@ -22,19 +22,29 @@ def back_main_kb():
     return back_kb("menu:main")
 
 
-# ═══ Game keyboards (used in /tgames) ═══
 def tgames_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🧠 ǫᴜiᴢ", callback_data="tg:quiz")],
-        [InlineKeyboardButton(text="🔤 ᴡσʀᴅ ɢᴜєssiηɢ", callback_data="tg:word")],
-        [InlineKeyboardButton(text="🔢 ɢᴜєss тнє ηᴜϻвєʀ", callback_data="tg:number")],
+        [InlineKeyboardButton(text="🧠 ǫᴜɪᴢ", callback_data="tg:quiz")],
+        [InlineKeyboardButton(text="🔤 ᴡᴏʀᴅ ɢᴜᴇꜱꜱɪɴɢ", callback_data="tg:word")],
+        [InlineKeyboardButton(text="🔢 ɢᴜᴇꜱꜱ ᴛʜᴇ ɴᴜᴍʙᴇʀ", callback_data="tg:number")],
+    ])
+
+
+def quiz_count_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="5 ǫᴜᴇꜱᴛɪᴏɴꜱ", callback_data="qzcount:5"),
+         InlineKeyboardButton(text="10 ǫᴜᴇꜱᴛɪᴏɴꜱ", callback_data="qzcount:10")],
+        [InlineKeyboardButton(text="15 ǫᴜᴇꜱᴛɪᴏɴꜱ", callback_data="qzcount:15"),
+         InlineKeyboardButton(text="20 ǫᴜᴇꜱᴛɪᴏɴꜱ", callback_data="qzcount:20")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
 
 
 def quiz_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🚀 sᴩᴧᴄє ǫᴜiᴢ", callback_data="quiz:space")],
-        [InlineKeyboardButton(text="🌍 ɢєηєʀᴧʟ ǫᴜiᴢ", callback_data="quiz:general")],
+        [InlineKeyboardButton(text="🚀 ꜱᴘᴀᴄᴇ ǫᴜɪᴢ", callback_data="quiz:space")],
+        [InlineKeyboardButton(text="🌍 ɢᴇɴᴇʀᴀʟ ǫᴜɪᴢ", callback_data="quiz:general")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
 
 
@@ -47,79 +57,72 @@ def quiz_options_kb(qid, a, b, c, d):
     ])
 
 
-# ═══ Leaderboard ═══
 def leaderboard_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="👥 ɢʀσᴜᴩ тσᴩ 10", callback_data="lb:group")],
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:main")],
+        [InlineKeyboardButton(text="👥 ɢʀᴏᴜᴘ ᴛᴏᴘ 10", callback_data="lb:group")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
 
 
-# ═══ Study ═══
 def study_class_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📘 ᴄʟᴧss 10", callback_data="study:10"),
-         InlineKeyboardButton(text="📗 ᴄʟᴧss 11", callback_data="study:11")],
-        [InlineKeyboardButton(text="📕 ᴄʟᴧss 12", callback_data="study:12")],
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:main")],
+        [InlineKeyboardButton(text="📘 ᴄʟᴀꜱꜱ 10", callback_data="study:10"),
+         InlineKeyboardButton(text="📗 ᴄʟᴀꜱꜱ 11", callback_data="study:11")],
+        [InlineKeyboardButton(text="📕 ᴄʟᴀꜱꜱ 12", callback_data="study:12")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
 
 
 def study_class10_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🔬 sᴄiєηᴄє", callback_data="st10:subject:science"),
-         InlineKeyboardButton(text="📐 ϻᴧтнs", callback_data="st10:subject:maths")],
-        [InlineKeyboardButton(text="🌍 ssт", callback_data="st10:subject:sst"),
-         InlineKeyboardButton(text="📖 єηɢʟisн", callback_data="st10:subject:english")],
-        [InlineKeyboardButton(text="📝 ᴩʏǫ", callback_data="st10:section:pyq")],
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:study")],
+        [InlineKeyboardButton(text="🔬 ꜱᴄɪᴇɴᴄᴇ", callback_data="st10:subject:science"),
+         InlineKeyboardButton(text="📐 ᴍᴀᴛʜꜱ", callback_data="st10:subject:maths")],
+        [InlineKeyboardButton(text="🌍 ꜱꜱᴛ", callback_data="st10:subject:sst"),
+         InlineKeyboardButton(text="📖 ᴇɴɢʟɪꜱʜ", callback_data="st10:subject:english")],
+        [InlineKeyboardButton(text="📝 ᴘʏǫ", callback_data="st10:section:pyq")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:study")],
     ])
 
 
 def study_class1112_kb(class_name):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎯 ᴊєє", callback_data=f"st{class_name}:section:jee")],
-        [InlineKeyboardButton(text="🩺 ηєєᴛ", callback_data=f"st{class_name}:section:neet")],
-        [InlineKeyboardButton(text="🎯🩺 ᴊєє + ηєєᴛ", callback_data=f"st{class_name}:section:both")],
-        [InlineKeyboardButton(text="📝 ᴩʏǫs", callback_data=f"st{class_name}:section:pyq")],
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:study")],
+        [InlineKeyboardButton(text="🎯 ᴊᴇᴇ", callback_data=f"st{class_name}:section:jee")],
+        [InlineKeyboardButton(text="🩺 ɴᴇᴇᴛ", callback_data=f"st{class_name}:section:neet")],
+        [InlineKeyboardButton(text="🎯🩺 ᴊᴇᴇ + ɴᴇᴇᴛ", callback_data=f"st{class_name}:section:both")],
+        [InlineKeyboardButton(text="📝 ᴘʏǫꜱ", callback_data=f"st{class_name}:section:pyq")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:study")],
     ])
 
 
-def chapters_kb(class_name, section, chapters, subject=None):
+def chapters_kb(class_name, section, chapters):
     rows = []
     for i, ch in enumerate(chapters):
-        cb = f"stch:{class_name}:{section}:{i}"
-        if subject:
-            cb = f"stch:{class_name}:{section}:{i}:{subject}"
-        rows.append([InlineKeyboardButton(text=f"📄 {ch}", callback_data=cb)])
-    rows.append([InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:study")])
+        rows.append([InlineKeyboardButton(text=f"📄 {ch}", callback_data=f"stch:{class_name}:{section}:{i}")])
+    rows.append([InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:study")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-# ═══ Shop ═══
 def shop_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="👁️ ᴩʀσтєᴄтiση ᴄнєᴄᴋєʀ (6💎)", callback_data="shop:checker")],
-        [InlineKeyboardButton(text="⚡ xᴩ вσσsт", callback_data="shop:xpboost")],
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:main")],
+        [InlineKeyboardButton(text="👁️ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ ᴄʜᴇᴄᴋᴇʀ (6💎)", callback_data="shop:checker")],
+        [InlineKeyboardButton(text="⚡ xᴘ ʙᴏᴏꜱᴛ", callback_data="shop:xpboost")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
 
 
 def xpboost_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="5 ᴅᴧʏs — 6💎", callback_data="shop:xp:5")],
-        [InlineKeyboardButton(text="7 ᴅᴧʏs — 8💎", callback_data="shop:xp:7")],
-        [InlineKeyboardButton(text="12 ᴅᴧʏs — 13💎", callback_data="shop:xp:12")],
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="shop:back")],
+        [InlineKeyboardButton(text="5 ᴅᴀʏꜱ — 6💎", callback_data="shop:xp:5")],
+        [InlineKeyboardButton(text="7 ᴅᴀʏꜱ — 8💎", callback_data="shop:xp:7")],
+        [InlineKeyboardButton(text="12 ᴅᴀʏꜱ — 13💎", callback_data="shop:xp:12")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="shop:back")],
     ])
 
 
-# ═══ Premium ═══
 def premium_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="1 ϻσηтн — 90⭐", callback_data="prem:1m")],
-        [InlineKeyboardButton(text="4 ϻσηтнs — 140⭐", callback_data="prem:4m")],
-        [InlineKeyboardButton(text="12 ϻσηтнs — 175⭐", callback_data="prem:12m")],
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:main")],
+        [InlineKeyboardButton(text="1 ᴍᴏɴᴛʜ — 90⭐", callback_data="prem:1m")],
+        [InlineKeyboardButton(text="4 ᴍᴏɴᴛʜꜱ — 140⭐", callback_data="prem:4m")],
+        [InlineKeyboardButton(text="12 ᴍᴏɴᴛʜꜱ — 175⭐", callback_data="prem:12m")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
