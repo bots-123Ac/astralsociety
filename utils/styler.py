@@ -11,5 +11,6 @@ FONT_MAP = {
     'U': 'ᴜ', 'V': 'ᴠ', 'W': 'ᴡ', 'X': 'x', 'Y': 'ʏ', 'Z': 'ᴢ',
 }
 
+
 def fancy(text: str) -> str:
     return "".join(FONT_MAP.get(c, c) for c in text)
