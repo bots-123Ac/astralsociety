@@ -16,7 +16,9 @@ from utils.database import (
 router = Router()
 
 
-# ═══ /give ═══
+# ═══════════════════════════════════════════════
+# /give [amount] — Reply to target
+# ═══════════════════════════════════════════════
 @router.message(Command("give"))
 async def cmd_give(message: Message, bot: Bot):
     if not message.reply_to_message or not message.reply_to_message.from_user:
@@ -66,11 +68,18 @@ async def cmd_give(message: Message, bot: Bot):
     )
 
 
-# ═══ /robs ═══
+# ═══════════════════════════════════════════════
+# 🪙 /robs — Full rob OR /robs <amount>
+# ═══════════════════════════════════════════════
 @router.message(Command("robs"))
 async def cmd_robs(message: Message, bot: Bot):
     if not message.reply_to_message or not message.reply_to_message.from_user:
-        return await message.reply("❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜꜱᴇʀ ᴛᴏ ʀᴏʙ ᴛʜᴇᴍ.")
+        return await message.reply(
+            "❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜꜱᴇʀ ᴛᴏ ʀᴏʙ ᴛʜᴇᴍ.\n\n"
+            "📌 <b>ᴜꜱᴀɢᴇ:</b>\n"
+            "• <code>/robs</code> — ʀᴏʙ ᴀʟʟ ᴄᴏɪɴꜱ\n"
+            "• <code>/robs 5000</code> — ʀᴏʙ ꜱᴘᴇᴄɪꜰɪᴄ ᴀᴍᴏᴜɴᴛ"
+        )
 
     robber = message.from_user
     victim = message.reply_to_message.from_user
@@ -97,44 +106,63 @@ async def cmd_robs(message: Message, bot: Bot):
     victim_coins = row[0] if row else 0
 
     if victim_coins < 10:
-        return await message.reply(f"❌ {victim.mention_html()} ʜᴀꜱ ɴᴏᴛʜɪɴɢ ᴡᴏʀᴛʜ ʀᴏʙʙɪɴɢ.")
+        return await message.reply(
+            f"❌ {victim.mention_html()} ʜᴀꜱ ɴᴏᴛʜɪɴɢ ᴡᴏʀᴛʜ ʀᴏʙʙɪɴɢ."
+        )
 
-    pct = ROB_PREMIUM_PERCENT if await is_premium(robber.id) else ROB_NORMAL_PERCENT
-    stolen_base = int(victim_coins * pct / 100)
+    # Parse amount (optional)
+    parts = message.text.split()
+    if len(parts) >= 2 and parts[1].isdigit():
+        base_amount = int(parts[1])
+        if base_amount < 1:
+            return await message.reply("❌ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ.")
+        if base_amount > victim_coins:
+            base_amount = victim_coins  # cap at victim's balance
+    else:
+        # Full rob
+        base_amount = victim_coins
 
-    if stolen_base < 1:
+    if base_amount < 1:
         return await message.reply("❌ ᴀᴍᴏᴜɴᴛ ᴛᴏᴏ ꜱᴍᴀʟʟ.")
 
-    deduction = (stolen_base * GIVE_DEDUCTION_PERCENT) // 100
-    robber_receives = stolen_base - deduction
+    # Deduction based on robber's premium status
+    deduction_pct = ROB_PREMIUM_PERCENT if await is_premium(robber.id) else ROB_NORMAL_PERCENT
+    deduction = (base_amount * deduction_pct) // 100
+    robber_receives = base_amount - deduction
 
-    await add_coins(victim.id, -stolen_base)
+    await add_coins(victim.id, -base_amount)
     await add_coins(robber.id, robber_receives)
 
     xp_gain = random.randint(0, 10)
     await add_xp(robber.id, xp_gain)
 
+    robbed_type = "ꜰᴜʟʟ ʙᴀʟᴀɴᴄᴇ" if base_amount == victim_coins and len(parts) < 2 else f"ᴛᴀʀɢᴇᴛ: {base_amount:,}"
+
     await message.reply(
         f"🪙 <b>ʀᴏʙ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ!</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🎯 {robbed_type}\n"
         f"👤 {robber.mention_html()} ɢᴀɪɴᴇᴅ <b>{robber_receives:,}</b> 🪙 "
-        f"ᴀꜰᴛᴇʀ 10% ᴏꜰ ᴅᴇᴅᴜᴄᴛɪᴏɴ.\n"
+        f"ᴀꜰᴛᴇʀ {deduction_pct}% ᴏꜰ ᴅᴇᴅᴜᴄᴛɪᴏɴ.\n"
         f"📈 xᴘ ɢᴀɪɴᴇᴅ: <b>+{xp_gain}</b>"
     )
 
+    # DM victim
     try:
         await bot.send_message(
             victim.id,
             f"⚠️ <b>ʏᴏᴜ ᴡᴇʀᴇ ʀᴏʙʙᴇᴅ!</b>\n\n"
             f"👤 ʀᴏʙʙᴇʀ: {robber.mention_html()}\n"
-            f"💸 ꜱᴛᴏʟᴇɴ: <b>{stolen_base:,}</b> 🪙\n"
+            f"💸 ꜱᴛᴏʟᴇɴ: <b>{base_amount:,}</b> 🪙\n"
             f"📍 ɢʀᴏᴜᴘ: <b>{message.chat.title or SUPPORT_GROUP_NAME}</b>"
         )
     except Exception:
         pass
 
 
-# ═══ /shield ═══
+# ═══════════════════════════════════════════════
+# /shield
+# ═══════════════════════════════════════════════
 @router.message(Command("shield"))
 async def cmd_shield(message: Message):
     parts = message.text.split()
@@ -159,7 +187,9 @@ async def cmd_shield(message: Message):
     )
 
 
-# ═══ /premium ═══
+# ═══════════════════════════════════════════════
+# /premium
+# ═══════════════════════════════════════════════
 @router.message(Command("premium"))
 async def cmd_premium(message: Message):
     text = (
