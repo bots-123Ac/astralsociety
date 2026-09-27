@@ -28,6 +28,7 @@ def _parse(s):
 
 async def init_db():
     async with aiosqlite.connect(DB_PATH) as db:
+        # ═══ USERS ═══
         await db.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id INTEGER PRIMARY KEY,
@@ -50,6 +51,8 @@ async def init_db():
                 created_at TEXT
             )
         """)
+
+        # ═══ STUDY ═══
         await db.execute("""
             CREATE TABLE IF NOT EXISTS study_materials (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,12 +61,16 @@ async def init_db():
                 uploaded_by INTEGER, uploaded_at TEXT
             )
         """)
+
+        # ═══ POWERS ═══
         await db.execute("""
             CREATE TABLE IF NOT EXISTS powers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER, power_type TEXT, expires_at TEXT
             )
         """)
+
+        # ═══ MISSION ═══
         await db.execute("""
             CREATE TABLE IF NOT EXISTS mission_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -75,6 +82,8 @@ async def init_db():
                 claimed INTEGER DEFAULT 0
             )
         """)
+
+        # ═══ DAILY WORD ATTEMPTS ═══
         await db.execute("""
             CREATE TABLE IF NOT EXISTS daily_word_attempts (
                 user_id INTEGER, date TEXT,
@@ -82,6 +91,8 @@ async def init_db():
                 PRIMARY KEY (user_id, date)
             )
         """)
+
+        # ═══ ACTIVE GROUPS (for events) ═══
         await db.execute("""
             CREATE TABLE IF NOT EXISTS active_groups (
                 chat_id INTEGER PRIMARY KEY,
@@ -89,10 +100,48 @@ async def init_db():
                 added_at TEXT
             )
         """)
+
+        # ═══ QUIZ QUESTIONS (5000+) ═══
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS quiz_questions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category TEXT,
+                question TEXT UNIQUE,
+                option_a TEXT, option_b TEXT,
+                option_c TEXT, option_d TEXT,
+                correct TEXT,
+                created_at TEXT
+            )
+        """)
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_quiz_cat ON quiz_questions(category)")
+
         await db.commit()
 
+        # ═══ SEED BUNDLED QUESTIONS ON FIRST RUN ═══
+        async with db.execute("SELECT COUNT(*) FROM quiz_questions") as cur:
+            cnt = (await cur.fetchone())[0]
+        if cnt == 0:
+            try:
+                from utils.quiz_seed import QUIZ_SEED
+                for cat, questions in QUIZ_SEED.items():
+                    for q, a, b, c, d, correct in questions:
+                        try:
+                            await db.execute(
+                                """INSERT OR IGNORE INTO quiz_questions
+                                (category, question, option_a, option_b, option_c, option_d, correct, created_at)
+                                VALUES (?,?,?,?,?,?,?,?)""",
+                                (cat, q, a, b, c, d, correct, _to_str(_now()))
+                            )
+                        except Exception:
+                            pass
+                await db.commit()
+            except Exception as e:
+                print(f"⚠️ Seed failed: {e}")
 
-# ═══ USERS ═══
+
+# ═══════════════════════════════════════════════
+# USERS
+# ═══════════════════════════════════════════════
 async def get_or_create_user(user_id, username, first_name):
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT * FROM users WHERE user_id=?", (user_id,)) as cur:
@@ -167,7 +216,9 @@ async def convert_coins_to_gems(user_id, coins_amount):
     return True, gems
 
 
-# ═══ PREMIUM ═══
+# ═══════════════════════════════════════════════
+# PREMIUM
+# ═══════════════════════════════════════════════
 async def is_premium(user_id) -> bool:
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT premium_until FROM users WHERE user_id=?", (user_id,)) as cur:
@@ -185,7 +236,9 @@ async def set_premium(user_id, days):
     return until
 
 
-# ═══ SHIELD ═══
+# ═══════════════════════════════════════════════
+# SHIELD
+# ═══════════════════════════════════════════════
 async def is_shielded(user_id) -> bool:
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT shield_until FROM users WHERE user_id=?", (user_id,)) as cur:
@@ -215,7 +268,9 @@ async def shield_remaining(user_id) -> int:
     return max(0, (dt - _now()).days)
 
 
-# ═══ DAILY ═══
+# ═══════════════════════════════════════════════
+# DAILY
+# ═══════════════════════════════════════════════
 async def can_claim_daily(user_id):
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT last_daily, streak FROM users WHERE user_id=?", (user_id,)) as cur:
@@ -243,7 +298,9 @@ async def mark_daily_claimed(user_id, new_streak):
         await db.commit()
 
 
-# ═══ STATS ═══
+# ═══════════════════════════════════════════════
+# STATS
+# ═══════════════════════════════════════════════
 async def inc_quiz_attempt(user_id):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("UPDATE users SET quiz_attempted = quiz_attempted + 1 WHERE user_id=?", (user_id,))
@@ -283,7 +340,9 @@ async def inc_number_guess(user_id):
         await db.commit()
 
 
-# ═══ LEADERBOARD ═══
+# ═══════════════════════════════════════════════
+# LEADERBOARD
+# ═══════════════════════════════════════════════
 async def get_global_leaderboard(limit=10):
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
@@ -303,7 +362,9 @@ async def get_user_rank(user_id):
     return ahead + 1
 
 
-# ═══ POWERS ═══
+# ═══════════════════════════════════════════════
+# POWERS
+# ═══════════════════════════════════════════════
 async def add_power(user_id, power_type, days):
     until = _now() + timedelta(days=days)
     async with aiosqlite.connect(DB_PATH) as db:
@@ -333,7 +394,9 @@ async def has_xp_boost(user_id) -> bool:
             return (await cur.fetchone()) is not None
 
 
-# ═══ MISSION ═══
+# ═══════════════════════════════════════════════
+# MISSION
+# ═══════════════════════════════════════════════
 async def get_or_create_mission(user_id):
     today = _now().strftime("%Y-%m-%d")
     async with aiosqlite.connect(DB_PATH) as db:
@@ -395,7 +458,9 @@ async def mission_claim(user_id):
         await db.commit()
 
 
-# ═══ STUDY ═══
+# ═══════════════════════════════════════════════
+# STUDY
+# ═══════════════════════════════════════════════
 async def save_study_material(class_name, section, subject, chapter,
                               content_type, content, caption, uploaded_by):
     async with aiosqlite.connect(DB_PATH) as db:
@@ -427,7 +492,9 @@ async def get_study_materials(class_name, section, chapter):
             return await cur.fetchall()
 
 
-# ═══ WORD GAME — GLOBAL DAILY LIMIT (3/day) ═══
+# ═══════════════════════════════════════════════
+# WORD GAME — GLOBAL DAILY LIMIT
+# ═══════════════════════════════════════════════
 async def get_daily_word_attempts(user_id) -> int:
     today = _now().strftime("%Y-%m-%d")
     async with aiosqlite.connect(DB_PATH) as db:
@@ -463,7 +530,9 @@ async def inc_daily_word_attempts(user_id) -> int:
         return new_count
 
 
-# ═══ ACTIVE GROUPS (for events) ═══
+# ═══════════════════════════════════════════════
+# ACTIVE GROUPS
+# ═══════════════════════════════════════════════
 async def register_group(chat_id, title):
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
@@ -478,3 +547,53 @@ async def get_all_active_groups():
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT chat_id FROM active_groups") as cur:
             return [r[0] for r in await cur.fetchall()]
+
+
+# ═══════════════════════════════════════════════
+# QUIZ QUESTIONS (5000+ support)
+# ═══════════════════════════════════════════════
+async def add_quiz_question(category, question, correct, wrongs):
+    """Add a question. Shuffles options, dedupes on question text."""
+    if len(wrongs) < 3:
+        return False
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            "SELECT 1 FROM quiz_questions WHERE question=?", (question,)
+        ) as cur:
+            if await cur.fetchone():
+                return False
+
+        options = list(wrongs[:3]) + [correct]
+        random.shuffle(options)
+        correct_letter = "ABCD"[options.index(correct)]
+
+        try:
+            await db.execute(
+                """INSERT INTO quiz_questions
+                (category, question, option_a, option_b, option_c, option_d, correct, created_at)
+                VALUES (?,?,?,?,?,?,?,?)""",
+                (category, question, options[0], options[1], options[2], options[3],
+                 correct_letter, _to_str(_now()))
+            )
+            await db.commit()
+            return True
+        except Exception:
+            return False
+
+
+async def get_random_quiz_question(category):
+    """Return one random question for the given category."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            """SELECT id, question, option_a, option_b, option_c, option_d, correct
+               FROM quiz_questions WHERE category=?
+               ORDER BY RANDOM() LIMIT 1""",
+            (category,)
+        ) as cur:
+            return await cur.fetchone()
+
+
+async def get_quiz_count():
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT COUNT(*) FROM quiz_questions") as cur:
+            return (await cur.fetchone())[0]
