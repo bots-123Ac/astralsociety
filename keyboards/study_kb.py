@@ -1,87 +1,62 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-RESOURCE_TYPES = [
+MATERIAL_TYPES = [
     ("📖 ησᴛєs", "notes"),
-    ("📝 ᴅᴩᴩ", "dpp"),
-    ("📚 ϻσᴅᴜʟєs", "modules"),
     ("📕 вσσᴋs", "books"),
-    ("❓ ᴩʀᴧᴄᴛiᴄє", "questions"),
-    ("🧠 ǫᴜiᴢᴢєs", "quiz"),
+    ("📝 ᴅᴩᴩ", "dpp"),
+    ("📄 ᴩʏǫ", "pyq"),
+    ("❓ ᴩʀᴧᴄᴛiᴄє", "practice"),
 ]
 
-RESOURCE_TYPE_LABELS = {
-    "notes": "📖 ησᴛєs", "dpp": "📝 ᴅᴩᴩ", "modules": "📚 ϻσᴅᴜʟєs",
-    "books": "📕 вσσᴋs", "questions": "❓ ᴩʀᴧᴄᴛiᴄє", "quiz": "🧠 ǫᴜiᴢᴢєs",
-    "video": "🎥 ᴠiᴅєσs", "pdf": "📁 ᴩᴅғ", "link": "🔗 ʟiηᴋs",
-    "image": "🖼️ iϻᴧɢєs", "other": "➕ σᴛнєʀ",
-}
+MATERIAL_LABELS = {k: v for v, k in MATERIAL_TYPES}
 
-CATEGORIES = [
-    ("🔬 sᴄiєηᴄє", "science"),
-    ("💼 ᴄσϻϻєʀᴄє", "commerce"),
-    ("🎨 ᴧʀᴛs", "arts"),
-    ("📚 ɢєηєʀᴧʟ", "general"),
-]
-
-SUBJECTS_BY_CATEGORY = {
-    "science": ["Physics", "Chemistry", "Biology", "Maths"],
-    "commerce": ["Accountancy", "Business Studies", "Economics"],
-    "arts": ["History", "Geography", "Political Science"],
-    "general": ["Science", "Maths", "English", "Social Science"],
+SUBJECTS_BY_BOARD = {
+    "cbse_9": ["Science", "Maths", "English", "Social Science", "Hindi"],
+    "cbse_10": ["Science", "Maths", "English", "Social Science", "Hindi"],
+    "cbse_11": ["Physics", "Chemistry", "Biology", "Maths", "English"],
+    "cbse_12": ["Physics", "Chemistry", "Biology", "Maths", "English"],
+    "icse_9": ["Physics", "Chemistry", "Biology", "Maths", "English"],
+    "icse_10": ["Physics", "Chemistry", "Biology", "Maths", "English"],
+    "icse_11": ["Physics", "Chemistry", "Biology", "Maths", "English"],
+    "icse_12": ["Physics", "Chemistry", "Biology", "Maths", "English"],
+    "jee": ["Physics", "Chemistry", "Maths"],
+    "neet": ["Physics", "Chemistry", "Biology"],
 }
 
 
-def study_main_kb():
-    rows, row = [], []
-    for label, code in RESOURCE_TYPES:
-        row.append(InlineKeyboardButton(text=label, callback_data=f"study:rt:{code}"))
-        if len(row) == 2:
-            rows.append(row); row = []
-    if row: rows.append(row)
-    rows.append([InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:main")])
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def education_kb():
+def boards_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🏫 ᴄʙsє", callback_data="study:edu:cbse"),
-         InlineKeyboardButton(text="🏫 iᴄsє", callback_data="study:edu:icse")],
-        [InlineKeyboardButton(text="⚡ ᴊєє", callback_data="study:edu:jee"),
-         InlineKeyboardButton(text="🩺 ηєєᴛ", callback_data="study:edu:neet")],
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:study")],
+        [InlineKeyboardButton(text="🏫 ᴄʙsє", callback_data="study:board:cbse"),
+         InlineKeyboardButton(text="🏫 iᴄsє", callback_data="study:board:icse")],
+        [InlineKeyboardButton(text="⚡ ᴊєє", callback_data="study:board:jee"),
+         InlineKeyboardButton(text="🩺 ηєєᴛ", callback_data="study:board:neet")],
+        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:main")],
     ])
 
 
-def class_kb():
+def classes_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="9️⃣ ᴄʟᴧss 9", callback_data="study:cls:9"),
          InlineKeyboardButton(text="🔟 ᴄʟᴧss 10", callback_data="study:cls:10")],
         [InlineKeyboardButton(text="1️⃣1️⃣ ᴄʟᴧss 11", callback_data="study:cls:11"),
          InlineKeyboardButton(text="1️⃣2️⃣ ᴄʟᴧss 12", callback_data="study:cls:12")],
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="study:back:edu")],
+        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:study")],
     ])
 
 
-def category_kb():
-    rows = [[InlineKeyboardButton(text=l, callback_data=f"study:cat:{c}")] for l, c in CATEGORIES]
-    rows.append([InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="study:back:cls")])
-    return InlineKeyboardMarkup(inline_keyboard=rows)
-
-
-def subject_kb(category):
-    subjects = SUBJECTS_BY_CATEGORY.get(category, [])
+def subjects_kb(board, cls, subjects):
     rows, row = [], []
     for s in subjects:
         row.append(InlineKeyboardButton(text=s, callback_data=f"study:sub:{s}"))
         if len(row) == 2:
             rows.append(row); row = []
     if row: rows.append(row)
-    rows.append([InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="study:back:cat")])
+    back = "menu:study" if board in ("jee", "neet") else "study:back:cls"
+    rows.append([InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data=back)])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def chapters_kb(chapters):
-    """chapters = [(chapter_name, count), ...]. Uses index in callback to avoid long data."""
     rows = []
     for i, (ch, count) in enumerate(chapters):
         rows.append([InlineKeyboardButton(
@@ -89,4 +64,16 @@ def chapters_kb(chapters):
             callback_data=f"study:chp:{i}"
         )])
     rows.append([InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="study:back:sub")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def materials_kb(materials):
+    rows = []
+    for mtype, count in materials:
+        label = MATERIAL_LABELS.get(mtype, mtype)
+        rows.append([InlineKeyboardButton(
+            text=f"{label} ({count})",
+            callback_data=f"study:mat:{mtype}"
+        )])
+    rows.append([InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="study:back:chp")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
