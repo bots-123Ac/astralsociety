@@ -5,7 +5,7 @@ from aiogram.types import Message
 
 from config import BOT_NAME, CREDIT_HTML
 from keyboards.main_menu import main_menu_kb
-from utils.database import get_or_create_user
+from utils.database import get_or_create_user, register_group
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -23,35 +23,33 @@ def welcome_text(first_name: str) -> str:
     )
 
 
-async def send_welcome(message: Message):
-    user = message.from_user
-    try:
-        await get_or_create_user(user.id, user.username, user.first_name)
-    except Exception as e:
-        logger.warning(f"register failed: {e}")
-
-    text = welcome_text(user.first_name)
-    kb = main_menu_kb()
-
-    try:
-        photos = await message.bot.get_user_profile_photos(user.id, limit=1)
-        if photos.total_count > 0:
-            file_id = photos.photos[0][-1].file_id
-            await message.answer_photo(photo=file_id, caption=text, reply_markup=kb)
-            return
-    except Exception as e:
-        logger.warning(f"pfp failed: {e}")
-
-    await message.answer(text, reply_markup=kb)
-
-
 @router.message(CommandStart())
 async def cmd_start(message: Message):
     try:
-        await send_welcome(message)
+        user = message.from_user
+        await get_or_create_user(user.id, user.username, user.first_name)
+        if message.chat.type in ("group", "supergroup"):
+            try:
+                await register_group(message.chat.id, message.chat.title or "")
+            except Exception:
+                pass
+
+        text = welcome_text(user.first_name)
+        kb = main_menu_kb()
+
+        try:
+            photos = await message.bot.get_user_profile_photos(user.id, limit=1)
+            if photos.total_count > 0:
+                file_id = photos.photos[0][-1].file_id
+                await message.answer_photo(photo=file_id, caption=text, reply_markup=kb)
+                return
+        except Exception:
+            pass
+
+        await message.answer(text, reply_markup=kb)
     except Exception as e:
         logger.error(f"/start err: {e}")
         try:
-            await message.answer("👋 нi! ᴩʟєᴧsє тʀʏ /start ᴧɢᴧiη.")
+            await message.answer("👋 ʜɪ! ᴘʟᴇᴀꜱᴇ ᴛʀʏ /start ᴀɢᴀɪɴ.")
         except Exception:
             pass
