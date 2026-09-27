@@ -14,8 +14,10 @@ SUPPORT_CHANNEL_LINK = "https://t.me/Astral_study_chest"
 
 BOT_ADD_LINK = f"https://t.me/{BOT_USERNAME.lstrip('@')}?startgroup=true"
 
-# ═══ OWNER & ADMINS ═══
-OWNER_ID = -1004398879964  # GC ID (Owner as group)
+# ═══════════════════════════════════════════════
+# 👑 OWNER & ADMINS
+# ═══════════════════════════════════════════════
+OWNER_ID = -1004398879964
 
 BOT_ADMIN_IDS = [
     7748285403,
@@ -24,6 +26,19 @@ BOT_ADMIN_IDS = [
     7790607144,
     8987845745,
 ]
+
+# ═══════════════════════════════════════════════
+# 👨‍💻 CREATOR CREDITS
+# ═══════════════════════════════════════════════
+CREATOR_1_NAME = "⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐"
+CREATOR_1_USERNAME = "@OfficialCrazyBoy07"
+CREATOR_1_ID = 7790607144
+
+CREATOR_2_NAME = "𝓚𝓪𝓷𝓱𝓪࿐✨🤟"
+CREATOR_2_USERNAME = "@Lunar_kanha_4572"
+CREATOR_2_ID = 8165863254
+
+CREDIT_LINE = f"ᴩσωєʀєᴅ вʏ {CREATOR_1_NAME} & {CREATOR_2_NAME}"
 
 DB_PATH = os.getenv("DB_PATH", "astral.db")
 
