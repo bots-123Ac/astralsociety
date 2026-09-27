@@ -8,7 +8,8 @@ from aiogram.types import ErrorEvent
 
 from config import BOT_TOKEN, BOT_NAME
 from handlers import (
-    start, menu, study, admin, quiz, games, group_mgmt,
+    start, menu, profile, robs, tgames, leaderboard, daily, study, mission,
+    shop, powers,
 )
 from utils.logger import setup_logger
 from utils.database import init_db
@@ -34,14 +35,18 @@ async def main():
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    # Order matters — group_mgmt LAST so its catch-all doesn't block games
+    # Order matters — wildcard handlers last
     dp.include_router(start.router)
     dp.include_router(menu.router)
+    dp.include_router(profile.router)
+    dp.include_router(robs.router)
+    dp.include_router(tgames.router)
+    dp.include_router(leaderboard.router)
+    dp.include_router(daily.router)
     dp.include_router(study.router)
-    dp.include_router(admin.router)
-    dp.include_router(quiz.router)
-    dp.include_router(games.router)
-    dp.include_router(group_mgmt.router)
+    dp.include_router(mission.router)
+    dp.include_router(shop.router)
+    dp.include_router(powers.router)
 
     logging.info("✅ Bot is running.")
     await bot.delete_webhook(drop_pending_updates=True)
