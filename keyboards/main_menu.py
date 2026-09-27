@@ -25,7 +25,6 @@ def back_main_kb():
 def tgames_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🧠 ǫᴜɪᴢ", callback_data="tg:quiz")],
-        [InlineKeyboardButton(text="🔤 ᴡᴏʀᴅ ɢᴜᴇꜱꜱɪɴɢ", callback_data="tg:word")],
         [InlineKeyboardButton(text="🔢 ɢᴜᴇꜱꜱ ᴛʜᴇ ɴᴜᴍʙᴇʀ", callback_data="tg:number")],
     ])
 
@@ -41,11 +40,34 @@ def quiz_count_kb():
 
 
 def quiz_menu_kb():
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🚀 ꜱᴘᴀᴄᴇ ǫᴜɪᴢ", callback_data="quiz:space")],
-        [InlineKeyboardButton(text="🌍 ɢᴇɴᴇʀᴀʟ ǫᴜɪᴢ", callback_data="quiz:general")],
-        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
-    ])
+    """15 categories in 2-column layout."""
+    categories = [
+        ("🚀 ꜱᴘᴀᴄᴇ", "quiz:space"),
+        ("🌍 ɢᴇɴᴇʀᴀʟ", "quiz:general"),
+        ("🔬 ꜱᴄɪᴇɴᴄᴇ", "quiz:science"),
+        ("📜 ʜɪꜱᴛᴏʀʏ", "quiz:history"),
+        ("🗺️ ɢᴇᴏɢʀᴀᴘʜʏ", "quiz:geography"),
+        ("🔢 ᴍᴀᴛʜꜱ", "quiz:maths"),
+        ("💻 ᴛᴇᴄʜ", "quiz:tech"),
+        ("⚽ ꜱᴘᴏʀᴛꜱ", "quiz:sports"),
+        ("🎬 ᴍᴏᴠɪᴇꜱ", "quiz:movies"),
+        ("🎵 ᴍᴜꜱɪᴄ", "quiz:music"),
+        ("🐾 ᴀɴɪᴍᴀʟꜱ", "quiz:animals"),
+        ("🍔 ꜰᴏᴏᴅ", "quiz:food"),
+        ("📖 ʟɪᴛᴇʀᴀᴛᴜʀᴇ", "quiz:literature"),
+        ("🏛️ ᴘᴏʟɪᴛɪᴄꜱ", "quiz:politics"),
+        ("💰 ʙᴜꜱɪɴᴇꜱꜱ", "quiz:business"),
+    ]
+    rows = []
+    for i in range(0, len(categories), 2):
+        row = [
+            InlineKeyboardButton(text=categories[i][0], callback_data=categories[i][1]),
+        ]
+        if i + 1 < len(categories):
+            row.append(InlineKeyboardButton(text=categories[i + 1][0], callback_data=categories[i + 1][1]))
+        rows.append(row)
+    rows.append([InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
 def quiz_options_kb(qid, a, b, c, d):
