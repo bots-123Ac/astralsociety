@@ -2,9 +2,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message
 
 from config import (
-    BOT_NAME, BOT_USERNAME,
-    CREATOR_1_NAME, CREATOR_1_USERNAME,
-    CREATOR_2_NAME, CREATOR_2_USERNAME,
+    BOT_NAME, BOT_USERNAME, CREDIT_HTML,
 )
 from keyboards.main_menu import main_menu_kb, back_main_kb
 from utils.ui import smart_edit
@@ -12,82 +10,71 @@ from utils.ui import smart_edit
 router = Router()
 
 
-# ═══════════════════════════════════════════════
-# HELP TEXT
-# ═══════════════════════════════════════════════
 def help_text() -> str:
     return (
         f"🆘 <b>{BOT_NAME} — нєʟᴩ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"<b>📚 sᴛᴜᴅʏ</b>\n"
-        f"/study — ʙʀᴏᴡsᴇ sᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ (ᴅᴍ)\n\n"
-        f"<b>🎮 ɢᴀᴍᴇs</b>\n"
+        f"<b>📚 ꜱᴛᴜᴅʏ</b>\n"
+        f"/study — ʙʀᴏᴡꜱᴇ ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ (ᴅᴍ)\n\n"
+        f"<b>🎮 ɢᴀᴍᴇꜱ</b>\n"
         f"/tgames — ǫᴜɪᴢ, ᴡᴏʀᴅ, ɴᴜᴍʙᴇʀ\n"
-        f"/quiz — sᴛᴀʀᴛ ᴀ ǫᴜɪᴢ\n"
-        f"/new 5 — sᴛᴀʀᴛ ᴡᴏʀᴅ ɢᴀᴍᴇ\n"
-        f"/h 250 — ɢᴜᴇss ɪɴ ɴᴜᴍʙᴇʀ ɢᴀᴍᴇ\n\n"
+        f"/quiz — ꜱᴛᴀʀᴛ ᴀ ǫᴜɪᴢ\n"
+        f"/new 5 — ꜱᴛᴀʀᴛ ᴡᴏʀᴅ ɢᴀᴍᴇ\n"
+        f"/h 250 — ɢᴜᴇꜱꜱ ɪɴ ɴᴜᴍʙᴇʀ ɢᴀᴍᴇ\n\n"
         f"<b>🚀 ᴅᴀɪʟʏ</b>\n"
         f"/daily — ᴄʟᴀɪᴍ ᴅᴀɪʟʏ ʀᴇᴡᴀʀᴅ (ᴅᴍ)\n"
-        f"/mission — ᴅᴀɪʟʏ ᴍɪssɪᴏɴ\n\n"
+        f"/mission — ᴅᴀɪʟʏ ᴍɪꜱꜱɪᴏɴ\n\n"
         f"<b>🪙 ᴇᴄᴏɴᴏᴍʏ</b>\n"
-        f"/profile — ᴠɪᴇᴡ ᴘʀᴏғɪʟᴇ\n"
-        f"/convert 100c — ᴄᴏɪɴs → ɢᴇᴍs\n"
-        f"/robs — ʀᴏʙ ᴜsᴇʀ (ʀᴇᴘʟʏ)\n"
+        f"/profile — ᴠɪᴇᴡ ᴘʀᴏꜰɪʟᴇ\n"
+        f"/convert 100c — ᴄᴏɪɴꜱ → ɢᴇᴍꜱ\n"
+        f"/give — ꜱᴇɴᴅ ᴄᴏɪɴꜱ (ʀᴇᴘʟʏ)\n"
+        f"/robs — ʀᴏʙ ᴜꜱᴇʀ (ʀᴇᴘʟʏ)\n"
         f"/shield 2 — ᴀᴄᴛɪᴠᴀᴛᴇ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ\n"
         f"/premium — ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ\n"
-        f"/shop — ᴏᴘᴇɴ sʜᴏᴘ (ᴅᴍ)\n"
-        f"/powers — ᴀᴄᴛɪᴠᴇ ᴘᴏᴡᴇʀs\n\n"
+        f"/shop — ᴏᴘᴇɴ ꜱʜᴏᴘ (ᴅᴍ)\n"
+        f"/powers — ᴀᴄᴛɪᴠᴇ ᴘᴏᴡᴇʀꜱ\n\n"
         f"<b>🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n"
         f"/aleaderboard — ɢʟᴏʙᴀʟ ʀᴀɴᴋɪɴɢ\n"
-        f"/performance — ʏᴏᴜʀ sᴛᴀᴛs (ᴅᴍ)\n\n"
+        f"/performance — ʏᴏᴜʀ ꜱᴛᴀᴛꜱ (ᴅᴍ)\n\n"
         f"<b>🛡️ ɢʀᴏᴜᴘ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ</b> <i>(ᴀᴅᴍɪɴ ᴏɴʟʏ)</i>\n"
-        f"/mute /unmute — ᴍᴜᴛᴇ ᴜsᴇʀ\n"
-        f"/ban /unban — ʙᴀɴ ᴜsᴇʀ\n"
-        f"/kick — ᴋɪᴄᴋ ᴜsᴇʀ\n"
-        f"/warn /unwarn — ᴡᴀʀɴ ᴜsᴇʀ\n"
+        f"/mute /unmute — ᴍᴜᴛᴇ ᴜꜱᴇʀ\n"
+        f"/ban /unban — ʙᴀɴ ᴜꜱᴇʀ\n"
+        f"/kick — ᴋɪᴄᴋ ᴜꜱᴇʀ\n"
+        f"/warn /unwarn — ᴡᴀʀɴ ᴜꜱᴇʀ\n"
         f"/lock /unlock — ʟᴏᴄᴋ ᴄᴏɴᴛᴇɴᴛ\n"
-        f"/settings — ɢʀᴏᴜᴘ sᴇᴛᴛɪɴɢs\n"
-        f"/purge — ᴅᴇʟᴇᴛᴇ ᴍᴇssᴀɢᴇs\n\n"
+        f"/settings — ɢʀᴏᴜᴘ ꜱᴇᴛᴛɪɴɢꜱ\n"
+        f"/purge — ᴅᴇʟᴇᴛᴇ ᴍᴇꜱꜱᴀɢᴇꜱ\n\n"
         f"<b>👑 ᴀᴅᴍɪɴ</b>\n"
         f"/admin — ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ\n\n"
-        f"🌠 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ʀɪsᴇ"
+        f"🌠 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ʀɪꜱᴇ"
     )
 
 
-# ═══════════════════════════════════════════════
-# ABOUT TEXT — with credits
-# ═══════════════════════════════════════════════
 def about_text() -> str:
     return (
         f"ℹ️ <b>ᴀʙᴏᴜᴛ {BOT_NAME}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"🤖 <b>ʙᴏᴛ ɴᴀᴍᴇ:</b> {BOT_NAME}\n"
-        f"🔗 <b>ᴜsᴇʀɴᴀᴍᴇ:</b> {BOT_USERNAME}\n\n"
-        f"<b>✨ ᴛʜɪs ʙᴏᴛ ɪɴᴄʟᴜᴅᴇs:</b>\n"
-        f"📚 sᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ sʏsᴛᴇᴍ\n"
-        f"📝 ǫᴜɪᴢ sʏsᴛᴇᴍ\n"
-        f"🎮 ᴛ-ɢᴀᴍᴇs (ǫᴜɪᴢ, ᴡᴏʀᴅ, ɴᴜᴍʙᴇʀ)\n"
-        f"🪙 ᴄᴏɪɴs & ɢᴇᴍs ᴇᴄᴏɴᴏᴍʏ\n"
-        f"🏆 ɢʟᴏʙᴀʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅs\n"
-        f"⭐ ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀsʜɪᴘ\n"
-        f"🛡️ sʜɪᴇʟᴅ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ\n\n"
-        f"⚠️ <b>ᴅɪsᴄʟᴀɪᴍᴇʀ:</b>\n"
-        f"ᴀʟʟ ʀᴇᴡᴀʀᴅs ᴀʀᴇ ᴠɪʀᴛᴜᴀʟ. ɴᴏ ʀᴇᴀʟ-ᴡᴏʀʟᴅ ᴠᴀʟᴜᴇ.\n"
+        f"🔗 <b>ᴜꜱᴇʀɴᴀᴍᴇ:</b> {BOT_USERNAME}\n\n"
+        f"<b>✨ ᴛʜɪꜱ ʙᴏᴛ ɪɴᴄʟᴜᴅᴇꜱ:</b>\n"
+        f"📚 ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ ꜱʏꜱᴛᴇᴍ\n"
+        f"📝 ǫᴜɪᴢ ꜱʏꜱᴛᴇᴍ\n"
+        f"🎮 ᴛ-ɢᴀᴍᴇꜱ (ǫᴜɪᴢ, ᴡᴏʀᴅ, ɴᴜᴍʙᴇʀ)\n"
+        f"🪙 ᴄᴏɪɴꜱ & ɢᴇᴍꜱ ᴇᴄᴏɴᴏᴍʏ\n"
+        f"🏆 ɢʟᴏʙᴀʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅꜱ\n"
+        f"⭐ ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀꜱʜɪᴘ\n"
+        f"🛡️ ꜱʜɪᴇʟᴅ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ\n\n"
+        f"⚠️ <b>ᴅɪꜱᴄʟᴀɪᴍᴇʀ:</b>\n"
+        f"ᴀʟʟ ʀᴇᴡᴀʀᴅꜱ ᴀʀᴇ ᴠɪʀᴛᴜᴀʟ. ɴᴏ ʀᴇᴀʟ-ᴡᴏʀʟᴅ ᴠᴀʟᴜᴇ.\n"
         f"ᴏɴʟʏ ᴍᴇᴀɴᴛ ғᴏʀ ɢᴀᴍᴇᴘʟᴀʏ ᴀɴᴅ ᴇɴᴛᴇʀᴛᴀɪɴᴍᴇɴᴛ.\n\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n"
         f"👨‍💻 <b>ᴘᴏᴡᴇʀᴇᴅ ʙʏ:</b>\n"
-        f"• <b>{CREATOR_1_NAME}</b>\n"
-        f"  {CREATOR_1_USERNAME}\n"
-        f"• <b>{CREATOR_2_NAME}</b>\n"
-        f"  {CREATOR_2_USERNAME}\n"
+        f"{CREDIT_HTML}\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🌠 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ʀɪsᴇ"
+        f"🌠 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ʀɪꜱᴇ"
     )
 
 
-# ═══════════════════════════════════════════════
-# CALLBACK HANDLERS
-# ═══════════════════════════════════════════════
 @router.callback_query(F.data == "menu:main")
 async def back_main(cb: CallbackQuery):
     text = (
@@ -95,7 +82,9 @@ async def back_main(cb: CallbackQuery):
         f"ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ <b>{BOT_NAME}</b> 🌌\n\n"
         f"ʏᴏᴜʀ ᴀʟʟ-ɪɴ-ᴏɴᴇ ᴛᴇʟᴇɢʀᴀᴍ ᴄᴏᴍᴘᴀɴɪᴏɴ ғᴏʀ\n"
         f"ꜱᴛᴜᴅʏ, ɢᴀᴍᴇꜱ ᴀɴᴅ ᴍᴏʀᴇ.\n\n"
-        f"ᴄʜᴏᴏꜱᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ 👇"
+        f"ᴄʜᴏᴏꜱᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ 👇\n\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n"
+        f"👨‍💻 {CREDIT_HTML}"
     )
     await smart_edit(cb, text, main_menu_kb())
     await cb.answer()
@@ -113,9 +102,6 @@ async def cb_about(cb: CallbackQuery):
     await cb.answer()
 
 
-# ═══════════════════════════════════════════════
-# STANDALONE COMMANDS
-# ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/help(\s|$)"))
 async def cmd_help(message: Message):
     await message.answer(help_text(), reply_markup=back_main_kb())
