@@ -1,67 +1,41 @@
 import random
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
-from aiogram.dispatcher.event.bases import SkipHandler
 
-from config import QUIZ_REWARD_COINS, NUMBER_REWARD_COINS, WORD_MAX_REWARD
+from config import QUIZ_REWARD_COINS, NUMBER_REWARD_COINS
 from keyboards.main_menu import (
     tgames_menu_kb, quiz_menu_kb, quiz_options_kb, quiz_count_kb, back_main_kb,
 )
-from utils.words import get_random_5letter_word, is_valid_word
 from utils.database import (
     add_coins, add_xp, inc_quiz_attempt, inc_quiz_solved,
-    inc_word_attempt, inc_word_solved, inc_number_attempt, inc_number_guess,
-    has_xp_boost, mission_word_played, get_daily_word_attempts,
-    inc_daily_word_attempts,
+    inc_number_attempt, inc_number_guess, has_xp_boost, mission_quiz_done,
+    get_random_quiz_question, get_quiz_count,
 )
 
 router = Router()
 
-# ═══ SESSION CACHES — keyed by (chat_id, user_id) ═══
 QUIZ_CACHE = {}
-WORD_CACHE = {}
 NUMBER_CACHE = {}
 
-DAILY_WORD_LIMIT = 3
-
-QUIZ_SPACE = [
-    ("Which planet is known as the Red Planet?", "Venus", "Mars", "Jupiter", "Saturn", "B"),
-    ("Largest planet in our solar system?", "Earth", "Saturn", "Jupiter", "Neptune", "C"),
-    ("How many moons does Earth have?", "1", "2", "3", "0", "A"),
-    ("Which planet has the most moons?", "Jupiter", "Saturn", "Uranus", "Neptune", "B"),
-    ("Closest planet to the Sun?", "Venus", "Earth", "Mercury", "Mars", "C"),
-    ("Which planet has prominent rings?", "Mars", "Saturn", "Venus", "Mercury", "B"),
-    ("What galaxy is Earth in?", "Andromeda", "Milky Way", "Sombrero", "Whirlpool", "B"),
-    ("Hottest planet?", "Mercury", "Venus", "Mars", "Jupiter", "B"),
-    ("How many planets in solar system?", "7", "8", "9", "10", "B"),
-    ("Which planet spins fastest?", "Earth", "Jupiter", "Saturn", "Mars", "B"),
-    ("What is the Sun mainly made of?", "Oxygen", "Hydrogen", "Helium", "Carbon", "B"),
-    ("Which moon is largest?", "Titan", "Ganymede", "Europa", "Io", "B"),
-    ("How far is Sun from Earth (AU)?", "0.5", "1", "2", "5", "B"),
-    ("Which planet is coldest?", "Mars", "Jupiter", "Neptune", "Uranus", "C"),
-    ("What is a shooting star?", "Star", "Meteor", "Planet", "Comet", "B"),
-]
-
-QUIZ_GENERAL = [
-    ("Capital of France?", "London", "Paris", "Rome", "Berlin", "B"),
-    ("Who wrote Romeo and Juliet?", "Dickens", "Shakespeare", "Tolstoy", "Twain", "B"),
-    ("Largest ocean?", "Atlantic", "Indian", "Pacific", "Arctic", "C"),
-    ("Which gas do plants absorb?", "Oxygen", "Nitrogen", "CO2", "Helium", "C"),
-    ("How many continents?", "5", "6", "7", "8", "C"),
-    ("Largest mammal?", "Elephant", "Blue Whale", "Giraffe", "Rhino", "B"),
-    ("Currency of Japan?", "Yuan", "Won", "Yen", "Dollar", "C"),
-    ("Fastest land animal?", "Lion", "Tiger", "Cheetah", "Leopard", "C"),
-    ("Smallest prime number?", "0", "1", "2", "3", "C"),
-    ("Chemical symbol for gold?", "Gd", "Au", "Ag", "Go", "B"),
-    ("Which country invented pizza?", "France", "Italy", "Greece", "Spain", "B"),
-    ("How many days in a leap year?", "364", "365", "366", "367", "C"),
-    ("Which is the largest desert?", "Sahara", "Gobi", "Antarctic", "Kalahari", "C"),
-    ("What does CPU stand for?", "Central Unit", "Computer Unit", "Central Processing Unit", "Core Unit", "C"),
-    ("First man on moon?", "Aldrin", "Armstrong", "Gagarin", "Glenn", "B"),
-]
+CATEGORY_NAMES = {
+    "space": "🚀 ꜱᴘᴀᴄᴇ",
+    "general": "🌍 ɢᴇɴᴇʀᴀʟ",
+    "science": "🔬 ꜱᴄɪᴇɴᴄᴇ",
+    "history": "📜 ʜɪꜱᴛᴏʀʏ",
+    "geography": "🗺️ ɢᴇᴏɢʀᴀᴘʜʏ",
+    "maths": "🔢 ᴍᴀᴛʜꜱ",
+    "tech": "💻 ᴛᴇᴄʜ",
+    "sports": "⚽ ꜱᴘᴏʀᴛꜱ",
+    "movies": "🎬 ᴍᴏᴠɪᴇꜱ",
+    "music": "🎵 ᴍᴜꜱɪᴄ",
+    "animals": "🐾 ᴀɴɪᴍᴀʟꜱ",
+    "food": "🍔 ꜰᴏᴏᴅ",
+    "literature": "📖 ʟɪᴛᴇʀᴀᴛᴜʀᴇ",
+    "politics": "🏛️ ᴘᴏʟɪᴛɪᴄꜱ",
+    "business": "💰 ʙᴜꜱɪɴᴇꜱꜱ",
+}
 
 
-# ═══ ENTRY ═══
 @router.message(F.text.regexp(r"^/tgames(\s|$)"))
 async def cmd_tgames(message: Message):
     await message.answer(
@@ -71,11 +45,14 @@ async def cmd_tgames(message: Message):
     )
 
 
-# ═══ QUIZ — Flow: menu → count → category → questions → result ═══
+# ═══ QUIZ ═══
 @router.callback_query(F.data == "tg:quiz")
 async def quiz_select(cb: CallbackQuery):
+    total = await get_quiz_count()
     await cb.message.edit_text(
-        "🧠 <b>ǫᴜɪᴢ</b>\n\nʜᴏᴡ ᴍᴀɴʏ ǫᴜᴇꜱᴛɪᴏɴꜱ?",
+        f"🧠 <b>ǫᴜɪᴢ</b>\n"
+        f"<i>ᴛᴏᴛᴀʟ: {total:,} ǫᴜᴇꜱᴛɪᴏɴꜱ</i>\n\n"
+        f"ʜᴏᴡ ᴍᴀɴʏ ǫᴜᴇꜱᴛɪᴏɴꜱ?",
         reply_markup=quiz_count_kb()
     )
     await cb.answer()
@@ -86,6 +63,7 @@ async def quiz_count_selected(cb: CallbackQuery):
     count = int(cb.data.split(":")[1])
     QUIZ_CACHE[(cb.message.chat.id, cb.from_user.id)] = {
         "total": count, "done": 0, "score": 0, "correct": 0, "wrong": 0,
+        "used_ids": set(),
     }
     await cb.message.edit_text(
         f"🧠 <b>ǫᴜɪᴢ — {count} ǫᴜᴇꜱᴛɪᴏɴꜱ</b>\n\nᴄʜᴏᴏꜱᴇ ᴄᴀᴛᴇɢᴏʀʏ:",
@@ -97,13 +75,14 @@ async def quiz_count_selected(cb: CallbackQuery):
 @router.callback_query(F.data.startswith("quiz:"))
 async def quiz_start(cb: CallbackQuery):
     cat = cb.data.split(":")[1]
+    if cat not in CATEGORY_NAMES:
+        return await cb.answer()
     key = (cb.message.chat.id, cb.from_user.id)
     sess = QUIZ_CACHE.get(key)
     if not sess:
-        # Fallback: default to 5 questions
-        sess = {"total": 5, "done": 0, "score": 0, "correct": 0, "wrong": 0}
+        sess = {"total": 5, "done": 0, "score": 0, "correct": 0, "wrong": 0, "used_ids": set()}
         QUIZ_CACHE[key] = sess
-
+    sess["category"] = cat
     await _send_quiz_question(cb, cat, key)
 
 
@@ -115,14 +94,29 @@ async def _send_quiz_question(cb: CallbackQuery, cat: str, key: tuple):
     if sess["done"] >= sess["total"]:
         return await _finish_quiz(cb, key)
 
-    pool = QUIZ_SPACE if cat == "space" else QUIZ_GENERAL
-    question, a, b, c, d, correct = random.choice(pool)
-    qid = random.randint(100000, 999999)
-    sess["current"] = (qid, correct, cat, question, a, b, c, d)
+    # Try up to 10 times to get an unused question
+    q = None
+    for _ in range(10):
+        row = await get_random_quiz_question(cat)
+        if not row:
+            break
+        if row[0] not in sess["used_ids"]:
+            q = row
+            break
+    if not q:
+        row = await get_random_quiz_question(cat)
+        if not row:
+            return await cb.answer("ɴᴏ ǫᴜᴇꜱᴛɪᴏɴꜱ ɪɴ ᴛʜɪꜱ ᴄᴀᴛᴇɢᴏʀʏ.", show_alert=True)
+        q = row
 
+    qid, question, a, b, c, d, correct = q
+    sess["used_ids"].add(qid)
+    sess["current"] = (qid, correct, question, a, b, c, d)
+
+    cat_label = CATEGORY_NAMES.get(cat, cat.upper())
     await cb.message.edit_text(
-        f"🧠 <b>{'ꜱᴘᴀᴄᴇ' if cat == 'space' else 'ɢᴇɴᴇʀᴀʟ'} ǫᴜɪᴢ</b>\n"
-        f"ᴏ̨: <b>{sess['done'] + 1}/{sess['total']}</b>  |  ꜱᴄᴏʀᴇ: <b>{sess['score']}</b>\n"
+        f"🧠 <b>{cat_label}</b>\n"
+        f"ǫ: <b>{sess['done'] + 1}/{sess['total']}</b>  |  ꜱᴄᴏʀᴇ: <b>{sess['score']}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"<b>{question}</b>\n\nᴄʜᴏᴏꜱᴇ:",
         reply_markup=quiz_options_kb(qid, a, b, c, d)
@@ -139,7 +133,7 @@ async def quiz_answer(cb: CallbackQuery):
     if not sess or "current" not in sess or sess["current"][0] != qid:
         return await cb.answer("ꜱᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ.", show_alert=True)
 
-    _, correct, cat, *_ = sess["current"]
+    _, correct, *_ = sess["current"]
     is_correct = (selected == correct)
 
     await inc_quiz_attempt(cb.from_user.id)
@@ -153,7 +147,6 @@ async def quiz_answer(cb: CallbackQuery):
             pass
     else:
         sess["wrong"] += 1
-        # -1 mark per 2 wrong
         if sess["wrong"] % 2 == 0:
             sess["score"] -= 1
 
@@ -162,8 +155,7 @@ async def quiz_answer(cb: CallbackQuery):
     if sess["done"] >= sess["total"]:
         return await _finish_quiz(cb, key)
 
-    # Continue with next question
-    await _send_quiz_question(cb, cat, key)
+    await _send_quiz_question(cb, sess.get("category"), key)
 
 
 async def _finish_quiz(cb: CallbackQuery, key: tuple):
@@ -175,7 +167,6 @@ async def _finish_quiz(cb: CallbackQuery, key: tuple):
     correct = sess["correct"]
     wrong = sess["wrong"]
 
-    # Reward: correct answers * 40 coins minimum
     coins = max(0, correct * QUIZ_REWARD_COINS)
     xp = random.randint(0, 5) * correct
     if await has_xp_boost(cb.from_user.id):
@@ -200,174 +191,7 @@ async def _finish_quiz(cb: CallbackQuery, key: tuple):
     await cb.answer("🏁")
 
 
-# ═══ WORD GAME ═══
-@router.callback_query(F.data == "tg:word")
-async def word_start_via_menu(cb: CallbackQuery):
-    user_id = cb.from_user.id
-    attempts_used = await get_daily_word_attempts(user_id)
-    if attempts_used >= DAILY_WORD_LIMIT:
-        return await cb.answer(
-            f"⏳ ᴅᴀɪʟʏ ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ ({attempts_used}/{DAILY_WORD_LIMIT})\n"
-            f"ʀᴇꜱᴇᴛ ᴀᴛ ᴍɪᴅɴɪɢʜᴛ ᴜᴛᴄ", show_alert=True
-        )
-
-    word = get_random_5letter_word()
-    key = (cb.message.chat.id, user_id)
-    WORD_CACHE[key] = {"word": word, "attempts": 0, "history": [], "guessed": set()}
-    await inc_word_attempt(user_id)
-    new_count = await inc_daily_word_attempts(user_id)
-    try:
-        await mission_word_played(user_id)
-    except Exception:
-        pass
-
-    remaining = DAILY_WORD_LIMIT - new_count
-
-    await cb.message.edit_text(
-        f"🔤 <b>ᴡᴏʀᴅ ɢᴜᴇꜱꜱɪɴɢ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"📏 ʟᴇɴɢᴛʜ: <b>5 ʟᴇᴛᴛᴇʀꜱ</b>\n"
-        f"🎯 ᴍᴀx ɢᴜᴇꜱꜱᴇꜱ: <b>30</b>\n"
-        f"🎫 ᴛᴏᴅᴀʏ ᴀᴛᴛᴇᴍᴘᴛꜱ ʟᴇꜰᴛ: <b>{remaining}/{DAILY_WORD_LIMIT}</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴛʏᴘᴇ ʏᴏᴜʀ 5-ʟᴇᴛᴛᴇʀ ᴡᴏʀᴅ ɪɴ ᴄʜᴀᴛ:"
-    )
-    await cb.answer()
-
-
-@router.message(F.text.regexp(r"^/new(\s|$)"))
-async def cmd_new(message: Message):
-    args = message.text.split(maxsplit=1)
-    user_id = message.from_user.id
-
-    if len(args) > 1 and args[1].strip().lower() == "end":
-        if message.chat.type == "private":
-            return await message.reply("📩 ᴜꜱᴇ 🛑 ɢɪᴠᴇ ᴜᴘ ʙᴜᴛᴛᴏɴ ɪɴ ᴅᴍ.")
-        # Group admin check via Telegram
-        try:
-            member = await message.bot.get_chat_member(message.chat.id, user_id)
-            from aiogram.types import ChatMemberOwner, ChatMemberAdministrator
-            if not isinstance(member, (ChatMemberOwner, ChatMemberAdministrator)):
-                return await message.reply("❌ ꜱᴏɴʟʏ ɢʀᴏᴜᴘ ᴀᴅᴍɪɴꜱ ᴄᴀɴ ᴇɴᴅ ɢᴀᴍᴇꜱ.")
-        except Exception:
-            return await message.reply("❌ ꜱᴏɴʟʏ ɢʀᴏᴜᴘ ᴀᴅᴍɪɴꜱ ᴄᴀɴ ᴇɴᴅ ɢᴀᴍᴇꜱ.")
-        to_remove = [k for k in WORD_CACHE if k[0] == message.chat.id]
-        for k in to_remove:
-            WORD_CACHE.pop(k, None)
-        return await message.reply("🛑 ᴀʟʟ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇꜱ ᴇɴᴅᴇᴅ ɪɴ ᴛʜɪꜱ ᴄʜᴀᴛ.")
-
-    attempts_used = await get_daily_word_attempts(user_id)
-    if attempts_used >= DAILY_WORD_LIMIT:
-        return await message.reply(
-            f"⏳ <b>ᴅᴀɪʟʏ ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ</b>\n"
-            f"ʏᴏᴜ'ᴠᴇ ᴜꜱᴇᴅ <b>{attempts_used}/{DAILY_WORD_LIMIT}</b> ᴀᴛᴛᴇᴍᴘᴛꜱ ᴛᴏᴅᴀʏ.\n"
-            f"ʀᴇꜱᴇᴛ ᴀᴛ ᴍɪᴅɴɪɢʜᴛ ᴜᴛᴄ."
-        )
-
-    word = get_random_5letter_word()
-    key = (message.chat.id, user_id)
-    WORD_CACHE[key] = {"word": word, "attempts": 0, "history": [], "guessed": set()}
-    await inc_word_attempt(user_id)
-    new_count = await inc_daily_word_attempts(user_id)
-    try:
-        await mission_word_played(user_id)
-    except Exception:
-        pass
-
-    remaining = DAILY_WORD_LIMIT - new_count
-
-    await message.answer(
-        f"🔤 <b>ᴡᴏʀᴅ ɢᴜᴇꜱꜱɪɴɢ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"📏 ʟᴇɴɢᴛʜ: <b>5 ʟᴇᴛᴛᴇʀꜱ</b>\n"
-        f"🎯 ᴍᴀx ɢᴜᴇꜱꜱᴇꜱ: <b>30</b>\n"
-        f"🎫 ᴛᴏᴅᴀʏ ᴀᴛᴛᴇᴍᴘᴛꜱ ʟᴇꜰᴛ: <b>{remaining}/{DAILY_WORD_LIMIT}</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴛʏᴘᴇ ʏᴏᴜʀ 5-ʟᴇᴛᴛᴇʀ ᴡᴏʀᴅ ɪɴ ᴄʜᴀᴛ:"
-    )
-
-
-def _render_history(history):
-    lines = []
-    for word, colors in history:
-        emoji = {"g": "🟩", "y": "🟨", "x": "⬛"}
-        chars = " ".join(c.upper() for c in word)
-        boxes = " ".join(emoji[c] for c in colors)
-        lines.append(f"<code>{chars}</code>\n{boxes}")
-    return "\n".join(lines)
-
-
-def _evaluate(word, guess):
-    result = ["x"] * 5
-    wc, gc = list(word), list(guess)
-    for i in range(5):
-        if gc[i] == wc[i]:
-            result[i] = "g"; wc[i] = None; gc[i] = None
-    for i in range(5):
-        if gc[i] and gc[i] in wc:
-            result[i] = "y"; wc[wc.index(gc[i])] = None
-    return result
-
-
-@router.message(F.text & ~F.text.startswith("/"))
-async def word_guess(message: Message):
-    if not message.text:
-        raise SkipHandler()
-
-    key = (message.chat.id, message.from_user.id)
-    game = WORD_CACHE.get(key)
-    if not game:
-        raise SkipHandler()
-
-    guess = message.text.strip().lower()
-
-    # Length / alpha check
-    if len(guess) != 5 or not guess.isalpha():
-        return await message.reply("❌ ꜱᴇɴᴅ ᴀ ᴠᴀʟɪᴅ 5-ʟᴇᴛᴛᴇʀ ᴡᴏʀᴅ.")
-    # All-same-letter rejection
-    if len(set(guess)) == 1:
-        return await message.reply("❌ ᴛʜᴀᴛ'ꜱ ɴᴏᴛ ᴀ ᴠᴀʟɪᴅ ᴡᴏʀᴅ.")
-    # Duplicate rejection
-    if guess in game.get("guessed", set()):
-        return await message.reply(f"⚠️ <b>{guess.upper()}</b> ᴀʟʀᴇᴀᴅʏ ɢᴜᴇꜱꜱᴇᴅ. ᴛʀʏ ᴀ ɴᴇᴡ ᴡᴏʀᴅ.")
-    # Dictionary check
-    if not is_valid_word(guess):
-        return await message.reply(f"❌ <b>{guess.upper()}</b> ɪꜱ ɴᴏᴛ ᴀ ᴠᴀʟɪᴅ ᴇɴɢʟɪꜱʜ ᴡᴏʀᴅ.")
-
-    game["guessed"].add(guess)
-    colors = _evaluate(game["word"], guess)
-    game["history"].append((guess, colors))
-    game["attempts"] += 1
-
-    # WIN → end game immediately
-    if all(c == "g" for c in colors):
-        attempts = game["attempts"]
-        reward = max(10, WORD_MAX_REWARD // attempts) if attempts > 1 else WORD_MAX_REWARD
-        await add_coins(message.from_user.id, reward)
-        await inc_word_solved(message.from_user.id, reward)
-        WORD_CACHE.pop(key, None)
-        return await message.reply(
-            f"🎉 <b>ᴄᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴꜱ!</b>\n"
-            f"ʏᴏᴜ ɢᴜᴇꜱꜱᴇᴅ ᴛʜᴇ ᴄᴏʀʀᴇᴄᴛ ᴡᴏʀᴅ!\n\n"
-            f"ᴛʜᴇ ᴡᴏʀᴅ ᴡᴀꜱ: <b>{game['word'].upper()}</b>\n"
-            f"ᴀᴛᴛᴇᴍᴘᴛꜱ: <b>{attempts}</b>\n\n"
-            f"🪙 +{reward} ᴄᴏɪɴꜱ"
-        )
-
-    if game["attempts"] >= 30:
-        word = game["word"]
-        WORD_CACHE.pop(key, None)
-        return await message.reply(f"💀 ɢᴀᴍᴇ ᴏᴠᴇʀ! ᴛʜᴇ ᴡᴏʀᴅ ᴡᴀꜱ <b>{word.upper()}</b>")
-
-    await message.reply(
-        f"🔤 <b>ᴡᴏʀᴅ ɢᴜᴇꜱꜱɪɴɢ</b>\n"
-        f"🎯 ᴀᴛᴛᴇᴍᴘᴛꜱ: <b>{game['attempts']}/30</b>\n\n"
-        f"{_render_history(game['history'])}\n\n"
-        f"ᴛʏᴘᴇ ɴᴇxᴛ ɢᴜᴇꜱꜱ (5 ʟᴇᴛᴛᴇʀꜱ):"
-    )
-
-
-# ═══ NUMBER GUESSING — /h ═══
+# ═══ NUMBER GUESSING ═══
 @router.callback_query(F.data == "tg:number")
 async def number_start(cb: CallbackQuery):
     secret = random.randint(100, 500)
@@ -426,4 +250,4 @@ async def number_guess(message: Message):
     if guess < secret:
         await message.reply(f"⬆️ <b>{guess} ɪꜱ ᴠᴇʀʏ ʟᴏᴡ</b>\nʀᴀɴɢᴇ: {guess}–500\nᴀᴛᴛᴇᴍᴘᴛꜱ: {game['attempts']}/12")
     else:
-        await message.reply(f"⬇️ <b>{guess} ɪꜱ ᴠᴇʀʏ ʜɪɢʜ</b>\nʀᴀɴɢᴇ: 100–{guess}\nᴀᴛᴛᴇᴍᴘᴛꜱ: {game['attempts']}/12")
+        await message.reply(f"⬇️ <b>{guess} ɪs ᴠᴇʀʏ ʜɪɢʜ</b>\nʀᴀɴɢᴇ: 100–{guess}\nᴀᴛᴛᴇᴍᴘᴛꜱ: {game['attempts']}/12")
