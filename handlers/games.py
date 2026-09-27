@@ -1,319 +1,300 @@
-import random
+import json
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.filters import Command
+from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
 
-from keyboards.games_kb import (
-    games_main_kb, fortune_kb, arena_kb, beast_kb,
-    detective_kb, raid_kb, game_lb_menu_kb,
+from keyboards.game_kb import (
+    games_menu_kb, word_length_kb, word_game_kb, leaderboard_menu_kb,
 )
 from keyboards.main_menu import back_kb
 from utils.database import (
-    get_balance, add_coins, add_points, save_game_score, get_leaderboard,
+    start_word_game, get_word_game, update_word_game, end_word_game,
+    add_points, add_coins, get_word_leaderboard,
 )
+from utils.words import get_random_word, words_count
 from utils.ui import smart_edit
 
 router = Router()
 
-
-class ArenaFlow(StatesGroup):
-    active = State()
+MAX_ATTEMPTS = 30
 
 
-@router.callback_query(F.data == "menu:games")
-async def show_games(cb: CallbackQuery):
-    text = (
-        "🎮 <b>ɢᴧϻєs sєᴄᴛiση</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "ᴄнσσsє ᴧ ɢᴧϻє тσ ᴩʟᴧʏ:\n\n"
-        "єᴧᴄн ɢᴧϻє нᴧs its σᴡη єᴄσησϻʏ, "
-        "ᴜᴩɢʀᴧᴅєs & ʟєᴧᴅєʀвσᴧʀᴅ."
-    )
-    await smart_edit(cb, text, games_main_kb())
-    await cb.answer()
+# ═══════════════════════════════════════════════
+# HELPERS
+# ═══════════════════════════════════════════════
+def score_for_attempt(attempts: int) -> int:
+    """Fewer attempts = more points. Attempt 1 = 300 pts, min 10."""
+    if attempts <= 1:
+        return 300
+    return max(10, 300 // attempts)
 
 
-# ─────────── 🎰 FORTUNE ───────────
+def evaluate_guess(word: str, guess: str) -> list:
+    """
+    Returns list of colors.
+    'green'  = correct letter + position
+    'yellow' = correct letter, wrong position
+    'grey'   = letter not in word
+    """
+    result = ["grey"] * len(word)
+    word_chars = list(word)
+    guess_chars = list(guess)
 
-@router.callback_query(F.data == "game:fortune")
-async def fortune_menu(cb: CallbackQuery):
-    bal = await get_balance(cb.from_user.id)
-    coins = bal[0] if bal else 0
-    text = (
-        "🎰 <b>ᴧsᴛʀᴧʟ ғσʀᴛᴜηє</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"💰 ʏσᴜʀ ᴄσiηs: <b>{coins}</b>\n\n"
-        "🎲 ʀσʟʟ тнє ᴅiᴄє — iғ ʏσᴜ ɢєᴛ 4, 5, σʀ 6, ʏσᴜ ᴅσᴜвʟє!\n\n"
-        "ᴄнσσsє ʙєᴛ:"
-    )
-    await smart_edit(cb, text, fortune_kb())
-    await cb.answer()
+    # Pass 1: mark greens
+    for i in range(len(word)):
+        if guess_chars[i] == word_chars[i]:
+            result[i] = "green"
+            word_chars[i] = None
+            guess_chars[i] = None
 
+    # Pass 2: mark yellows
+    for i in range(len(word)):
+        if guess_chars[i] and guess_chars[i] in word_chars:
+            result[i] = "yellow"
+            word_chars[word_chars.index(guess_chars[i])] = None
 
-@router.callback_query(F.data.startswith("fortune:bet:"))
-async def fortune_play(cb: CallbackQuery):
-    bet = int(cb.data.split(":")[2])
-    bal = await get_balance(cb.from_user.id)
-    coins = bal[0] if bal else 0
-    if coins < bet:
-        await cb.answer(f"❌ ɴᴏᴛ єɴᴏᴜɢʜ ᴄᴏɪɴs! ʏᴏᴜ ʜᴀᴠᴇ {coins}", show_alert=True)
-        return
-
-    roll = random.randint(1, 6)
-    if roll >= 4:
-        winnings = bet * 2
-        await add_coins(cb.from_user.id, winnings - bet)
-        await add_points(cb.from_user.id, 5)
-        await save_game_score(cb.from_user.id, "fortune", winnings)
-        result = f"🎉 ʏᴏᴜ ʀᴏʟʟᴇᴅ <b>{roll}</b>!\n💰 ʏᴏᴜ ᴡᴏɴ <b>{winnings} ᴄᴏɪɴs</b>!"
-    else:
-        await add_coins(cb.from_user.id, -bet)
-        await save_game_score(cb.from_user.id, "fortune", 0)
-        result = f"😢 ʏᴏᴜ ʀᴏʟʟᴇᴅ <b>{roll}</b>.\n💸 ʏᴏᴜ ʟᴏsᴛ <b>{bet} ᴄᴏɪɴs</b>."
-
-    new_bal = await get_balance(cb.from_user.id)
-    text = (
-        "🎰 <b>ᴧsᴛʀᴧʟ ғσʀᴛᴜηє</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"{result}\n\n"
-        f"💰 ηєᴡ ʙᴧʟᴧηᴄє: <b>{new_bal[0]}</b> ᴄσiηs\n\n"
-        "ᴡᴧηηᴧ ᴩʟᴧʏ ᴧɢᴧiη?"
-    )
-    await smart_edit(cb, text, fortune_kb())
-    await cb.answer()
+    return result
 
 
-# ─────────── ⚔️ ARENA ───────────
-
-@router.callback_query(F.data == "game:arena")
-async def arena_menu(cb: CallbackQuery, state: FSMContext):
-    await state.update_data(player_hp=100, bot_hp=100)
-    text = (
-        "⚔️ <b>ᴧsᴛʀᴧʟ ᴧʀєηᴧ</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "👤 ʏσᴜ:  ██████████ 100 нᴩ\n"
-        "🤖 вσᴛ:  ██████████ 100 нᴩ\n\n"
-        "ᴄнσσsє ʏσᴜʀ ᴧᴄᴛiση:"
-    )
-    await smart_edit(cb, text, arena_kb())
-    await cb.answer()
+def render_guess(guess: str, colors: list) -> str:
+    emoji = {"green": "🟩", "yellow": "🟨", "grey": "⬛"}
+    chars = " ".join(c.upper() for c in guess)
+    boxes = " ".join(emoji[c] for c in colors)
+    return f"<code>{chars}</code>\n{boxes}"
 
 
-@router.callback_query(F.data == "arena:attack")
-async def arena_attack(cb: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    if not data:
-        await cb.answer("sᴛᴧʀᴛ ᴧ ɴєᴡ вᴧᴛᴛʟє", show_alert=True)
-        return
-    bot_hp = data.get("bot_hp", 100)
-    player_hp = data.get("player_hp", 100)
-    player_dmg = random.randint(15, 30)
-    bot_hp -= player_dmg
-
-    if bot_hp <= 0:
-        reward = 100
-        await add_coins(cb.from_user.id, reward)
-        await add_points(cb.from_user.id, 10)
-        await save_game_score(cb.from_user.id, "arena", 100)
-        await state.clear()
-        text = (
-            "⚔️ <b>ᴧsᴛʀᴧʟ ᴧʀєηᴧ</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"🗡️ ʏᴏᴜ ᴅєᴧʟᴛ <b>{player_dmg}</b> ᴅᴧϻᴧɢє!\n"
-            f"🤖 вσᴛ ᴅєғєᴧᴛєᴅ!\n\n"
-            f"🎉 <b>ᴠiᴄᴛσʀʏ!</b>\n"
-            f"💰 +{reward} ᴄσiηs | ⭐ +10 ᴩσiηᴛs"
-        )
-        await smart_edit(cb, text, arena_kb())
-        await cb.answer("🎉 ᴠɪᴄᴛᴏʀʏ!")
-        return
-
-    bot_dmg = random.randint(10, 25)
-    player_hp -= bot_dmg
-
-    if player_hp <= 0:
-        await save_game_score(cb.from_user.id, "arena", 0)
-        await state.clear()
-        text = (
-            "⚔️ <b>ᴧsᴛʀᴧʟ ᴧʀєηᴧ</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"🗡️ ʏᴏᴜ ᴅєᴧʟᴛ <b>{player_dmg}</b>\n"
-            f"🤖 вσᴛ ᴅєᴧʟᴛ <b>{bot_dmg}</b>\n\n"
-            f"💀 <b>ᴅєғєᴧᴛ!</b>"
-        )
-        await smart_edit(cb, text, arena_kb())
-        await cb.answer("💀 ʏᴏᴜ ʟᴏsᴛ!")
-        return
-
-    await state.update_data(player_hp=player_hp, bot_hp=bot_hp)
-    p_bar = "█" * (player_hp // 10) + "░" * (10 - player_hp // 10)
-    b_bar = "█" * (bot_hp // 10) + "░" * (10 - bot_hp // 10)
-    text = (
-        "⚔️ <b>ᴧsᴛʀᴧʟ ᴧʀєηᴧ</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"👤 ʏσᴜ:  {p_bar} {player_hp} нᴩ\ n"
-        f"🤖 вσᴛ:  {b_bar} {bot_hp} нᴩ\n\n"
-        f"🗡️ ʏᴏᴜ ᴅєᴧʟᴛ <b>{player_dmg}</b> | 🤖 вσᴛ ᴅєᴧʟᴛ <b>{bot_dmg}</b>\n\n"
-        "ᴄнσσsє ʏσᴜʀ ᴧᴄᴛiση:"
-    ).replace("\\ n", "\n")
-    await smart_edit(cb, text, arena_kb())
-    await cb.answer()
-
-
-@router.callback_query(F.data == "arena:defend")
-async def arena_defend(cb: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    if not data:
-        await cb.answer("sᴛᴧʀᴛ ᴧ ɴєᴡ вᴧᴛᴛʟє", show_alert=True)
-        return
-    bot_hp = data.get("bot_hp", 100)
-    player_hp = data.get("player_hp", 100)
-    bot_dmg = random.randint(5, 10)
-    player_hp -= bot_dmg
-    await state.update_data(player_hp=player_hp, bot_hp=bot_hp)
-    p_bar = "█" * (max(player_hp, 0) // 10) + "░" * (10 - max(player_hp, 0) // 10)
-    b_bar = "█" * (bot_hp // 10) + "░" * (10 - bot_hp // 10)
-    text = (
-        "⚔️ <b>ᴧsᴛʀᴧʟ ᴧʀєηᴧ</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"👤 ʏσᴜ:  {p_bar} {max(player_hp, 0)} нᴩ\ n"
-        f"🤖 вσᴛ:  {b_bar} {bot_hp} нᴩ\n\n"
-        f"🛡️ ʏᴏᴜ ᴅєғєηᴅєᴅ! 🤖 вσᴛ ᴅєᴧʟᴛ <b>{bot_dmg}</b>\n\n"
-        "ᴄнσσsє ʏσᴜʀ ᴧᴄᴛiση:"
-    ).replace("\\ n", "\n")
-    await smart_edit(cb, text, arena_kb())
-    await cb.answer()
-
-
-# ─────────── 🐉 BEAST ───────────
-
-@router.callback_query(F.data == "game:beast")
-async def beast_menu(cb: CallbackQuery):
-    text = (
-        "🐉 <b>ᴧsᴛʀᴧʟ вєᴧsᴛ</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "ʏσᴜʀ вєᴧsᴛ: <b>ᴅʀᴧᴋσ</b>\n"
-        "ʟєᴠєʟ: 1 | xᴩ: 0/100\n\n"
-        "ғєєᴅ (10 ᴄσiηs) → +20 xᴩ\n"
-        "ᴛʀᴧiη (20 ᴄσiηs) → +30 xᴩ"
-    )
-    await smart_edit(cb, text, beast_kb())
-    await cb.answer()
-
-
-@router.callback_query(F.data.startswith("beast:"))
-async def beast_action(cb: CallbackQuery):
-    action = cb.data.split(":")[1]
-    cost = 10 if action == "feed" else 20
-    xp = 20 if action == "feed" else 30
-    bal = await get_balance(cb.from_user.id)
-    coins = bal[0] if bal else 0
-    if coins < cost:
-        await cb.answer(f"❌ ɴᴏᴛ єɴᴏᴜɢʜ ᴄᴏɪɴs! (ηєєᴅ {cost})", show_alert=True)
-        return
-    await add_coins(cb.from_user.id, -cost)
-    await add_points(cb.from_user.id, 2)
-    await save_game_score(cb.from_user.id, "beast", xp)
-    new_bal = await get_balance(cb.from_user.id)
-    text = (
-        "🐉 <b>ᴧsᴛʀᴧʟ вєᴧsᴛ</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"✅ ʏσᴜʀ вєᴧsᴛ ɢᴧiηєᴅ <b>+{xp} xᴩ</b>!\n\n"
-        f"💰 ʙᴧʟᴧηᴄє: <b>{new_bal[0]}</b> ᴄσiηs"
-    )
-    await smart_edit(cb, text, beast_kb())
-    await cb.answer()
-
-
-# ─────────── 🧩 DETECTIVE ───────────
-
-RIDDLES = [
-    ("i sᴩєᴧᴋ ᴡiᴛнσᴜᴛ ᴧ ϻσᴜᴛн, i нєᴧʀ ᴡiᴛнσᴜᴛ єᴧʀs. i нᴧᴠє ησ вσᴅʏ, вᴜᴛ i ᴄσϻє ᴧʟiᴠє ᴡiᴛн ᴡiηᴅ. ᴡнᴧᴛ ᴧϻ i?", "echo"),
-    ("тнє ϻσʀє ʏσᴜ тᴧᴋє, тнє ϻσʀє ʏσᴜ ʟєᴧᴠє вєнiηᴅ. ᴡнᴧᴛ ᴧϻ i?", "footsteps"),
-    ("i нᴧᴠє нᴧηᴅs ᴜᴛ ησ ғєєт, i нᴧᴠє ᴧ ғᴧᴄє вᴜᴛ ησ ϻσᴜᴛн. ᴡнᴧᴛ ᴧϻ i?", "clock"),
-]
-
-
-@router.callback_query(F.data == "game:detective")
-async def detective_menu(cb: CallbackQuery):
-    riddle, _ = random.choice(RIDDLES)
-    text = (
-        f"🧩 <b>ᴧsᴛʀᴧʟ ᴅєᴛєᴄᴛiᴠє</b>\n"
+def game_status_text(word_length, attempts, max_attempts, history_lines):
+    return (
+        f"🔤 <b>ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ ɢᴀᴍᴇ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n"
+        f"📏 ʟᴇɴɢᴛʜ: <b>{word_length}</b> ʟᴇᴛᴛᴇʀs\n"
+        f"🎯 ᴀᴛᴛᴇᴍᴘᴛs: <b>{attempts}/{max_attempts}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"ᴛσᴅᴧʏ's ʀiᴅᴅʟє:\n\n<i>{riddle}</i>\n\n"
-        f"ᴛʏᴩє ʏσᴜʀ ᴧηsᴡєʀ iη ᴄнᴧᴛ!"
+        f"{chr(10).join(history_lines)}\n\n"
+        f"ᴛʏᴘᴇ ʏᴏᴜʀ ɢᴜᴇss ({word_length} ʟᴇᴛᴛᴇʀs):"
     )
-    await smart_edit(cb, text, detective_kb())
+
+
+# ═══════════════════════════════════════════════
+# 🎮 GAMES MENU
+# ═══════════════════════════════════════════════
+@router.callback_query(F.data == "menu:games")
+async def games_menu(cb: CallbackQuery, state: FSMContext):
+    await state.clear()
+    text = (
+        "🎮 <b>ɢᴀᴍᴇs sᴇᴄᴛɪᴏɴ</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "ᴄʜᴏᴏsᴇ ᴀ ɢᴀᴍᴇ ᴛᴏ ᴘʟᴀʏ:\n\n"
+        "🔤 ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ — ɢᴜᴇss ᴛʜᴇ ᴡᴏʀᴅ, ᴇᴀʀɴ ᴘᴏɪɴᴛs\n\n"
+        "ᴍᴏʀᴇ ɢᴀᴍᴇs ᴄᴏᴍɪɴɢ sᴏᴏɴ ✨"
+    )
+    await smart_edit(cb, text, games_menu_kb())
     await cb.answer()
 
 
-@router.callback_query(F.data == "detective:investigate")
-async def detective_investigate(cb: CallbackQuery):
-    await add_coins(cb.from_user.id, 5)
-    await add_points(cb.from_user.id, 3)
-    await save_game_score(cb.from_user.id, "detective", 5)
-    await cb.answer("🔍 iηνєsᴛiɢᴧᴛiση ᴄσϻᴩʟєᴛє! +5 ᴄσiηs, +3 ᴩσiηᴛs", show_alert=True)
-
-
-# ─────────── 🏹 RAID ───────────
-
-@router.callback_query(F.data == "game:raid")
-async def raid_menu(cb: CallbackQuery):
+# ═══════════════════════════════════════════════
+# 🔤 WORD GAME
+# ═══════════════════════════════════════════════
+@router.callback_query(F.data == "wg:menu")
+async def wg_menu(cb: CallbackQuery, state: FSMContext):
+    counts = words_count()
     text = (
-        "🏹 <b>ᴧsᴛʀᴧʟ ʀᴧiᴅ</b>\n"
+        "🔤 <b>ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ ɢᴀᴍᴇ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        "🐲 ʙσss: ᴅʀᴧɢση\n"
-        "нᴩ: ██████████ 100/100\n\n"
-        "ᴧᴛᴛᴧᴄᴋ тнє вσss!"
+        "🟩 ᴄᴏʀʀᴇᴄᴛ ʟᴇᴛᴛᴇʀ + ᴘᴏsɪᴛɪᴏɴ\n"
+        "🟨 ᴄᴏʀʀᴇᴄᴛ ʟᴇᴛᴛᴇʀ, ᴡʀᴏɴɢ ᴘᴏsɪᴛɪᴏɴ\n"
+        "⬛ ʟᴇᴛᴛᴇʀ ɴᴏᴛ ɪɴ ᴡᴏʀᴅ\n\n"
+        "🎯 ᴍᴀx ᴀᴛᴛᴇᴍᴘᴛs: 30\n"
+        "⭐ ғᴇᴡᴇʀ ᴀᴛᴛᴇᴍᴘᴛs = ᴍᴏʀᴇ ᴘᴏɪɴᴛs\n\n"
+        f"📚 ᴡᴏʀᴅ ᴘᴏᴏʟ:\n"
+        f"   • 4 ʟᴇᴛᴛᴇʀs — {counts.get(4, 0)} ᴡᴏʀᴅs\n"
+        f"   • 5 ʟᴇᴛᴛᴇʀs — {counts.get(5, 0)} ᴡᴏʀᴅs\n"
+        f"   • 6 ʟᴇᴛᴛᴇʀs — {counts.get(6, 0)} ᴡᴏʀᴅs\n\n"
+        "ᴄʜᴏᴏsᴇ ᴡᴏʀᴅ ʟᴇɴɢᴛʜ:"
     )
-    await smart_edit(cb, text, raid_kb())
+    await smart_edit(cb, text, word_length_kb())
     await cb.answer()
 
 
-@router.callback_query(F.data == "raid:attack")
-async def raid_attack(cb: CallbackQuery):
-    dmg = random.randint(10, 25)
-    reward = dmg
-    await add_coins(cb.from_user.id, reward)
-    await add_points(cb.from_user.id, 5)
-    await save_game_score(cb.from_user.id, "raid", dmg)
+@router.callback_query(F.data.startswith("wg:new:"))
+async def wg_new(cb: CallbackQuery, state: FSMContext):
+    try:
+        length = int(cb.data.split(":")[2])
+    except (ValueError, IndexError):
+        await cb.answer("ɪɴᴠᴀʟɪᴅ ʟᴇɴɢᴛʜ", show_alert=True)
+        return
+
+    if length not in (4, 5, 6):
+        await cb.answer("ɪɴᴠᴀʟɪᴅ", show_alert=True)
+        return
+
+    word = get_random_word(length)
+    await start_word_game(cb.from_user.id, word, length)
+
+    text = game_status_text(length, 0, MAX_ATTEMPTS, ["🎯 sᴛᴀʀᴛ ɢᴜᴇssɪɴɢ!"])
+    await smart_edit(cb, text, word_game_kb())
+    await cb.answer(f"🎮 ɢᴀᴍᴇ sᴛᴀʀᴛᴇᴅ! {length} ʟᴇᴛᴛᴇʀs")
+
+
+@router.callback_query(F.data == "wg:status")
+async def wg_status(cb: CallbackQuery):
+    row = await get_word_game(cb.from_user.id)
+    if not row:
+        await cb.answer("ɴᴏ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ", show_alert=True)
+        return
+    word, length, attempts, max_a, status, guesses_json = row
+    guesses = json.loads(guesses_json or "[]")
+    history = [render_guess(g["word"], g["colors"]) for g in guesses]
+    if not history:
+        history = ["🎯 sᴛᴀʀᴛ ɢᴜᴇssɪɴɢ!"]
+    text = game_status_text(length, attempts, max_a, history)
+    await smart_edit(cb, text, word_game_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data == "wg:giveup")
+async def wg_giveup(cb: CallbackQuery):
+    row = await get_word_game(cb.from_user.id)
+    if not row:
+        await cb.answer("ɴᴏ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ", show_alert=True)
+        return
+    word, length, attempts, _, _, _ = row
+    await end_word_game(cb.from_user.id, word, attempts, False, 0)
     text = (
-        "🏹 <b>ᴧsᴛʀᴧʟ ʀᴧiᴅ</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"⚔️ ʏσᴜ ᴅєᴧʟᴛ <b>{dmg}</b> ᴅᴧϻᴧɢє!\n"
-        f"💰 +{reward} ᴄσiηs | ⭐ +5 ᴩσiηᴛs"
+        f"🛑 <b>ɢᴀᴍᴇ ᴇɴᴅᴇᴅ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ᴛʜᴇ ᴡᴏʀᴅ ᴡᴀs: <b>{word.upper()}</b>\n"
+        f"ᴀᴛᴛᴇᴍᴘᴛs ᴜsᴇᴅ: <b>{attempts}</b>"
     )
-    await smart_edit(cb, text, raid_kb())
-    await cb.answer("⚔️ нiᴛ!")
+    await smart_edit(cb, text, games_menu_kb())
+    await cb.answer()
 
 
-# ─────────── 🏆 LEADERBOARDS ───────────
+# ═══════════════════════════════════════════════
+# 🎯 /new COMMAND
+# ═══════════════════════════════════════════════
+@router.message(Command("new"))
+async def cmd_new(message: Message, state: FSMContext):
+    text = (
+        "🔤 <b>ᴡᴏʀᴅ ɢᴜᴇssɪɴɢ ɢᴀᴍᴇ</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n\n"
+        "ᴄʜᴏᴏsᴇ ᴡᴏʀᴅ ʟᴇɴɢᴛʜ:"
+    )
+    await message.answer(text, reply_markup=word_length_kb())
 
-@router.callback_query(F.data == "game:lb_menu")
+
+# ═══════════════════════════════════════════════
+# ✏️ GUESS HANDLER
+# ═══════════════════════════════════════════════
+@router.message(F.text & ~F.text.startswith("/"))
+async def handle_guess(message: Message, state: FSMContext):
+    """
+    Capture guesses ONLY if user has an active game in PM.
+    Otherwise silently ignore (no conflict with other handlers).
+    """
+    if message.chat.type != "private":
+        return
+
+    row = await get_word_game(message.from_user.id)
+    if not row:
+        return
+
+    word, length, attempts, max_a, status, guesses_json = row
+    if status != "active":
+        return
+
+    guess = (message.text or "").strip().lower()
+
+    if len(guess) != length or not guess.isalpha():
+        await message.answer(
+            f"❌ sᴇɴᴅ ᴀ <b>{length}-ʟᴇᴛᴛᴇʀ</b> ᴡᴏʀᴅ (ᴏɴʟʏ ʟᴇᴛᴛᴇʀs)."
+        )
+        return
+
+    colors = evaluate_guess(word, guess)
+    guesses = json.loads(guesses_json or "[]")
+    guesses.append({"word": guess, "colors": colors})
+    attempts += 1
+
+    # ─── WIN ───
+    if all(c == "green" for c in colors):
+        score = score_for_attempt(attempts)
+        await end_word_game(message.from_user.id, word, attempts, True, score)
+        await add_points(message.from_user.id, score)
+        await add_coins(message.from_user.id, score // 2)
+
+        text = (
+            f"🎉 <b>ʏᴏᴜ ᴡᴏɴ!</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"ᴛʜᴇ ᴡᴏʀᴅ ᴡᴀs: <b>{word.upper()}</b>\n"
+            f"ᴀᴛᴛᴇᴍᴘᴛs: <b>{attempts}</b>\n\n"
+            f"⭐ ᴘᴏɪɴᴛs: <b>+{score}</b>\n"
+            f"🪙 ᴄᴏɪɴs: <b>+{score // 2}</b>"
+        )
+        await message.answer(text)
+        return
+
+    # ─── LOSS ───
+    if attempts >= max_a:
+        await end_word_game(message.from_user.id, word, attempts, False, 0)
+        await message.answer(
+            f"💀 <b>ɢᴀᴍᴇ ᴏᴠᴇʀ</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"ᴛʜᴇ ᴡᴏʀᴅ ᴡᴀs: <b>{word.upper()}</b>\n"
+            f"ʙᴇᴛᴛᴇʀ ʟᴜᴄᴋ ɴᴇxᴛ ᴛɪᴍᴇ!"
+        )
+        return
+
+    # ─── CONTINUE ───
+    await update_word_game(
+        message.from_user.id, attempts, "active", json.dumps(guesses)
+    )
+    history = [render_guess(g["word"], g["colors"]) for g in guesses]
+    text = game_status_text(length, attempts, max_a, history)
+    await message.answer(text, reply_markup=word_game_kb())
+
+
+# ═══════════════════════════════════════════════
+# 🏆 LEADERBOARD
+# ═══════════════════════════════════════════════
+@router.callback_query(F.data == "menu:lb")
 async def lb_menu(cb: CallbackQuery):
-    text = "🏆 <b>ɢᴧϻє ʟєᴧᴅєʀвσᴧʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧ ɢᴧϻє:"
-    await smart_edit(cb, text, game_lb_menu_kb())
+    text = "🏆 <b>ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n━━━━━━━━━━━━━━━━━━━━━\n\nᴄʜᴏᴏsᴇ ᴄᴀᴛᴇɢᴏʀʏ:"
+    await smart_edit(cb, text, leaderboard_menu_kb())
     await cb.answer()
 
 
-@router.callback_query(F.data.startswith("lb:"))
-async def show_game_lb(cb: CallbackQuery):
-    game = cb.data.split(":")[1]
-    rows = await get_leaderboard(game, 10)
+@router.callback_query(F.data == "lb:word")
+async def lb_word(cb: CallbackQuery):
+    rows = await get_word_leaderboard(10)
     medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
     if not rows:
-        body = "ησ sᴄσʀєs ʏєᴛ. вє тнє ғiʀsᴛ!"
+        body = "ηᴏ sᴄᴏʀᴇs ʏᴇᴛ.\n\nʙᴇ ᴛʜᴇ ғɪʀsᴛ ᴛᴏ ᴘʟᴀʏ!"
     else:
-        body = "\n".join(
-            f"{medals[i]} {name} — <b>{score}</b>"
-            for i, (name, uname, score) in enumerate(rows)
-        )
+        lines = []
+        for i, (name, uname, score) in enumerate(rows):
+            display = f"@{uname}" if uname else name
+            lines.append(f"{medals[i]} {display} — <b>{score}</b> ᴘᴛs")
+        body = "\n".join(lines)
 
     text = (
-        f"🏆 <b>{game.upper()} ʟєᴧᴅєʀвσᴧʀᴅ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n{body}"
+        f"🏆 <b>ᴡᴏʀᴅ ɢᴀᴍᴇ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ᴛᴏᴘ 10 ᴘʟᴀʏᴇʀs:\n\n{body}"
     )
-    await smart_edit(cb, text, game_lb_menu_kb())
+    await smart_edit(cb, text, leaderboard_menu_kb())
+    await cb.answer()
+
+
+@router.callback_query(F.data == "lb:quiz")
+async def lb_quiz(cb: CallbackQuery):
+    text = (
+        f"🏆 <b>ǫᴜɪᴢ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ᴜsᴇ /profile ᴛᴏ sᴇᴇ ʏᴏᴜʀ ᴏᴡɴ sᴛᴀᴛs.\n\n"
+        f"sᴜʙᴊᴇᴄᴛ-ᴡɪsᴇ ʀᴀɴᴋɪɴɢ ᴄᴏᴍɪɴɢ sᴏᴏɴ ✨"
+    )
+    await smart_edit(cb, text, leaderboard_menu_kb())
     await cb.answer()
