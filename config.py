@@ -14,35 +14,17 @@ SUPPORT_CHANNEL_LINK = "https://t.me/Astral_study_chest"
 
 BOT_ADD_LINK = f"https://t.me/{BOT_USERNAME.lstrip('@')}?startgroup=true"
 
-# ═══════════════════════════════════════════════
-# 👑 OWNER & ADMINS
-# ═══════════════════════════════════════════════
 OWNER_ID = -1004398879964
+BOT_ADMIN_IDS = [7748285403, 7415480513, 8165863254, 7790607144, 8987845745]
 
-BOT_ADMIN_IDS = [
-    7748285403,
-    7415480513,
-    8165863254,
-    7790607144,
-    8987845745,
-]
-
-# ═══════════════════════════════════════════════
-# 👨‍💻 CREATOR CREDITS (Clickable links)
-# ═══════════════════════════════════════════════
+# ═══ CREATOR CREDITS ═══
 CREATOR_1_NAME = "⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐"
-CREATOR_1_USERNAME = "@OfficialCrazyBoy07"
 CREATOR_1_LINK = "https://t.me/OfficialCrazyBoy07"
-CREATOR_1_ID = 7790607144
-
 CREATOR_2_NAME = "𝓚𝓪𝓷𝓱𝓪࿐✨🤟"
-CREATOR_2_USERNAME = "@Lunar_kanha_4572"
 CREATOR_2_LINK = "https://t.me/Lunar_kanha_4572"
-CREATOR_2_ID = 8165863254
 
-# HTML clickable credit line
 CREDIT_HTML = (
-    f'ᴩσωєʀєᴅ вʏ '
+    f'ᴘᴏᴡᴇʀᴇᴅ ʙʏ '
     f'<a href="{CREATOR_1_LINK}">{CREATOR_1_NAME}</a> '
     f'& '
     f'<a href="{CREATOR_2_LINK}">{CREATOR_2_NAME}</a>'
@@ -66,8 +48,16 @@ ROB_PREMIUM_PERCENT = 5
 SHIELD_FREE_DAYS = 2
 GIVE_DEDUCTION_PERCENT = 10
 
+# ═══ EVENT SETTINGS ═══
+EVENT_INTERVAL_SECONDS = 3600   # 1 hour
+EVENT_TIME_LIMIT_MINUTES = 60
+EVENT_PRIZE_MIN = 500
+EVENT_PRIZE_MAX = 2000
+EVENT_NUMBER_MIN = 100
+EVENT_NUMBER_MAX = 500
+
 PREMIUM_PLANS = {
-    "1m": {"days": 30, "stars": 90, "label": "1 Month"},
-    "4m": {"days": 120, "stars": 140, "label": "4 Months"},
-    "12m": {"days": 365, "stars": 175, "label": "12 Months"},
+    "1m": {"days": 30, "stars": 90},
+    "4m": {"days": 120, "stars": 140},
+    "12m": {"days": 365, "stars": 175},
 }
