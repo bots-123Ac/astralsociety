@@ -1,4 +1,5 @@
 import os
+import time
 import random
 import string
 from datetime import datetime, timedelta
@@ -8,6 +9,9 @@ import asyncpg
 from config import DATABASE_URL, COINS_PER_GEM
 
 
+# ═══════════════════════════════════════════════
+# CONNECTION POOL
+# ═══════════════════════════════════════════════
 _pool: asyncpg.Pool | None = None
 
 
@@ -18,11 +22,16 @@ async def get_pool() -> asyncpg.Pool:
             raise RuntimeError("❌ DATABASE_URL missing! Set it in Railway variables.")
         _pool = await asyncpg.create_pool(
             DATABASE_URL,
-            min_size=1,
-            max_size=10,
-            command_timeout=30,
+            min_size=3,
+            max_size=20,
+            command_timeout=15,
+            statement_cache_size=100,
+            max_inactive_connection_lifetime=300,
         )
-        print("✅ PostgreSQL connection pool created")
+        # Warm-up connection
+        async with _pool.acquire() as conn:
+            await conn.fetchval("SELECT 1")
+        print("✅ PostgreSQL pool warmed up (3 conns ready)")
     return _pool
 
 
@@ -34,6 +43,38 @@ async def close_pool():
         print("🔌 PostgreSQL pool closed")
 
 
+# ═══════════════════════════════════════════════
+# IN-MEMORY CACHE (short TTL for hot reads)
+# ═══════════════════════════════════════════════
+CACHE_TTL = 5  # seconds
+
+_premium_cache: dict[int, tuple] = {}
+_shield_cache: dict[int, tuple] = {}
+_coins_cache: dict[int, tuple] = {}
+
+
+def _cache_get(cache: dict, key):
+    entry = cache.get(key)
+    if entry is None:
+        return None
+    value, expires = entry
+    if time.time() > expires:
+        cache.pop(key, None)
+        return None
+    return value
+
+
+def _cache_set(cache: dict, key, value):
+    cache[key] = (value, time.time() + CACHE_TTL)
+
+
+def _cache_invalidate(cache: dict, key):
+    cache.pop(key, None)
+
+
+# ═══════════════════════════════════════════════
+# HELPERS
+# ═══════════════════════════════════════════════
 def _gen_astral_id():
     return "".join(random.choices(string.digits, k=6))
 
@@ -60,6 +101,9 @@ def _parse(s):
             return None
 
 
+# ═══════════════════════════════════════════════
+# INIT DB
+# ═══════════════════════════════════════════════
 async def init_db():
     pool = await get_pool()
 
@@ -179,10 +223,14 @@ async def get_or_create_user(user_id, username, first_name):
             user_id, username or "", first_name or "", astral_id, _to_str(_now())
         )
     else:
-        await pool.execute(
-            "UPDATE users SET username = $1, first_name = $2 WHERE user_id = $3",
-            username or "", first_name or "", user_id
-        )
+        # Fire-and-forget update (don't block response)
+        try:
+            await pool.execute(
+                "UPDATE users SET username = $1, first_name = $2 WHERE user_id = $3",
+                username or "", first_name or "", user_id
+            )
+        except Exception:
+            pass
 
     return await pool.fetchrow("SELECT * FROM users WHERE user_id = $1", user_id)
 
@@ -211,6 +259,7 @@ async def add_coins(user_id, amount):
         "UPDATE users SET coins = coins + $1 WHERE user_id = $2",
         amount, user_id
     )
+    _cache_invalidate(_coins_cache, user_id)
 
 
 async def add_gems(user_id, amount):
@@ -230,9 +279,14 @@ async def add_xp(user_id, amount):
 
 
 async def get_user_coins(user_id) -> int:
+    cached = _cache_get(_coins_cache, user_id)
+    if cached is not None:
+        return cached
     pool = await get_pool()
     val = await pool.fetchval("SELECT coins FROM users WHERE user_id = $1", user_id)
-    return val if val is not None else 0
+    result = val if val is not None else 0
+    _cache_set(_coins_cache, user_id, result)
+    return result
 
 
 async def get_user_gems(user_id) -> int:
@@ -262,23 +316,29 @@ async def convert_coins_to_gems(user_id, coins_amount):
                 "UPDATE users SET gems = gems + $1 WHERE user_id = $2",
                 gems, user_id
             )
+    _cache_invalidate(_coins_cache, user_id)
     return True, gems
 
 
 # ═══════════════════════════════════════════════
-# PREMIUM
+# PREMIUM (cached)
 # ═══════════════════════════════════════════════
 async def is_premium(user_id) -> bool:
+    cached = _cache_get(_premium_cache, user_id)
+    if cached is not None:
+        return cached
+
     pool = await get_pool()
     val = await pool.fetchval(
         "SELECT premium_until FROM users WHERE user_id = $1", user_id
     )
-    if not val:
-        return False
-    dt = _parse(val)
-    if not dt:
-        return False
-    return dt > _now()
+    result = False
+    if val:
+        dt = _parse(val)
+        if dt and dt > _now():
+            result = True
+    _cache_set(_premium_cache, user_id, result)
+    return result
 
 
 async def set_premium(user_id, days):
@@ -288,6 +348,7 @@ async def set_premium(user_id, days):
         "UPDATE users SET premium_until = $1 WHERE user_id = $2",
         _to_str(until), user_id
     )
+    _cache_invalidate(_premium_cache, user_id)
     return until
 
 
@@ -320,19 +381,24 @@ async def deduct_gems(user_id, amount) -> bool:
 
 
 # ═══════════════════════════════════════════════
-# SHIELD
+# SHIELD (cached)
 # ═══════════════════════════════════════════════
 async def is_shielded(user_id) -> bool:
+    cached = _cache_get(_shield_cache, user_id)
+    if cached is not None:
+        return cached
+
     pool = await get_pool()
     val = await pool.fetchval(
         "SELECT shield_until FROM users WHERE user_id = $1", user_id
     )
-    if not val:
-        return False
-    dt = _parse(val)
-    if not dt:
-        return False
-    return dt > _now()
+    result = False
+    if val:
+        dt = _parse(val)
+        if dt and dt > _now():
+            result = True
+    _cache_set(_shield_cache, user_id, result)
+    return result
 
 
 async def set_shield(user_id, days):
@@ -342,6 +408,7 @@ async def set_shield(user_id, days):
         "UPDATE users SET shield_until = $1 WHERE user_id = $2",
         _to_str(until), user_id
     )
+    _cache_invalidate(_shield_cache, user_id)
     return until
 
 
