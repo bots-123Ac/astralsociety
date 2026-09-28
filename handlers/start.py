@@ -1,5 +1,5 @@
 import logging
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
@@ -28,12 +28,17 @@ async def cmd_start(message: Message):
     try:
         user = message.from_user
         await get_or_create_user(user.id, user.username, user.first_name)
+
+        # Auto-register group for events
         if message.chat.type in ("group", "supergroup"):
             try:
                 await register_group(message.chat.id, message.chat.title or "")
-            except Exception:
-                pass
+                logger.info(f"✅ Group registered: {message.chat.id} ({message.chat.title})")
+            except Exception as e:
+                logger.warning(f"Group register failed: {e}")
+            return  # Don't send welcome in groups
 
+        # Only send welcome in private chat
         text = welcome_text(user.first_name)
         kb = main_menu_kb()
 
@@ -49,7 +54,15 @@ async def cmd_start(message: Message):
         await message.answer(text, reply_markup=kb)
     except Exception as e:
         logger.error(f"/start err: {e}")
-        try:
-            await message.answer("👋 ʜɪ! ᴘʟᴇᴀꜱᴇ ᴛʀʏ /start ᴀɢᴀɪɴ.")
-        except Exception:
-            pass
+
+
+# ═══════════════════════════════════════════════
+# AUTO-REGISTER GROUP ON ANY MESSAGE
+# ═══════════════════════════════════════════════
+@router.message(F.chat.type.in_({"group", "supergroup"}))
+async def auto_register_group(message: Message):
+    """Register any group where bot receives a message (once)."""
+    try:
+        await register_group(message.chat.id, message.chat.title or "")
+    except Exception as e:
+        logger.debug(f"auto-register: {e}")
