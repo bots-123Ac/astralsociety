@@ -52,53 +52,37 @@ CREDIT_HTML = (
 )
 
 # ═══════════════════════════════════════════════
-# 🗄️ DATABASE
+# 🗄️ DATABASE — Neon PostgreSQL
 # ═══════════════════════════════════════════════
-DB_PATH = os.getenv("DB_PATH", "astral.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 # ═══════════════════════════════════════════════
 # 💰 ECONOMY
 # ═══════════════════════════════════════════════
-COINS_PER_GEM = 100              # 100 Coins = 1 Gem
-
-# ─── Daily Rewards ───
+COINS_PER_GEM = 100
 DAILY_NORMAL_COINS = 2000
 DAILY_NORMAL_XP = 150
 DAILY_PREMIUM_COINS = 5000
 DAILY_PREMIUM_XP = 350
-
-# ─── Mission ───
 MISSION_REWARD_COINS = 8000
 MISSION_REWARD_XP = 200
-
-# ─── Games ───
 QUIZ_REWARD_COINS = 40
 NUMBER_REWARD_COINS = 80
 NUMBER_MIN = 100
 NUMBER_MAX = 500
 NUMBER_MAX_ATTEMPTS = 12
-
-# ─── Rob & Give ───
 ROB_NORMAL_PERCENT = 10
 ROB_PREMIUM_PERCENT = 5
 GIVE_DEDUCTION_PERCENT = 10
-
-# ─── Shield ───
 SHIELD_NORMAL_MAX_DAYS = 2
 SHIELD_PREMIUM_MAX_DAYS = 5
 
-# ═══════════════════════════════════════════════
-# ⭐ PREMIUM (via Gems)
-# ═══════════════════════════════════════════════
 PREMIUM_PLANS = {
     "1w": {"days": 7,   "gems": 1000,   "label": "1 Week"},
     "1m": {"days": 30,  "gems": 10000,  "label": "1 Month"},
     "1y": {"days": 365, "gems": 100000, "label": "1 Year"},
 }
 
-# ═══════════════════════════════════════════════
-# 🛒 SHOP (Gems)
-# ═══════════════════════════════════════════════
 XP_BOOST_PLANS = {
     5:  {"gems": 6,  "label": "5 Days"},
     7:  {"gems": 8,  "label": "7 Days"},
