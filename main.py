@@ -12,7 +12,7 @@ from handlers import (
     shop, powers, admin, quiz, premium, tgames,
 )
 from utils.logger import setup_logger
-from utils.database import init_db, close_pool
+from utils.database import init_db, close_pool, get_pool
 from utils.quiz_loader import background_load
 
 
@@ -23,7 +23,9 @@ async def main():
     if not BOT_TOKEN:
         raise RuntimeError("❌ BOT_TOKEN missing!")
 
+    # Init DB + pre-warm pool
     await init_db()
+    await get_pool()   # ensure pool is ready
 
     bot = Bot(
         token=BOT_TOKEN,
@@ -36,6 +38,7 @@ async def main():
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
+    # ═══ ROUTERS ═══
     dp.include_router(start.router)
     dp.include_router(menu.router)
     dp.include_router(profile.router)
@@ -51,6 +54,7 @@ async def main():
     dp.include_router(premium.router)
     dp.include_router(tgames.router)
 
+    # Background task: auto-fetch quiz questions
     asyncio.create_task(background_load())
 
     logging.info("✅ Bot is running.")
