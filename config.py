@@ -46,10 +46,10 @@ CREATOR_2_ID = 8165863254
 
 CREDIT_HTML = (
     f'ᴘᴏᴡᴇʀᴇᴅ ʙʏ '
-    f'<a href="tg://user?id={CREATOR_1_ID}">{CREATOR_1_NAME}</a> '
-    f'& '
     f'<a href="tg://user?id={CREATOR_2_ID}">{CREATOR_2_NAME}</a>'
-)
+    f'& '
+    f'<a href="https://t.me/OfficialCrazyBoy07">{CREATOR_1_NAME}</a> '
+}
 
 # ═══════════════════════════════════════════════
 # 🗄️ DATABASE — Neon PostgreSQL
