@@ -14,8 +14,8 @@ from utils.database import (
 
 router = Router()
 
-QUIZ_CACHE = {}     # (chat_id, user_id) -> quiz session
-NUMBER_CACHE = {}   # (chat_id, user_id) -> personal game
+QUIZ_CACHE = {}
+NUMBER_CACHE = {}
 
 NUMBER_MIN = 100
 NUMBER_MAX = 500
@@ -33,10 +33,18 @@ CATEGORY_NAMES = {
 }
 
 
-# ═══════════════════════════════════════════════
-# /tgames entry
-# ═══════════════════════════════════════════════
-@router.message(F.text.regexp(r"^/tgames(\s|$)"))
+def _private_only(func):
+    """Decorator: only works in private chat."""
+    async def wrapper(message: Message, *args, **kwargs):
+        if message.chat.type != "private":
+            return await message.reply("📩 ɢᴀᴍᴇꜱ ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ ᴅᴍ.")
+        return await func(message, *args, **kwargs)
+    return wrapper
+
+
+# ═══ ENTRY ═══
+@router.message(F.text.regexp(r"^/tgames(@\w+)?(\s|$)"))
+@_private_only
 async def cmd_tgames(message: Message):
     await message.answer(
         "🎮 <b>ᴀꜱᴛʀᴀʟ ᴛ-ɢᴀᴍᴇꜱ</b>\n"
@@ -45,11 +53,11 @@ async def cmd_tgames(message: Message):
     )
 
 
-# ═══════════════════════════════════════════════
-# QUIZ
-# ═══════════════════════════════════════════════
+# ═══ QUIZ ═══
 @router.callback_query(F.data == "tg:quiz")
 async def quiz_select(cb: CallbackQuery):
+    if cb.message.chat.type != "private":
+        return await cb.answer("📩 ᴅᴍ ᴏɴʟʏ", show_alert=True)
     total = await get_quiz_count()
     await cb.message.edit_text(
         f"🧠 <b>ǫᴜɪᴢ</b>\n<i>ᴛᴏᴛᴀʟ: {total:,} ǫᴜᴇꜱᴛɪᴏɴꜱ</i>\n\nʜᴏᴡ ᴍᴀɴʏ ǫᴜᴇꜱᴛɪᴏɴꜱ?",
@@ -185,11 +193,11 @@ async def _finish_quiz(cb: CallbackQuery, key: tuple):
     await cb.answer("🏁")
 
 
-# ═══════════════════════════════════════════════
-# PERSONAL NUMBER GAME — /tgames → Number
-# ═══════════════════════════════════════════════
+# ═══ NUMBER GAME ═══
 @router.callback_query(F.data == "tg:number")
 async def number_start(cb: CallbackQuery):
+    if cb.message.chat.type != "private":
+        return await cb.answer("📩 ᴅᴍ ᴏɴʟʏ", show_alert=True)
     secret = random.randint(NUMBER_MIN, NUMBER_MAX)
     key = (cb.message.chat.id, cb.from_user.id)
     NUMBER_CACHE[key] = {
@@ -210,23 +218,12 @@ async def number_start(cb: CallbackQuery):
     await cb.answer()
 
 
-# ═══════════════════════════════════════════════
-# /h — WORKS EVERYWHERE (DM + GC + Group)
-# Priority: Event (if GC has active event) → Personal Game
-# ═══════════════════════════════════════════════
-@router.message(F.text.regexp(r"^/h(\s|$)"))
+# ═══ /h — DM ONLY ═══
+@router.message(F.text.regexp(r"^/h(@\w+)?(\s|$)"))
 async def number_guess(message: Message):
-    # 1️⃣ Try event first (only in groups)
-    try:
-        from handlers.events import try_handle_event_guess
-        handled = await try_handle_event_guess(message)
-        if handled:
-            return
-    except Exception as e:
-        import logging
-        logging.error(f"event guess err: {e}")
+    if message.chat.type != "private":
+        return
 
-    # 2️⃣ Personal game — auto-start if none exists
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2 or not parts[1].strip().isdigit():
         return await message.reply("ᴜꜱᴀɢᴇ: <code>/h 250</code>")
@@ -235,14 +232,11 @@ async def number_guess(message: Message):
     key = (message.chat.id, user_id)
     game = NUMBER_CACHE.get(key)
 
-    # Auto-start if not started
     if not game:
         secret = random.randint(NUMBER_MIN, NUMBER_MAX)
         game = {
-            "secret": secret,
-            "attempts": 0,
-            "low": NUMBER_MIN,
-            "high": NUMBER_MAX,
+            "secret": secret, "attempts": 0,
+            "low": NUMBER_MIN, "high": NUMBER_MAX,
         }
         NUMBER_CACHE[key] = game
         await inc_number_attempt(user_id)
@@ -257,7 +251,6 @@ async def number_guess(message: Message):
     await inc_number_guess(user_id)
     secret = game["secret"]
 
-    # ═══ CORRECT ═══
     if guess == secret:
         coins = NUMBER_REWARD_COINS
         xp_gain = random.randint(0, 12)
@@ -273,15 +266,12 @@ async def number_guess(message: Message):
         )
 
     remaining = NUMBER_MAX_ATTEMPTS - game["attempts"]
-
-    # ═══ GAME OVER ═══
     if game["attempts"] >= NUMBER_MAX_ATTEMPTS:
         NUMBER_CACHE.pop(key, None)
         return await message.reply(
             f"💀 <b>ɢᴀᴍᴇ ᴏᴠᴇʀ!</b>\n\nꜱᴇᴄʀᴇᴛ ᴡᴀꜱ <b>{secret}</b>"
         )
 
-    # ═══ FEEDBACK ═══
     if guess > secret:
         game["high"] = min(game["high"], guess - 1)
         arrow, label = "📈", "ᴛᴏᴏ ʜɪɢʜ"
