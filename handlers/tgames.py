@@ -2,7 +2,10 @@ import random
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 
-from config import QUIZ_REWARD_COINS, NUMBER_REWARD_COINS
+from config import (
+    QUIZ_REWARD_COINS, NUMBER_REWARD_COINS,
+    NUMBER_MIN, NUMBER_MAX, NUMBER_MAX_ATTEMPTS,
+)
 from keyboards.main_menu import (
     tgames_menu_kb, quiz_menu_kb, quiz_options_kb, quiz_count_kb, back_main_kb,
 )
@@ -17,10 +20,6 @@ router = Router()
 QUIZ_CACHE = {}
 NUMBER_CACHE = {}
 
-NUMBER_MIN = 100
-NUMBER_MAX = 500
-NUMBER_MAX_ATTEMPTS = 12
-
 CATEGORY_NAMES = {
     "space": "🚀 ꜱᴘᴀᴄᴇ", "general": "🌍 ɢᴇɴᴇʀᴀʟ",
     "science": "🔬 ꜱᴄɪᴇɴᴄᴇ", "history": "📜 ʜɪꜱᴛᴏʀʏ",
@@ -34,7 +33,6 @@ CATEGORY_NAMES = {
 
 
 def _private_only(func):
-    """Decorator: only works in private chat."""
     async def wrapper(message: Message, *args, **kwargs):
         if message.chat.type != "private":
             return await message.reply("📩 ɢᴀᴍᴇꜱ ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ ᴅᴍ.")
@@ -42,7 +40,6 @@ def _private_only(func):
     return wrapper
 
 
-# ═══ ENTRY ═══
 @router.message(F.text.regexp(r"^/tgames(@\w+)?(\s|$)"))
 @_private_only
 async def cmd_tgames(message: Message):
@@ -106,7 +103,7 @@ async def _send_quiz_question(cb: CallbackQuery, cat: str, key: tuple):
         row = await get_random_quiz_question(cat)
         if not row:
             break
-        if row[0] not in sess["used_ids"]:
+        if row["id"] not in sess["used_ids"]:
             q = row
             break
     if not q:
@@ -115,7 +112,14 @@ async def _send_quiz_question(cb: CallbackQuery, cat: str, key: tuple):
             return await cb.answer("ɴᴏ ǫᴜᴇꜱᴛɪᴏɴꜱ.", show_alert=True)
         q = row
 
-    qid, question, a, b, c, d, correct = q
+    qid = q["id"]
+    question = q["question"]
+    a = q["option_a"]
+    b = q["option_b"]
+    c = q["option_c"]
+    d = q["option_d"]
+    correct = q["correct"]
+
     sess["used_ids"].add(qid)
     sess["current"] = (qid, correct, question, a, b, c, d)
 
@@ -218,7 +222,6 @@ async def number_start(cb: CallbackQuery):
     await cb.answer()
 
 
-# ═══ /h — DM ONLY ═══
 @router.message(F.text.regexp(r"^/h(@\w+)?(\s|$)"))
 async def number_guess(message: Message):
     if message.chat.type != "private":
