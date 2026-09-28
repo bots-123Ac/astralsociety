@@ -49,7 +49,7 @@ CREDIT_HTML = (
     f'<a href="tg://user?id={CREATOR_2_ID}">{CREATOR_2_NAME}</a>'
     f'& '
     f'<a href="https://t.me/OfficialCrazyBoy07">{CREATOR_1_NAME}</a> '
-}
+)
 
 # ═══════════════════════════════════════════════
 # 🗄️ DATABASE — Neon PostgreSQL
