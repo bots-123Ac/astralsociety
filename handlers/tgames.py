@@ -32,17 +32,12 @@ CATEGORY_NAMES = {
 }
 
 
-def _private_only(func):
-    async def wrapper(message: Message, *args, **kwargs):
-        if message.chat.type != "private":
-            return await message.reply("📩 ɢᴀᴍᴇꜱ ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ ᴅᴍ.")
-        return await func(message, *args, **kwargs)
-    return wrapper
-
-
 @router.message(F.text.regexp(r"^/tgames(@\w+)?(\s|$)"))
-@_private_only
 async def cmd_tgames(message: Message):
+    # DM only
+    if message.chat.type != "private":
+        return await message.reply("📩 ɢᴀᴍᴇꜱ ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ ᴅᴍ.")
+
     await message.answer(
         "🎮 <b>ᴀꜱᴛʀᴀʟ ᴛ-ɢᴀᴍᴇꜱ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\nᴄʜᴏᴏꜱᴇ ᴀ ɢᴀᴍᴇ:",
@@ -205,10 +200,8 @@ async def number_start(cb: CallbackQuery):
     secret = random.randint(NUMBER_MIN, NUMBER_MAX)
     key = (cb.message.chat.id, cb.from_user.id)
     NUMBER_CACHE[key] = {
-        "secret": secret,
-        "attempts": 0,
-        "low": NUMBER_MIN,
-        "high": NUMBER_MAX,
+        "secret": secret, "attempts": 0,
+        "low": NUMBER_MIN, "high": NUMBER_MAX,
     }
     await inc_number_attempt(cb.from_user.id)
     await cb.message.edit_text(
