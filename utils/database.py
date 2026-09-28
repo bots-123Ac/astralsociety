@@ -115,6 +115,17 @@ async def init_db():
         """)
         await db.execute("CREATE INDEX IF NOT EXISTS idx_quiz_cat ON quiz_questions(category)")
 
+        # ═══ EVENT WINS ═══
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS event_wins (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                chat_id INTEGER,
+                prize INTEGER,
+                won_at TEXT
+            )
+        """)
+
         await db.commit()
 
         # ═══ SEED BUNDLED QUESTIONS ON FIRST RUN ═══
@@ -550,10 +561,9 @@ async def get_all_active_groups():
 
 
 # ═══════════════════════════════════════════════
-# QUIZ QUESTIONS (5000+ support)
+# QUIZ QUESTIONS (5000+)
 # ═══════════════════════════════════════════════
 async def add_quiz_question(category, question, correct, wrongs):
-    """Add a question. Shuffles options, dedupes on question text."""
     if len(wrongs) < 3:
         return False
     async with aiosqlite.connect(DB_PATH) as db:
@@ -582,7 +592,6 @@ async def add_quiz_question(category, question, correct, wrongs):
 
 
 async def get_random_quiz_question(category):
-    """Return one random question for the given category."""
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
             """SELECT id, question, option_a, option_b, option_c, option_d, correct
@@ -597,3 +606,41 @@ async def get_quiz_count():
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT COUNT(*) FROM quiz_questions") as cur:
             return (await cur.fetchone())[0]
+
+
+# ═══════════════════════════════════════════════
+# EVENT WINS
+# ═══════════════════════════════════════════════
+async def record_event_win(user_id, chat_id, prize):
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            "INSERT INTO event_wins (user_id, chat_id, prize, won_at) VALUES (?,?,?,?)",
+            (user_id, chat_id, prize, _to_str(_now()))
+        )
+        await db.commit()
+
+
+async def count_event_wins_total(user_id, chat_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            "SELECT COUNT(*) FROM event_wins WHERE user_id=? AND chat_id=?",
+            (user_id, chat_id)
+        ) as cur:
+            return (await cur.fetchone())[0]
+
+
+async def count_event_wins_today(user_id, chat_id):
+    today = _now().strftime("%Y-%m-%d") + "%"
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute(
+            "SELECT COUNT(*) FROM event_wins WHERE user_id=? AND chat_id=? AND won_at LIKE ?",
+            (user_id, chat_id, today)
+        ) as cur:
+            return (await cur.fetchone())[0]
+
+
+async def get_user_coins(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT coins FROM users WHERE user_id=?", (user_id,)) as cur:
+            row = await cur.fetchone()
+        return row[0] if row else 0
