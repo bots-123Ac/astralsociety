@@ -1,9 +1,11 @@
-from aiogram import Router, F
+from aiogram import Router
+from aiogram.filters import Command
 from aiogram.types import Message
 
 from utils.database import (
     get_or_create_user, get_user_by_astral_id, get_user_by_username,
-    get_user_by_id, convert_coins_to_gems, is_premium, get_user_coins, get_user_gems,
+    get_user_by_id, convert_coins_to_gems, is_premium,
+    get_user_coins, get_user_gems,
 )
 
 router = Router()
@@ -17,6 +19,7 @@ def format_profile(u, premium: bool = False) -> str:
     gems = u["gems"] or 0
     xp = u["xp"] or 0
     quiz_solved = u["quiz_solved"] or 0
+    word_score = u["word_score"] or 0
 
     if premium:
         return (
@@ -30,7 +33,8 @@ def format_profile(u, premium: bool = False) -> str:
             f"🪙 ᴄᴏɪɴꜱ       — <b>{coins:,}</b>\n"
             f"💎 ɢᴇᴍꜱ         — <b>{gems:,}</b>\n"
             f"📈 xᴘ          — <b>{xp:,}</b>\n"
-            f"🧠 ǫᴜɪᴢ ꜱᴏʟᴠᴇᴅ — <b>{quiz_solved}</b>\n\n"
+            f"🧠 ǫᴜɪᴢ ꜱᴏʟᴠᴇᴅ — <b>{quiz_solved}</b>\n"
+            f"🏆 ᴡᴏʀᴅ sᴄᴏʀᴇ  — <b>{word_score:,}</b>\n\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n"
             f"⭐ ᴘʀᴇᴍɪᴜᴍ ᴘᴇʀᴋꜱ ᴀᴄᴛɪᴠᴇ\n"
             f"━━━━━━━━━━━━━━━━━━━━━"
@@ -49,9 +53,13 @@ def format_profile(u, premium: bool = False) -> str:
     )
 
 
-@router.message(F.text.regexp(r"^/profile(\s|$)") | F.text.regexp(r"^/profile@\w+(\s|$)"))
+# ═══════════════════════════════════════════════
+# /profile — works in DM AND GC
+# Priority: reply → @username → astral_id → self
+# ═══════════════════════════════════════════════
+@router.message(Command("profile"))
 async def cmd_profile(message: Message):
-    # Reply to user
+    # ═══ Reply to a user's message ═══
     if message.reply_to_message and message.reply_to_message.from_user:
         target = message.reply_to_message.from_user
         await get_or_create_user(target.id, target.username, target.first_name)
@@ -61,20 +69,28 @@ async def cmd_profile(message: Message):
         prem = await is_premium(target.id)
         return await message.reply(format_profile(u, prem))
 
+    # ═══ Parse args ═══
     text = message.text or ""
     parts = text.split()
     args = parts[1:] if len(parts) > 1 else []
 
+    # ═══ No args — own profile ═══
     if not args:
-        await get_or_create_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
+        await get_or_create_user(
+            message.from_user.id,
+            message.from_user.username,
+            message.from_user.first_name,
+        )
         u = await get_user_by_id(message.from_user.id)
         if not u:
             return await message.reply("❌ ᴜꜱᴇʀ ɴᴏᴛ ꜰᴏᴜɴᴅ.")
         prem = await is_premium(message.from_user.id)
         return await message.reply(format_profile(u, prem))
 
+    # ═══ Has arg — resolve target ═══
     arg = args[0].strip()
     u = None
+
     if arg.startswith("@"):
         u = await get_user_by_username(arg)
     elif arg.isdigit():
@@ -91,24 +107,38 @@ async def cmd_profile(message: Message):
     await message.reply(format_profile(u, prem))
 
 
-@router.message(F.text.regexp(r"^/convert(\s|$)"))
+# ═══════════════════════════════════════════════
+# /convert
+# ═══════════════════════════════════════════════
+@router.message(Command("convert"))
 async def cmd_convert(message: Message):
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
         return await message.reply("ᴜꜱᴀɢᴇ: <code>/convert 100c</code>\n100 ᴄᴏɪɴꜱ = 1 ɢᴇᴍ")
+
     arg = parts[1].strip().lower().replace("c", "").replace(" ", "")
     if not arg.isdigit():
         return await message.reply("❌ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ.")
+
     amount = int(arg)
     if amount < 100:
         return await message.reply(
-            "❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ᴄᴏɪɴꜱ!\n\nʏᴏᴜ ɴᴇᴇᴅ 100 🪙 ᴄᴏɪɴꜱ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ᴛᴏ 1 💎 ɢᴇᴍ."
+            "❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ᴄᴏɪɴꜱ!\n\n"
+            "ʏᴏᴜ ɴᴇᴇᴅ 100 🪙 ᴄᴏɪɴꜱ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ᴛᴏ 1 💎 ɢᴇᴍ."
         )
+
+    await get_or_create_user(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
+    )
+
     ok, result = await convert_coins_to_gems(message.from_user.id, amount)
     if not ok:
         if result == "insufficient":
             return await message.reply(
-                "❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ᴄᴏɪɴꜱ!\n\nʏᴏᴜ ɴᴇᴇᴅ 100 🪙 ᴄᴏɪɴꜱ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ᴛᴏ 1 💎 ɢᴇᴍ."
+                "❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ᴄᴏɪɴꜱ!\n\n"
+                "ʏᴏᴜ ɴᴇᴇᴅ 100 🪙 ᴄᴏɪɴꜱ ᴛᴏ ᴄᴏɴᴠᴇʀᴛ ᴛᴏ 1 💎 ɢᴇᴍ."
             )
         return await message.reply("❌ ᴄᴏɴᴠᴇʀꜱɪᴏɴ ꜰᴀɪʟᴇᴅ.")
 
