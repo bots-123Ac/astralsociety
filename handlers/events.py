@@ -22,14 +22,6 @@ from utils.database import (
 router = Router()
 logger = logging.getLogger(__name__)
 
-# ═══════════════════════════════════════════════
-# IN-MEMORY EVENT STATE
-# chat_id -> {
-#     "secret": int, "prize": int,
-#     "expires_at": datetime,
-#     "user_guesses": {user_id: {"count": int, "low": int, "high": int}}
-# }
-# ═══════════════════════════════════════════════
 ACTIVE_EVENTS = {}
 
 
@@ -59,51 +51,55 @@ async def _post_event(bot: Bot, chat_id: int):
 
     try:
         await bot.send_message(chat_id, _event_post_text(prize))
-        logger.info(f"Event in {chat_id}: secret={secret}, prize={prize}")
+        logger.info(f"✅ Event posted in {chat_id}: secret={secret}, prize={prize}")
     except Exception as e:
-        logger.warning(f"Event post failed in {chat_id}: {e}")
+        logger.warning(f"❌ Event post failed in {chat_id}: {e}")
 
 
 async def event_poster_loop(bot: Bot):
-    """Every EVENT_INTERVAL_SECONDS, post a unique event per GC."""
-    await asyncio.sleep(20)
+    # Initial delay
+    await asyncio.sleep(15)
+    logger.info("🎯 Event poster loop STARTED")
     while True:
         try:
             groups = await get_all_active_groups()
             now = datetime.utcnow()
+            logger.info(f"🔍 Event check: {len(groups)} groups registered")
+
             for gid in groups:
                 ev = ACTIVE_EVENTS.get(gid)
+                # Skip if unexpired event
                 if ev and ev["expires_at"] > now:
                     continue
+                # Expire old
                 if ev:
                     ACTIVE_EVENTS.pop(gid, None)
+                # Post new
                 await _post_event(bot, gid)
                 await asyncio.sleep(2)
+
         except Exception as e:
             logger.error(f"event_poster_loop: {e}")
+
         await asyncio.sleep(EVENT_INTERVAL_SECONDS)
 
 
 # ═══════════════════════════════════════════════
-# /h — EVENT GUESS HANDLER (higher priority)
+# /h — EVENT GUESS HANDLER
 # ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/h(\s|$)"))
 async def event_guess_handler(message: Message):
     chat_id = message.chat.id
     user_id = message.from_user.id
 
-    # Check if there's an active event in this chat
     ev = ACTIVE_EVENTS.get(chat_id)
     if not ev:
-        # No event → pass to personal game in tgames.py
-        raise SkipHandler()
+        raise SkipHandler()  # No event → personal game
 
-    # Check expiry
     if ev["expires_at"] <= datetime.utcnow():
         ACTIVE_EVENTS.pop(chat_id, None)
         return await message.reply("⏳ ᴛʜᴇ ᴇᴠᴇɴᴛ ʜᴀꜱ ᴇxᴘɪʀᴇᴅ. ᴡᴀɪᴛ ꜰᴏʀ ᴛʜᴇ ɴᴇxᴛ ᴅʀᴏᴘ.")
 
-    # Parse guess
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2 or not parts[1].strip().isdigit():
         return await message.reply("ᴜꜱᴀɢᴇ: <code>/h 250</code>")
@@ -114,7 +110,6 @@ async def event_guess_handler(message: Message):
             f"❌ ɢᴜᴇꜱꜱ ʙᴇᴛᴡᴇᴇɴ {EVENT_NUMBER_MIN} ᴀɴᴅ {EVENT_NUMBER_MAX}."
         )
 
-    # Check per-user daily limit
     wins_today = await count_event_wins_today(user_id, chat_id)
     if wins_today >= EVENT_MAX_WINS_PER_DAY:
         return await message.reply(
@@ -122,7 +117,6 @@ async def event_guess_handler(message: Message):
             f"ᴄᴏᴍᴇ ʙᴀᴄᴋ ᴛᴏᴍᴏʀʀᴏᴡ."
         )
 
-    # Initialize user's guess state
     ug = ev["user_guesses"].setdefault(user_id, {
         "count": 0,
         "low": EVENT_NUMBER_MIN,
@@ -138,7 +132,7 @@ async def event_guess_handler(message: Message):
     remaining = EVENT_MAX_GUESSES - ug["count"]
     secret = ev["secret"]
 
-    # ═══ CORRECT GUESS ═══
+    # ═══ CORRECT ═══
     if guess == secret:
         prize = ev["prize"]
         await get_or_create_user(user_id, message.from_user.username, message.from_user.first_name)
@@ -162,19 +156,14 @@ async def event_guess_handler(message: Message):
             f"📅 ᴡɪɴꜱ ᴛᴏᴅᴀʏ: <b>{today_wins}/{EVENT_MAX_WINS_PER_DAY}</b>"
         )
 
-    # ═══ HIGH / LOW FEEDBACK ═══
+    # ═══ FEEDBACK ═══
     if guess > secret:
-        # HIGH guess → 📈 UP arrow (matches Baka style)
         ug["high"] = min(ug["high"], guess - 1)
-        arrow = "📈"
-        label = "ᴛᴏᴏ ʜɪɢʜ"
+        arrow, label = "📈", "ᴛᴏᴏ ʜɪɢʜ"
     else:
-        # LOW guess → 📉 DOWN arrow
         ug["low"] = max(ug["low"], guess + 1)
-        arrow = "📉"
-        label = "ᴛᴏᴏ ʟᴏᴡ"
+        arrow, label = "📉", "ᴛᴏᴏ ʟᴏᴡ"
 
-    # If bounds collapse (bad luck with limit)
     if ug["low"] >= ug["high"]:
         ug["low"] = EVENT_NUMBER_MIN
         ug["high"] = EVENT_NUMBER_MAX
