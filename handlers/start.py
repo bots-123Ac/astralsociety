@@ -10,7 +10,6 @@ from utils.database import get_or_create_user
 router = Router()
 logger = logging.getLogger(__name__)
 
-# Disable link preview (no profile card, no page preview)
 NO_PREVIEW = LinkPreviewOptions(is_disabled=True)
 
 
@@ -32,7 +31,6 @@ async def cmd_start(message: Message):
         user = message.from_user
         await get_or_create_user(user.id, user.username, user.first_name)
 
-        # Skip welcome in groups
         if message.chat.type in ("group", "supergroup"):
             return
 
