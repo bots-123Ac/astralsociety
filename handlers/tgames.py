@@ -15,7 +15,16 @@ from utils.database import (
 router = Router()
 
 QUIZ_CACHE = {}
+
+# ═══════════════════════════════════════════════
+# NUMBER CACHE — per user per chat with range tracking
+# key: (chat_id, user_id) → {"secret": int, "attempts": int, "low": int, "high": int}
+# ═══════════════════════════════════════════════
 NUMBER_CACHE = {}
+
+NUMBER_MIN = 100
+NUMBER_MAX = 500
+NUMBER_MAX_ATTEMPTS = 12
 
 CATEGORY_NAMES = {
     "space": "🚀 ꜱᴘᴀᴄᴇ", "general": "🌍 ɢᴇɴᴇʀᴀʟ",
@@ -176,24 +185,34 @@ async def _finish_quiz(cb: CallbackQuery, key: tuple):
     await cb.answer("🏁")
 
 
-# ═══ PERSONAL NUMBER GAME (fallback /h) ═══
+# ═══════════════════════════════════════════════
+# PERSONAL NUMBER GAME — /tgames → Number
+# ═══════════════════════════════════════════════
 @router.callback_query(F.data == "tg:number")
 async def number_start(cb: CallbackQuery):
-    secret = random.randint(100, 500)
+    secret = random.randint(NUMBER_MIN, NUMBER_MAX)
     key = (cb.message.chat.id, cb.from_user.id)
-    NUMBER_CACHE[key] = {"secret": secret, "attempts": 0}
+    NUMBER_CACHE[key] = {
+        "secret": secret,
+        "attempts": 0,
+        "low": NUMBER_MIN,
+        "high": NUMBER_MAX,
+    }
     await inc_number_attempt(cb.from_user.id)
     await cb.message.edit_text(
         "🔢 <b>ɢᴜᴇꜱꜱ ᴛʜᴇ ɴᴜᴍʙᴇʀ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n"
-        "🎯 ʀᴀɴɢᴇ: <b>100–500</b>\n"
-        "🎲 ᴍᴀx ᴄʜᴀɴᴄᴇꜱ: <b>12</b>\n\n"
+        f"🎯 ʀᴀɴɢᴇ: <b>{NUMBER_MIN}–{NUMBER_MAX}</b>\n"
+        f"🎲 ᴍᴀx ᴄʜᴀɴᴄᴇꜱ: <b>{NUMBER_MAX_ATTEMPTS}</b>\n\n"
         "ᴜꜱᴇ <code>/h &lt;ɴᴜᴍʙᴇʀ&gt;</code> ᴛᴏ ɢᴜᴇꜱꜱ.\n"
         "ᴇxᴀᴍᴘʟᴇ: <code>/h 250</code>"
     )
     await cb.answer()
 
 
+# ═══════════════════════════════════════════════
+# /h — PERSONAL NUMBER GUESS (fallback when no event)
+# ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/h(\s|$)"))
 async def number_guess(message: Message):
     parts = message.text.split(maxsplit=1)
@@ -207,13 +226,16 @@ async def number_guess(message: Message):
         return await message.reply("❌ ꜱᴛᴀʀᴛ ᴀ ɢᴀᴍᴇ ᴠɪᴀ /tgames ꜰɪʀꜱᴛ.")
 
     guess = int(parts[1].strip())
-    if not (100 <= guess <= 500):
-        return await message.reply("❌ ɢᴜᴇꜱꜱ ʙᴇᴛᴡᴇᴇɴ 100 ᴀɴᴅ 500.")
+    if not (NUMBER_MIN <= guess <= NUMBER_MAX):
+        return await message.reply(
+            f"❌ ɢᴜᴇꜱꜱ ʙᴇᴛᴡᴇᴇɴ {NUMBER_MIN} ᴀɴᴅ {NUMBER_MAX}."
+        )
 
     game["attempts"] += 1
     await inc_number_guess(user_id)
     secret = game["secret"]
 
+    # ═══ CORRECT ═══
     if guess == secret:
         coins = NUMBER_REWARD_COINS
         xp_gain = random.randint(0, 12)
@@ -228,21 +250,29 @@ async def number_guess(message: Message):
             f"🪙 +{coins} | 📈 +{xp_gain} xᴘ"
         )
 
-    remaining = 12 - game["attempts"]
-    if game["attempts"] >= 12:
-        NUMBER_CACHE.pop(key, None)
-        return await message.reply(f"💀 ɢᴀᴍᴇ ᴏᴠᴇʀ! ꜱᴇᴄʀᴇᴛ ᴡᴀꜱ <b>{secret}</b>")
+    remaining = NUMBER_MAX_ATTEMPTS - game["attempts"]
 
-    # ═══ EMOJI FIX: HIGH → 📈, LOW → 📉 (matches Baka style) ═══
+    # ═══ GAME OVER ═══
+    if game["attempts"] >= NUMBER_MAX_ATTEMPTS:
+        NUMBER_CACHE.pop(key, None)
+        return await message.reply(
+            f"💀 <b>ɢᴀᴍᴇ ᴏᴠᴇʀ!</b>\n\nꜱᴇᴄʀᴇᴛ ᴡᴀꜱ <b>{secret}</b>"
+        )
+
+    # ═══ UPDATE RANGE (per user tracking) ═══
     if guess > secret:
-        await message.reply(
-            f"📈 [ <b>{guess}</b> ] ɪꜱ ᴛᴏᴏ ʜɪɢʜ!\n"
-            f"🎯 ʀᴀɴɢᴇ: [ 100 ──── {guess - 1} ]\n"
-            f"⚠️ ᴀᴛᴛᴇᴍᴘᴛꜱ ʟᴇꜰᴛ: <b>{remaining}</b>"
-        )
+        # Too HIGH → tighten upper bound
+        game["high"] = min(game["high"], guess - 1)
+        arrow = "📈"
+        label = "ᴛᴏᴏ ʜɪɢʜ"
     else:
-        await message.reply(
-            f"📉 [ <b>{guess}</b> ] ɪꜱ ᴛᴏᴏ ʟᴏᴡ!\n"
-            f"🎯 ʀᴀɴɢᴇ: [ {guess + 1} ──── 500 ]\n"
-            f"⚠️ ᴀᴛᴛᴇᴍᴘᴛꜱ ʟᴇꜰᴛ: <b>{remaining}</b>"
-        )
+        # Too LOW → tighten lower bound
+        game["low"] = max(game["low"], guess + 1)
+        arrow = "📉"
+        label = "ᴛᴏᴏ ʟᴏᴡ"
+
+    await message.reply(
+        f"{arrow} [ <b>{guess}</b> ] ɪꜱ {label}!\n"
+        f"🎯 ʀᴀɴɢᴇ: [ <b>{game['low']} ──── {game['high']}</b> ]\n"
+        f"⚠️ ᴀᴛᴛᴇᴍᴘᴛꜱ ʟᴇꜰᴛ: <b>{remaining}</b>"
+    )
