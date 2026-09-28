@@ -1,4 +1,3 @@
-from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message
 
@@ -15,34 +14,31 @@ router = Router()
 async def cmd_mission(message: Message):
     await get_or_create_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
     m = await get_or_create_mission(message.from_user.id)
-    # m = (id, user_id, date, quizzes_required, quiz_done, word_played, pyq_downloaded, claimed)
     _, _, _, req, qdone, wplay, pyq, claimed = m
 
     if claimed:
         return await message.reply(
-            f"✅ ʏσᴜ'ᴠє ᴀʟʀᴇᴀᴅʏ ᴄʟᴀɪᴍᴇᴅ ᴛᴏᴅᴀʏ's ᴍɪssɪᴏɴ!\n"
-            f"ᴄᴏᴍᴇ ʙᴀᴄᴋ ᴛᴏᴍᴏʀʀᴏᴡ."
+            f"✅ ʏᴏᴜ'ᴠᴇ ᴀʟʀᴇᴀᴅʏ ᴄʟᴀɪᴍᴇᴅ ᴛᴏᴅᴀʏ'ꜱ ᴍɪꜱꜱɪᴏɴ!\nᴄᴏᴍᴇ ʙᴀᴄᴋ ᴛᴏᴍᴏʀʀᴏᴡ."
         )
 
+    # Quiz line
     if req == 0:
-        quiz_line = "1. 🧠 sσʟᴠє 0 ǫᴜiᴢᴢєs ✅ (ᴧᴜтσ-ᴅσηє)"
+        quiz_line = "1. 🧠 ꜱᴏʟᴠᴇ 0 ǫᴜɪᴢᴢᴇꜱ ✅ (ᴀᴜᴛᴏ-ᴅᴏɴᴇ)"
     else:
         mark = "✅" if qdone >= req else "⬜"
-        quiz_line = f"1. 🧠 sσʟᴠє <b>{req}</b> ǫᴜiᴢᴢєs {mark}"
+        quiz_line = f"1. 🧠 ꜱᴏʟᴠᴇ <b>{req}</b> ǫᴜɪᴢᴢᴇꜱ {mark} ({qdone}/{req})"
 
-    word_line = f"2. 🔤 ᴩʟᴧʏ ᴡσʀᴅ ɢᴧϻє {'✅' if wplay else '⬜'}"
-    pyq_line = f"3. 📚 ᴅσωηʟσᴧᴅ ᴧ ᴩʏǫ (ᴄʟᴧss 10 ᴏʀ 11) {'✅' if pyq else '⬜'}"
+    pyq_line = f"2. 📚 ᴅᴏᴡɴʟᴏᴀᴅ ᴀ ᴘʏǫ (ᴄʟᴀꜱꜱ 10/11/12) {'✅' if pyq else '⬜'}"
 
-    all_done = (qdone >= req) and wplay and pyq
+    all_done = (qdone >= req) and pyq
 
     text = (
-        f"🌟 <b>ᴅᴧiʟʏ ᴧsᴛʀᴧʟ ϻissiση</b>\n"
+        f"🌟 <b>ᴅᴀɪʟʏ ᴀꜱᴛʀᴀʟ ᴍɪꜱꜱɪᴏɴ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"{quiz_line}\n"
-        f"{word_line}\n"
         f"{pyq_line}\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🎁 ʀєᴡᴧʀᴅ: <b>{MISSION_REWARD_COINS:,}</b> 🪙 + <b>{MISSION_REWARD_XP}</b> 📈"
+        f"🎁 ʀᴇᴡᴀʀᴅ: <b>{MISSION_REWARD_COINS:,}</b> 🪙 + <b>{MISSION_REWARD_XP}</b> 📈"
     )
 
     if all_done:
@@ -50,20 +46,18 @@ async def cmd_mission(message: Message):
         await add_xp(message.from_user.id, MISSION_REWARD_XP)
         await mission_claim(message.from_user.id)
 
-        # DM to user
         try:
             await message.bot.send_message(
                 message.from_user.id,
-                f"🌟 <b>ᴅᴧiʟʏ ᴧsᴛʀᴧʟ ϻissiση ᴄσϻᴩʟєᴛєᴅ!</b>\n"
+                f"🌟 <b>ᴅᴀɪʟʏ ᴀꜱᴛʀᴀʟ ᴍɪꜱꜱɪᴏɴ ᴄᴏᴍᴘʟᴇᴛᴇᴅ!</b>\n"
                 f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-                f"🪙 +{MISSION_REWARD_COINS:,} ᴄσiηs\n"
-                f"📈 +{MISSION_REWARD_XP} xᴩ\n\n"
-                f"ᴄσϻє вᴧᴄᴋ тσϻσʀʀσω тσ ᴄσϻᴩєтє ωiтн ʏσᴜʀ ғʀiєηᴅs!"
+                f"🪙 +{MISSION_REWARD_COINS:,} ᴄᴏɪɴꜱ\n"
+                f"📈 +{MISSION_REWARD_XP} xᴘ\n\n"
+                f"ᴄᴏᴍᴇ ʙᴀᴄᴋ ᴛᴏᴍᴏʀʀᴏᴡ ᴛᴏ ᴄᴏᴍᴘᴇᴛᴇ ᴡɪᴛʜ ʏᴏᴜʀ ꜰʀɪᴇɴᴅꜱ!"
             )
         except Exception:
             pass
 
-        text += "\n\n✅ <b>ᴍissiση ᴄσϻᴩʟєтє!</b> ʀєᴡᴧʀᴅ ᴄʟᴧiϻєᴅ."
-        text += "\n\n🪙 +8000 | 📈 +200"
+        text += "\n\n✅ <b>ᴍɪꜱꜱɪᴏɴ ᴄᴏᴍᴘʟᴇᴛᴇ!</b> ʀᴇᴡᴀʀᴅ ᴄʟᴀɪᴍᴇᴅ."
 
     await message.reply(text)
