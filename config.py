@@ -14,11 +14,9 @@ SUPPORT_CHANNEL_LINK = "https://t.me/Astral_study_chest"
 
 BOT_ADD_LINK = f"https://t.me/{BOT_USERNAME.lstrip('@')}?startgroup=true"
 
-# ═══ OWNER & ADMINS ═══
 OWNER_ID = -1004398879964
 BOT_ADMIN_IDS = [7748285403, 7415480513, 8165863254, 7790607144, 8987845745]
 
-# ═══ CREATOR CREDITS ═══
 CREATOR_1_NAME = "⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐"
 CREATOR_1_LINK = "https://t.me/OfficialCrazyBoy07"
 CREATOR_2_NAME = "𝓚𝓪𝓷𝓱𝓪࿐✨🤟"
@@ -37,31 +35,23 @@ DB_PATH = os.getenv("DB_PATH", "astral.db")
 COINS_PER_GEM = 100
 DAILY_NORMAL_COINS = 2000
 DAILY_NORMAL_XP = 150
-DAILY_PREMIUM_COINS = 5500
+DAILY_PREMIUM_COINS = 5000
 DAILY_PREMIUM_XP = 350
 MISSION_REWARD_COINS = 8000
 MISSION_REWARD_XP = 200
 QUIZ_REWARD_COINS = 40
 NUMBER_REWARD_COINS = 80
-WORD_MAX_REWARD = 100
 ROB_NORMAL_PERCENT = 10
 ROB_PREMIUM_PERCENT = 5
-SHIELD_FREE_DAYS = 2
 GIVE_DEDUCTION_PERCENT = 10
 
-# ═══ EVENT SETTINGS (automatic, no admin command needed) ═══
-# 3600 = 1 hour (production). Change to 60 for testing (1 min).
-EVENT_INTERVAL_SECONDS = 3600
-EVENT_TIME_LIMIT_MINUTES = 60
-EVENT_PRIZE_MIN = 500
-EVENT_PRIZE_MAX = 2000
-EVENT_NUMBER_MIN = 100
-EVENT_NUMBER_MAX = 500
-EVENT_MAX_GUESSES = 10
-EVENT_MAX_WINS_PER_DAY = 3
+# ═══ SHIELD ═══
+SHIELD_NORMAL_MAX_DAYS = 2
+SHIELD_PREMIUM_MAX_DAYS = 5
 
+# ═══ PREMIUM (via Gems) ═══
 PREMIUM_PLANS = {
-    "1m": {"days": 30, "stars": 90},
-    "4m": {"days": 120, "stars": 140},
-    "12m": {"days": 365, "stars": 175},
+    "1w": {"days": 7, "gems": 1000, "label": "1 Week"},
+    "1m": {"days": 30, "gems": 10000, "label": "1 Month"},
+    "1y": {"days": 365, "gems": 100000, "label": "1 Year"},
 }
