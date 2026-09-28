@@ -12,7 +12,7 @@ from handlers import (
     shop, powers, admin, quiz, events, tgames,
 )
 from utils.logger import setup_logger
-from utils.database import init_db
+from utils.database import init_db, get_all_active_groups
 from utils.quiz_loader import background_load
 
 
@@ -36,6 +36,7 @@ async def main():
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
+    # ═══ ROUTER ORDER ═══
     dp.include_router(start.router)
     dp.include_router(menu.router)
     dp.include_router(profile.router)
@@ -48,12 +49,21 @@ async def main():
     dp.include_router(powers.router)
     dp.include_router(admin.router)
     dp.include_router(quiz.router)
-    dp.include_router(events.router)
-    dp.include_router(tgames.router)
+    dp.include_router(events.router)    # 👈 BEFORE tgames
+    dp.include_router(tgames.router)    # 👈 LAST
 
-    # Background tasks
+    # ═══ BACKGROUND TASKS ═══
     asyncio.create_task(events.event_poster_loop(bot))
-    asyncio.create_task(background_load())   # 👈 quiz fetch
+    asyncio.create_task(background_load())
+
+    # Log registered groups on startup
+    try:
+        groups = await get_all_active_groups()
+        logging.info(f"📋 Registered groups for events: {len(groups)}")
+        for g in groups[:5]:
+            logging.info(f"  • {g}")
+    except Exception as e:
+        logging.warning(f"Group count check: {e}")
 
     logging.info("✅ Bot is running.")
     await bot.delete_webhook(drop_pending_updates=True)
