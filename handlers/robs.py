@@ -10,17 +10,21 @@ from config import (
 )
 from utils.database import (
     get_or_create_user, add_coins, add_xp, is_premium, is_shielded,
-    set_shield, shield_remaining, get_premium_status,
+    set_shield, shield_remaining, get_user_coins,
 )
 
 router = Router()
 
 
-# ═══ /give ═══
+# ═══════════════════════════════════════════════
+# /give [amount] — reply only
+# ═══════════════════════════════════════════════
 @router.message(Command("give"))
 async def cmd_give(message: Message, bot: Bot):
     if not message.reply_to_message or not message.reply_to_message.from_user:
-        return await message.reply("❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜꜱᴇʀ ᴡɪᴛʜ <code>/give [ᴀᴍᴏᴜɴᴛ]</code>")
+        return await message.reply(
+            "❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜꜱᴇʀ ᴡɪᴛʜ <code>/give [ᴀᴍᴏᴜɴᴛ]</code>"
+        )
 
     parts = message.text.split()
     if len(parts) < 2 or not parts[1].isdigit():
@@ -40,12 +44,7 @@ async def cmd_give(message: Message, bot: Bot):
     await get_or_create_user(sender.id, sender.username, sender.first_name)
     await get_or_create_user(receiver.id, receiver.username, receiver.first_name)
 
-    import aiosqlite
-    from config import DB_PATH
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute("SELECT coins FROM users WHERE user_id=?", (sender.id,)) as cur:
-            row = await cur.fetchone()
-    sender_coins = row[0] if row else 0
+    sender_coins = await get_user_coins(sender.id)
 
     if sender_coins < amount:
         return await message.reply(
@@ -66,7 +65,9 @@ async def cmd_give(message: Message, bot: Bot):
     )
 
 
-# ═══ /robs ═══
+# ═══════════════════════════════════════════════
+# /robs — reply only (full or specific amount)
+# ═══════════════════════════════════════════════
 @router.message(Command("robs"))
 async def cmd_robs(message: Message, bot: Bot):
     if not message.reply_to_message or not message.reply_to_message.from_user:
@@ -94,12 +95,7 @@ async def cmd_robs(message: Message, bot: Bot):
             "ᴡᴀɪᴛ ᴛɪʟʟ ᴛʜᴇʏ ʀᴇᴍᴏᴠᴇ ᴛʜᴇɪʀ ꜱʜɪᴇʟᴅ."
         )
 
-    import aiosqlite
-    from config import DB_PATH
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute("SELECT coins FROM users WHERE user_id=?", (victim.id,)) as cur:
-            row = await cur.fetchone()
-    victim_coins = row[0] if row else 0
+    victim_coins = await get_user_coins(victim.id)
 
     if victim_coins < 10:
         return await message.reply(
@@ -138,6 +134,7 @@ async def cmd_robs(message: Message, bot: Bot):
         f"📈 xᴘ: <b>+{xp_gain}</b>"
     )
 
+    # DM victim
     try:
         await bot.send_message(
             victim.id,
@@ -150,27 +147,36 @@ async def cmd_robs(message: Message, bot: Bot):
         pass
 
 
-# ═══ /shield ═══
+# ═══════════════════════════════════════════════
+# /shield [days]
+# ═══════════════════════════════════════════════
 @router.message(Command("shield"))
 async def cmd_shield(message: Message):
-    parts = message.text.split()
+    await get_or_create_user(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
+    )
+
     is_prem = await is_premium(message.from_user.id)
     max_days = SHIELD_PREMIUM_MAX_DAYS if is_prem else SHIELD_NORMAL_MAX_DAYS
 
+    parts = message.text.split()
     if len(parts) < 2 or not parts[1].isdigit():
         return await message.reply(
             f"ᴜꜱᴀɢᴇ: <code>/shield 2</code>\n\n"
             f"🛡️ ɴᴏʀᴍᴀʟ ᴍᴀx: {SHIELD_NORMAL_MAX_DAYS} ᴅᴀʏꜱ\n"
             f"⭐ ᴘʀᴇᴍɪᴜᴍ ᴍᴀx: {SHIELD_PREMIUM_MAX_DAYS} ᴅᴀʏꜱ"
         )
+
     days = int(parts[1])
     if days < 1:
         return await message.reply("❌ ɪɴᴠᴀʟɪᴅ ᴅᴀʏꜱ.")
     if days > max_days:
-        return await message.reply(
-            f"❌ ᴍᴀx {max_days} ᴅᴀʏꜱ ᴏɴʟʏ.\n"
-            + ("⭐ ᴜꜱᴇ /premium ꜰᴏʀ 5 ᴅᴀʏꜱ." if not is_prem else "")
-        )
+        msg = f"❌ ᴍᴀx {max_days} ᴅᴀʏꜱ ᴏɴʟʏ."
+        if not is_prem:
+            msg += "\n⭐ ᴜꜱᴇ /premium ꜰᴏʀ 5 ᴅᴀʏꜱ."
+        return await message.reply(msg)
 
     until = await set_shield(message.from_user.id, days)
     await message.reply(
@@ -180,13 +186,21 @@ async def cmd_shield(message: Message):
     )
 
 
-# ═══ /shieldcheck — Premium users can check others ═══
+# ═══════════════════════════════════════════════
+# /shieldcheck
+# ═══════════════════════════════════════════════
 @router.message(Command("shieldcheck"))
 async def cmd_shieldcheck(message: Message):
+    await get_or_create_user(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
+    )
+
     checker = message.from_user
     checker_premium = await is_premium(checker.id)
 
-    # ═══ Normal user → only own shield ═══
+    # Normal user → only own shield
     if not checker_premium:
         rem = await shield_remaining(checker.id)
         if rem <= 0:
@@ -196,8 +210,7 @@ async def cmd_shieldcheck(message: Message):
             )
         return await message.reply(f"🛡️ ʏᴏᴜʀ ꜱʜɪᴇʟᴅ: <b>{rem} ᴅᴀʏꜱ ʟᴇꜰᴛ</b>")
 
-    # ═══ Premium user → check target ═══
-    # No reply → own
+    # Premium user
     if not message.reply_to_message or not message.reply_to_message.from_user:
         rem = await shield_remaining(checker.id)
         if rem <= 0:
@@ -206,7 +219,6 @@ async def cmd_shieldcheck(message: Message):
 
     target = message.reply_to_message.from_user
 
-    # Can't check other premium
     if await is_premium(target.id):
         return await message.reply(
             "❌ ᴄᴀɴ'ᴛ ᴄʜᴇᴄᴋ ᴀɴᴏᴛʜᴇʀ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀ'ꜱ ꜱʜɪᴇʟᴅ."
