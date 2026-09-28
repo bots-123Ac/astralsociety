@@ -18,20 +18,13 @@ QUIZ_CACHE = {}
 NUMBER_CACHE = {}
 
 CATEGORY_NAMES = {
-    "space": "🚀 ꜱᴘᴀᴄᴇ",
-    "general": "🌍 ɢᴇɴᴇʀᴀʟ",
-    "science": "🔬 ꜱᴄɪᴇɴᴄᴇ",
-    "history": "📜 ʜɪꜱᴛᴏʀʏ",
-    "geography": "🗺️ ɢᴇᴏɢʀᴀᴘʜʏ",
-    "maths": "🔢 ᴍᴀᴛʜꜱ",
-    "tech": "💻 ᴛᴇᴄʜ",
-    "sports": "⚽ ꜱᴘᴏʀᴛꜱ",
-    "movies": "🎬 ᴍᴏᴠɪᴇꜱ",
-    "music": "🎵 ᴍᴜꜱɪᴄ",
-    "animals": "🐾 ᴀɴɪᴍᴀʟꜱ",
-    "food": "🍔 ꜰᴏᴏᴅ",
-    "literature": "📖 ʟɪᴛᴇʀᴀᴛᴜʀᴇ",
-    "politics": "🏛️ ᴘᴏʟɪᴛɪᴄꜱ",
+    "space": "🚀 ꜱᴘᴀᴄᴇ", "general": "🌍 ɢᴇɴᴇʀᴀʟ",
+    "science": "🔬 ꜱᴄɪᴇɴᴄᴇ", "history": "📜 ʜɪꜱᴛᴏʀʏ",
+    "geography": "🗺️ ɢᴇᴏɢʀᴀᴘʜʏ", "maths": "🔢 ᴍᴀᴛʜꜱ",
+    "tech": "💻 ᴛᴇᴄʜ", "sports": "⚽ ꜱᴘᴏʀᴛꜱ",
+    "movies": "🎬 ᴍᴏᴠɪᴇꜱ", "music": "🎵 ᴍᴜꜱɪᴄ",
+    "animals": "🐾 ᴀɴɪᴍᴀʟꜱ", "food": "🍔 ꜰᴏᴏᴅ",
+    "literature": "📖 ʟɪᴛᴇʀᴀᴛᴜʀᴇ", "politics": "🏛️ ᴘᴏʟɪᴛɪᴄꜱ",
     "business": "💰 ʙᴜꜱɪɴᴇꜱꜱ",
 }
 
@@ -50,9 +43,7 @@ async def cmd_tgames(message: Message):
 async def quiz_select(cb: CallbackQuery):
     total = await get_quiz_count()
     await cb.message.edit_text(
-        f"🧠 <b>ǫᴜɪᴢ</b>\n"
-        f"<i>ᴛᴏᴛᴀʟ: {total:,} ǫᴜᴇꜱᴛɪᴏɴꜱ</i>\n\n"
-        f"ʜᴏᴡ ᴍᴀɴʏ ǫᴜᴇꜱᴛɪᴏɴꜱ?",
+        f"🧠 <b>ǫᴜɪᴢ</b>\n<i>ᴛᴏᴛᴀʟ: {total:,} ǫᴜᴇꜱᴛɪᴏɴꜱ</i>\n\nʜᴏᴡ ᴍᴀɴʏ ǫᴜᴇꜱᴛɪᴏɴꜱ?",
         reply_markup=quiz_count_kb()
     )
     await cb.answer()
@@ -90,11 +81,9 @@ async def _send_quiz_question(cb: CallbackQuery, cat: str, key: tuple):
     sess = QUIZ_CACHE.get(key)
     if not sess:
         return await cb.answer("ꜱᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ.", show_alert=True)
-
     if sess["done"] >= sess["total"]:
         return await _finish_quiz(cb, key)
 
-    # Try up to 10 times to get an unused question
     q = None
     for _ in range(10):
         row = await get_random_quiz_question(cat)
@@ -106,7 +95,7 @@ async def _send_quiz_question(cb: CallbackQuery, cat: str, key: tuple):
     if not q:
         row = await get_random_quiz_question(cat)
         if not row:
-            return await cb.answer("ɴᴏ ǫᴜᴇꜱᴛɪᴏɴꜱ ɪɴ ᴛʜɪꜱ ᴄᴀᴛᴇɢᴏʀʏ.", show_alert=True)
+            return await cb.answer("ɴᴏ ǫᴜᴇꜱᴛɪᴏɴꜱ.", show_alert=True)
         q = row
 
     qid, question, a, b, c, d, correct = q
@@ -117,8 +106,7 @@ async def _send_quiz_question(cb: CallbackQuery, cat: str, key: tuple):
     await cb.message.edit_text(
         f"🧠 <b>{cat_label}</b>\n"
         f"ǫ: <b>{sess['done'] + 1}/{sess['total']}</b>  |  ꜱᴄᴏʀᴇ: <b>{sess['score']}</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"<b>{question}</b>\n\nᴄʜᴏᴏꜱᴇ:",
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n<b>{question}</b>\n\nᴄʜᴏᴏꜱᴇ:",
         reply_markup=quiz_options_kb(qid, a, b, c, d)
     )
     await cb.answer()
@@ -151,10 +139,8 @@ async def quiz_answer(cb: CallbackQuery):
             sess["score"] -= 1
 
     sess["done"] += 1
-
     if sess["done"] >= sess["total"]:
         return await _finish_quiz(cb, key)
-
     await _send_quiz_question(cb, sess.get("category"), key)
 
 
@@ -163,9 +149,9 @@ async def _finish_quiz(cb: CallbackQuery, key: tuple):
     if not sess:
         return await cb.answer("ꜱᴇꜱꜱɪᴏɴ ᴇxᴘɪʀᴇᴅ.", show_alert=True)
 
-    score = sess["score"]
     correct = sess["correct"]
     wrong = sess["wrong"]
+    score = sess["score"]
 
     coins = max(0, correct * QUIZ_REWARD_COINS)
     xp = random.randint(0, 5) * correct
@@ -184,14 +170,13 @@ async def _finish_quiz(cb: CallbackQuery, key: tuple):
         f"✅ ᴄᴏʀʀᴇᴄᴛ: <b>{correct}</b>\n"
         f"❌ ᴡʀᴏɴɢ: <b>{wrong}</b>\n"
         f"🎯 ꜰɪɴᴀʟ ꜱᴄᴏʀᴇ: <b>{score}</b>\n\n"
-        f"🪙 +{coins} ᴄᴏɪɴꜱ\n"
-        f"📈 +{xp} xᴘ",
+        f"🪙 +{coins} ᴄᴏɪɴꜱ\n📈 +{xp} xᴘ",
         reply_markup=back_main_kb()
     )
     await cb.answer("🏁")
 
 
-# ═══ NUMBER GUESSING ═══
+# ═══ PERSONAL NUMBER GAME (fallback /h) ═══
 @router.callback_query(F.data == "tg:number")
 async def number_start(cb: CallbackQuery):
     secret = random.randint(100, 500)
@@ -243,11 +228,21 @@ async def number_guess(message: Message):
             f"🪙 +{coins} | 📈 +{xp_gain} xᴘ"
         )
 
+    remaining = 12 - game["attempts"]
     if game["attempts"] >= 12:
         NUMBER_CACHE.pop(key, None)
         return await message.reply(f"💀 ɢᴀᴍᴇ ᴏᴠᴇʀ! ꜱᴇᴄʀᴇᴛ ᴡᴀꜱ <b>{secret}</b>")
 
-    if guess < secret:
-        await message.reply(f"⬆️ <b>{guess} ɪꜱ ᴠᴇʀʏ ʟᴏᴡ</b>\nʀᴀɴɢᴇ: {guess}–500\nᴀᴛᴛᴇᴍᴘᴛꜱ: {game['attempts']}/12")
+    # ═══ EMOJI FIX: HIGH → 📈, LOW → 📉 (matches Baka style) ═══
+    if guess > secret:
+        await message.reply(
+            f"📈 [ <b>{guess}</b> ] ɪꜱ ᴛᴏᴏ ʜɪɢʜ!\n"
+            f"🎯 ʀᴀɴɢᴇ: [ 100 ──── {guess - 1} ]\n"
+            f"⚠️ ᴀᴛᴛᴇᴍᴘᴛꜱ ʟᴇꜰᴛ: <b>{remaining}</b>"
+        )
     else:
-        await message.reply(f"⬇️ <b>{guess} ɪs ᴠᴇʀʏ ʜɪɢʜ</b>\nʀᴀɴɢᴇ: 100–{guess}\nᴀᴛᴛᴇᴍᴘᴛꜱ: {game['attempts']}/12")
+        await message.reply(
+            f"📉 [ <b>{guess}</b> ] ɪꜱ ᴛᴏᴏ ʟᴏᴡ!\n"
+            f"🎯 ʀᴀɴɢᴇ: [ {guess + 1} ──── 500 ]\n"
+            f"⚠️ ᴀᴛᴛᴇᴍᴘᴛꜱ ʟᴇꜰᴛ: <b>{remaining}</b>"
+        )
