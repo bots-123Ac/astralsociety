@@ -4,7 +4,6 @@ import random
 from datetime import datetime, timedelta
 
 from aiogram import Bot, Router, F
-from aiogram.dispatcher.event.bases import SkipHandler
 from aiogram.types import Message
 
 from config import (
@@ -22,6 +21,9 @@ from utils.database import (
 router = Router()
 logger = logging.getLogger(__name__)
 
+# ═══ IN-MEMORY EVENT STATE ═══
+# chat_id -> {"secret": int, "prize": int, "expires_at": datetime,
+#             "user_guesses": {user_id: {"count": int, "low": int, "high": int}}}
 ACTIVE_EVENTS = {}
 
 
@@ -52,31 +54,36 @@ async def _post_event(bot: Bot, chat_id: int):
     try:
         await bot.send_message(chat_id, _event_post_text(prize))
         logger.info(f"✅ Event posted in {chat_id}: secret={secret}, prize={prize}")
+        return True
     except Exception as e:
         logger.warning(f"❌ Event post failed in {chat_id}: {e}")
+        return False
 
 
 async def event_poster_loop(bot: Bot):
-    # Initial delay
-    await asyncio.sleep(15)
+    """Fully automatic — posts events every EVENT_INTERVAL_SECONDS in all GCs."""
+    await asyncio.sleep(20)  # wait for bot startup
     logger.info("🎯 Event poster loop STARTED")
+
     while True:
         try:
             groups = await get_all_active_groups()
             now = datetime.utcnow()
-            logger.info(f"🔍 Event check: {len(groups)} groups registered")
+            logger.info(f"🔍 Event cycle: {len(groups)} registered groups")
 
+            posted = 0
             for gid in groups:
                 ev = ACTIVE_EVENTS.get(gid)
-                # Skip if unexpired event
                 if ev and ev["expires_at"] > now:
-                    continue
-                # Expire old
+                    continue  # still active
                 if ev:
                     ACTIVE_EVENTS.pop(gid, None)
-                # Post new
-                await _post_event(bot, gid)
+                if await _post_event(bot, gid):
+                    posted += 1
                 await asyncio.sleep(2)
+
+            if posted:
+                logger.info(f"✅ Posted {posted} event(s) this cycle")
 
         except Exception as e:
             logger.error(f"event_poster_loop: {e}")
@@ -85,37 +92,45 @@ async def event_poster_loop(bot: Bot):
 
 
 # ═══════════════════════════════════════════════
-# /h — EVENT GUESS HANDLER
+# PUBLIC: Try to handle /h as event guess
+# Returns True if handled by event, False otherwise
 # ═══════════════════════════════════════════════
-@router.message(F.text.regexp(r"^/h(\s|$)"))
-async def event_guess_handler(message: Message):
+async def try_handle_event_guess(message: Message) -> bool:
     chat_id = message.chat.id
     user_id = message.from_user.id
 
+    # Only in groups
+    if message.chat.type not in ("group", "supergroup"):
+        return False
+
     ev = ACTIVE_EVENTS.get(chat_id)
     if not ev:
-        raise SkipHandler()  # No event → personal game
+        return False
 
     if ev["expires_at"] <= datetime.utcnow():
         ACTIVE_EVENTS.pop(chat_id, None)
-        return await message.reply("⏳ ᴛʜᴇ ᴇᴠᴇɴᴛ ʜᴀꜱ ᴇxᴘɪʀᴇᴅ. ᴡᴀɪᴛ ꜰᴏʀ ᴛʜᴇ ɴᴇxᴛ ᴅʀᴏᴘ.")
+        await message.reply("⏳ ᴛʜᴇ ᴇᴠᴇɴᴛ ʜᴀꜱ ᴇxᴘɪʀᴇᴅ.")
+        return True
 
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2 or not parts[1].strip().isdigit():
-        return await message.reply("ᴜꜱᴀɢᴇ: <code>/h 250</code>")
+        await message.reply("ᴜꜱᴀɢᴇ: <code>/h 250</code>")
+        return True
 
     guess = int(parts[1].strip())
     if not (EVENT_NUMBER_MIN <= guess <= EVENT_NUMBER_MAX):
-        return await message.reply(
+        await message.reply(
             f"❌ ɢᴜᴇꜱꜱ ʙᴇᴛᴡᴇᴇɴ {EVENT_NUMBER_MIN} ᴀɴᴅ {EVENT_NUMBER_MAX}."
         )
+        return True
 
     wins_today = await count_event_wins_today(user_id, chat_id)
     if wins_today >= EVENT_MAX_WINS_PER_DAY:
-        return await message.reply(
+        await message.reply(
             f"⏳ ʏᴏᴜ'ᴠᴇ ʀᴇᴀᴄʜᴇᴅ ᴛʜᴇ ᴅᴀɪʟʏ ʟɪᴍɪᴛ ({EVENT_MAX_WINS_PER_DAY} ᴡɪɴꜱ).\n"
             f"ᴄᴏᴍᴇ ʙᴀᴄᴋ ᴛᴏᴍᴏʀʀᴏᴡ."
         )
+        return True
 
     ug = ev["user_guesses"].setdefault(user_id, {
         "count": 0,
@@ -124,9 +139,10 @@ async def event_guess_handler(message: Message):
     })
 
     if ug["count"] >= EVENT_MAX_GUESSES:
-        return await message.reply(
+        await message.reply(
             f"❌ ʏᴏᴜ'ᴠᴇ ᴜꜱᴇᴅ ᴀʟʟ {EVENT_MAX_GUESSES} ɢᴜᴇꜱꜱᴇꜱ ꜰᴏʀ ᴛʜɪꜱ ᴇᴠᴇɴᴛ."
         )
+        return True
 
     ug["count"] += 1
     remaining = EVENT_MAX_GUESSES - ug["count"]
@@ -146,7 +162,7 @@ async def event_guess_handler(message: Message):
 
         ACTIVE_EVENTS.pop(chat_id, None)
 
-        return await message.reply(
+        await message.reply(
             f"🎉 ᴄᴏɴɢʀᴀᴛᴜʟᴀᴛɪᴏɴꜱ {message.from_user.mention_html()}! "
             f"ʏᴏᴜ ɢᴜᴇꜱꜱᴇᴅ ᴛʜᴇ ʀɪɢʜᴛ ɴᴜᴍʙᴇʀ.\n\n"
             f"🔑 ꜱᴇᴄʀᴇᴛ ɴᴜᴍʙᴇʀ: <b>{secret}</b>\n"
@@ -155,6 +171,7 @@ async def event_guess_handler(message: Message):
             f"🏆 ᴛᴏᴛᴀʟ ᴅʀᴏᴘꜱ ᴡᴏɴ ʜᴇʀᴇ: <b>{total_wins}</b>\n"
             f"📅 ᴡɪɴꜱ ᴛᴏᴅᴀʏ: <b>{today_wins}/{EVENT_MAX_WINS_PER_DAY}</b>"
         )
+        return True
 
     # ═══ FEEDBACK ═══
     if guess > secret:
@@ -173,10 +190,11 @@ async def event_guess_handler(message: Message):
         f"🎯 ʀᴀɴɢᴇ: [ <b>{ug['low']} ──── {ug['high']}</b> ]\n"
         f"⚠️ ɢᴜᴇꜱꜱᴇꜱ ʟᴇꜰᴛ: <b>{remaining}</b>"
     )
+    return True
 
 
 # ═══════════════════════════════════════════════
-# /event — admin manual trigger
+# /event — admin manual trigger (optional)
 # ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/event(\s|$)"))
 async def cmd_event(message: Message, bot: Bot):
