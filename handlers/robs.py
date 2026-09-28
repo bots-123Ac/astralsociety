@@ -4,21 +4,19 @@ from aiogram.filters import Command
 from aiogram.types import Message
 
 from config import (
-    ROB_NORMAL_PERCENT, ROB_PREMIUM_PERCENT, SHIELD_FREE_DAYS,
+    ROB_NORMAL_PERCENT, ROB_PREMIUM_PERCENT,
+    SHIELD_NORMAL_MAX_DAYS, SHIELD_PREMIUM_MAX_DAYS,
     SUPPORT_GROUP_NAME, GIVE_DEDUCTION_PERCENT,
 )
-from keyboards.main_menu import premium_kb
 from utils.database import (
     get_or_create_user, add_coins, add_xp, is_premium, is_shielded,
-    set_shield,
+    set_shield, shield_remaining, get_premium_status,
 )
 
 router = Router()
 
 
-# ═══════════════════════════════════════════════
-# /give [amount] — Reply to target
-# ═══════════════════════════════════════════════
+# ═══ /give ═══
 @router.message(Command("give"))
 async def cmd_give(message: Message, bot: Bot):
     if not message.reply_to_message or not message.reply_to_message.from_user:
@@ -68,17 +66,15 @@ async def cmd_give(message: Message, bot: Bot):
     )
 
 
-# ═══════════════════════════════════════════════
-# 🪙 /robs — Full rob OR /robs <amount>
-# ═══════════════════════════════════════════════
+# ═══ /robs ═══
 @router.message(Command("robs"))
 async def cmd_robs(message: Message, bot: Bot):
     if not message.reply_to_message or not message.reply_to_message.from_user:
         return await message.reply(
-            "❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜꜱᴇʀ ᴛᴏ ʀᴏʙ ᴛʜᴇᴍ.\n\n"
+            "❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜꜱᴇʀ.\n\n"
             "📌 <b>ᴜꜱᴀɢᴇ:</b>\n"
-            "• <code>/robs</code> — ʀᴏʙ ᴀʟʟ ᴄᴏɪɴꜱ\n"
-            "• <code>/robs 5000</code> — ʀᴏʙ ꜱᴘᴇᴄɪꜰɪᴄ ᴀᴍᴏᴜɴᴛ"
+            "• <code>/robs</code> — ꜰᴜʟʟ ʙᴀʟᴀɴᴄᴇ\n"
+            "• <code>/robs 5000</code> — ꜱᴘᴇᴄɪꜰɪᴄ ᴀᴍᴏᴜɴᴛ"
         )
 
     robber = message.from_user
@@ -110,24 +106,22 @@ async def cmd_robs(message: Message, bot: Bot):
             f"❌ {victim.mention_html()} ʜᴀꜱ ɴᴏᴛʜɪɴɢ ᴡᴏʀᴛʜ ʀᴏʙʙɪɴɢ."
         )
 
-    # Parse amount (optional)
     parts = message.text.split()
     if len(parts) >= 2 and parts[1].isdigit():
         base_amount = int(parts[1])
         if base_amount < 1:
             return await message.reply("❌ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ.")
         if base_amount > victim_coins:
-            base_amount = victim_coins  # cap at victim's balance
+            base_amount = victim_coins
     else:
-        # Full rob
         base_amount = victim_coins
 
     if base_amount < 1:
         return await message.reply("❌ ᴀᴍᴏᴜɴᴛ ᴛᴏᴏ ꜱᴍᴀʟʟ.")
 
-    # Deduction based on robber's premium status
-    deduction_pct = ROB_PREMIUM_PERCENT if await is_premium(robber.id) else ROB_NORMAL_PERCENT
-    deduction = (base_amount * deduction_pct) // 100
+    # Deduction based on robber's premium
+    pct = ROB_PREMIUM_PERCENT if await is_premium(robber.id) else ROB_NORMAL_PERCENT
+    deduction = (base_amount * pct) // 100
     robber_receives = base_amount - deduction
 
     await add_coins(victim.id, -base_amount)
@@ -136,18 +130,14 @@ async def cmd_robs(message: Message, bot: Bot):
     xp_gain = random.randint(0, 10)
     await add_xp(robber.id, xp_gain)
 
-    robbed_type = "ꜰᴜʟʟ ʙᴀʟᴀɴᴄᴇ" if base_amount == victim_coins and len(parts) < 2 else f"ᴛᴀʀɢᴇᴛ: {base_amount:,}"
-
     await message.reply(
         f"🪙 <b>ʀᴏʙ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ!</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🎯 {robbed_type}\n"
         f"👤 {robber.mention_html()} ɢᴀɪɴᴇᴅ <b>{robber_receives:,}</b> 🪙 "
-        f"ᴀꜰᴛᴇʀ {deduction_pct}% ᴏꜰ ᴅᴇᴅᴜᴄᴛɪᴏɴ.\n"
-        f"📈 xᴘ ɢᴀɪɴᴇᴅ: <b>+{xp_gain}</b>"
+        f"ᴀꜰᴛᴇʀ {pct}% ᴏꜰ ᴅᴇᴅᴜᴄᴛɪᴏɴ.\n"
+        f"📈 xᴘ: <b>+{xp_gain}</b>"
     )
 
-    # DM victim
     try:
         await bot.send_message(
             victim.id,
@@ -160,25 +150,28 @@ async def cmd_robs(message: Message, bot: Bot):
         pass
 
 
-# ═══════════════════════════════════════════════
-# /shield
-# ═══════════════════════════════════════════════
+# ═══ /shield ═══
 @router.message(Command("shield"))
 async def cmd_shield(message: Message):
     parts = message.text.split()
+    is_prem = await is_premium(message.from_user.id)
+    max_days = SHIELD_PREMIUM_MAX_DAYS if is_prem else SHIELD_NORMAL_MAX_DAYS
+
     if len(parts) < 2 or not parts[1].isdigit():
         return await message.reply(
             f"ᴜꜱᴀɢᴇ: <code>/shield 2</code>\n\n"
-            f"🛡️ ꜰʀᴇᴇ ꜱʜɪᴇʟᴅ: {SHIELD_FREE_DAYS} ᴅᴀʏꜱ\nᴘʀᴇᴍɪᴜᴍ: ᴜᴘ ᴛᴏ 5 ᴅᴀʏꜱ"
+            f"🛡️ ɴᴏʀᴍᴀʟ ᴍᴀx: {SHIELD_NORMAL_MAX_DAYS} ᴅᴀʏꜱ\n"
+            f"⭐ ᴘʀᴇᴍɪᴜᴍ ᴍᴀx: {SHIELD_PREMIUM_MAX_DAYS} ᴅᴀʏꜱ"
         )
     days = int(parts[1])
     if days < 1:
         return await message.reply("❌ ɪɴᴠᴀʟɪᴅ ᴅᴀʏꜱ.")
-    if days > SHIELD_FREE_DAYS:
-        if not await is_premium(message.from_user.id):
-            return await message.reply(
-                f"❌ ᴍᴀx {SHIELD_FREE_DAYS} ᴅᴀʏꜱ ꜰʀᴇᴇ.\nᴜꜱᴇ /premium ꜰᴏʀ ᴇxᴛʀᴀ."
-            )
+    if days > max_days:
+        return await message.reply(
+            f"❌ ᴍᴀx {max_days} ᴅᴀʏꜱ ᴏɴʟʏ.\n"
+            + ("⭐ ᴜꜱᴇ /premium ꜰᴏʀ 5 ᴅᴀʏꜱ." if not is_prem else "")
+        )
+
     until = await set_shield(message.from_user.id, days)
     await message.reply(
         f"🛡️ <b>ꜱʜɪᴇʟᴅ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b>\n\n"
@@ -187,23 +180,43 @@ async def cmd_shield(message: Message):
     )
 
 
-# ═══════════════════════════════════════════════
-# /premium
-# ═══════════════════════════════════════════════
-@router.message(Command("premium"))
-async def cmd_premium(message: Message):
-    text = (
-        f"⭐ <b>ᴀꜱᴛʀᴀʟ ᴘʀᴇᴍɪᴜᴍ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🎁 <b>ᴘʀᴇᴍɪᴜᴍ ʙᴇɴᴇꜰɪᴛꜱ:</b>\n"
-        f"• ʀᴏʙ ᴅᴇᴅᴜᴄᴛɪᴏɴ: 10% → <b>5%</b>\n"
-        f"• ᴅᴀɪʟʏ ʀᴇᴡᴀʀᴅ: 2000 → <b>5500 ᴄᴏɪɴꜱ</b>\n"
-        f"• ᴅᴀɪʟʏ xᴘ: 150 → <b>350 xᴘ</b>\n"
-        f"• ʟᴏɴɢᴇʀ ꜱʜɪᴇʟᴅ ᴅᴜʀᴀᴛɪᴏɴ\n\n"
-        f"📦 <b>ᴘʟᴀɴꜱ:</b>\n"
-        f"• 1 ᴍᴏɴᴛʜ — 90 ⭐\n"
-        f"• 4 ᴍᴏɴᴛʜꜱ — 140 ⭐\n"
-        f"• 12 ᴍᴏɴᴛʜꜱ — 175 ⭐\n\n"
-        f"💫 ᴠɪᴀ ᴛᴇʟᴇɢʀᴀᴍ ꜱᴛᴀʀꜱ ᴛᴏ ᴛʜᴇ ᴏᴡɴᴇʀ."
+# ═══ /shieldcheck — Premium users can check others ═══
+@router.message(Command("shieldcheck"))
+async def cmd_shieldcheck(message: Message):
+    checker = message.from_user
+    checker_premium = await is_premium(checker.id)
+
+    # ═══ Normal user → only own shield ═══
+    if not checker_premium:
+        rem = await shield_remaining(checker.id)
+        if rem <= 0:
+            return await message.reply(
+                "🛡️ ʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ.\n\n"
+                "⭐ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀꜱ ᴄᴀɴ ᴄʜᴇᴄᴋ ᴏᴛʜᴇʀꜱ' ꜱʜɪᴇʟᴅ ᴛɪᴍᴇ."
+            )
+        return await message.reply(f"🛡️ ʏᴏᴜʀ ꜱʜɪᴇʟᴅ: <b>{rem} ᴅᴀʏꜱ ʟᴇꜰᴛ</b>")
+
+    # ═══ Premium user → check target ═══
+    # No reply → own
+    if not message.reply_to_message or not message.reply_to_message.from_user:
+        rem = await shield_remaining(checker.id)
+        if rem <= 0:
+            return await message.reply("🛡️ ʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ.")
+        return await message.reply(f"🛡️ ʏᴏᴜʀ ꜱʜɪᴇʟᴅ: <b>{rem} ᴅᴀʏꜱ ʟᴇꜰᴛ</b>")
+
+    target = message.reply_to_message.from_user
+
+    # Can't check other premium
+    if await is_premium(target.id):
+        return await message.reply(
+            "❌ ᴄᴀɴ'ᴛ ᴄʜᴇᴄᴋ ᴀɴᴏᴛʜᴇʀ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀ'ꜱ ꜱʜɪᴇʟᴅ."
+        )
+
+    rem = await shield_remaining(target.id)
+    if rem <= 0:
+        return await message.reply(
+            f"🛡️ {target.mention_html()}: <b>ɴᴏ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ</b>"
+        )
+    await message.reply(
+        f"🛡️ {target.mention_html()}: <b>{rem} ᴅᴀʏꜱ ʟᴇꜰᴛ</b>"
     )
-    await message.reply(text, reply_markup=premium_kb())
