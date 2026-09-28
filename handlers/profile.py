@@ -4,16 +4,13 @@ import aiosqlite
 from config import DB_PATH
 from utils.database import (
     get_or_create_user, get_user_by_astral_id, get_user_by_username,
-    convert_coins_to_gems,
+    convert_coins_to_gems, is_premium,
 )
 
 router = Router()
 
 
-def format_profile(u) -> str:
-    # Schema: user_id, username, first_name, astral_id, coins, gems, xp,
-    # quiz_attempted, quiz_solved, word_attempted, word_solved, word_score,
-    # number_attempted, number_guess, ...
+def format_profile(u, premium: bool = False) -> str:
     name = u[2] or "ᴜɴᴋɴᴏᴡɴ"
     uname = f"@{u[1]}" if u[1] else "ɴᴏɴᴇ"
     astral_id = u[3] or "—"
@@ -21,7 +18,25 @@ def format_profile(u) -> str:
     gems = u[5] or 0
     xp = u[6] or 0
     quiz_solved = u[8] or 0
-    word_score = u[11] if len(u) > 11 else 0
+
+    if premium:
+        return (
+            f"👑 <b>ᴘʀᴇᴍɪᴜᴍ ᴘʀᴏꜰɪʟᴇ</b> 👑\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n"
+            f"⭐ <b>ᴘʀᴇᴍɪᴜᴍ ᴍᴇᴍʙᴇʀ</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"✨ ɴᴀᴍᴇ       — <b>{name}</b>\n"
+            f"😄 ᴜꜱᴇʀɴᴀᴍᴇ  — {uname}\n"
+            f"🚀 ᴀꜱᴛʀᴀʟ ɪᴅ — <code>{astral_id}</code>\n\n"
+            f"🪙 ᴄᴏɪɴꜱ       — <b>{coins:,}</b>\n"
+            f"💎 ɢᴇᴍꜱ         — <b>{gems:,}</b>\n"
+            f"📈 xᴘ          — <b>{xp:,}</b>\n"
+            f"🧠 ǫᴜɪᴢ ꜱᴏʟᴠᴇᴅ — <b>{quiz_solved}</b>\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n"
+            f"⭐ ᴘʀᴇᴍɪᴜᴍ ᴘᴇʀᴋꜱ ᴀᴄᴛɪᴠᴇ\n"
+            f"━━━━━━━━━━━━━━━━━━━━━"
+        )
+
     return (
         f"👤 <b>ᴘʀᴏꜰɪʟᴇ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -41,68 +56,55 @@ async def _fetch_user_by_id(uid):
             return await cur.fetchone()
 
 
-@router.message(F.text.regexp(r"^/profile(\s|$)") | F.text.regexp(r"^/profile@[\w]+(\s|$)"))
+@router.message(F.text.regexp(r"^/profile(\s|$)") | F.text.regexp(r"^/profile@\w+(\s|$)"))
 async def cmd_profile(message: Message):
-    # ═══ 1. Reply to a user ═══
+    # Reply to a user
     if message.reply_to_message and message.reply_to_message.from_user:
         target = message.reply_to_message.from_user
         await get_or_create_user(target.id, target.username, target.first_name)
         u = await _fetch_user_by_id(target.id)
         if not u:
             return await message.reply("❌ ᴜꜱᴇʀ ɴᴏᴛ ꜰᴏᴜɴᴅ.")
-        return await message.reply(format_profile(u))
+        prem = await is_premium(target.id)
+        return await message.reply(format_profile(u, prem))
 
-    # ═══ 2. Check args ═══
-    # Strip bot username suffix if /profile@BotName
+    # Args
     text = message.text or ""
     parts = text.split()
-    # Remove command part
     args = parts[1:] if len(parts) > 1 else []
 
-    # ═══ 3. No args — own profile ═══
     if not args:
         await get_or_create_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
         u = await _fetch_user_by_id(message.from_user.id)
         if not u:
             return await message.reply("❌ ᴜꜱᴇʀ ɴᴏᴛ ꜰᴏᴜɴᴅ.")
-        return await message.reply(format_profile(u))
+        prem = await is_premium(message.from_user.id)
+        return await message.reply(format_profile(u, prem))
 
-    # ═══ 4. Has args — resolve target ═══
     arg = args[0].strip()
-
     u = None
-
-    # @username
     if arg.startswith("@"):
         u = await get_user_by_username(arg)
-
-    # astral_id (6 digits) or user_id
     elif arg.isdigit():
         if len(arg) == 6:
             u = await get_user_by_astral_id(arg)
         if not u:
             u = await _fetch_user_by_id(int(arg))
-
-    # Plain username without @
     else:
         u = await get_user_by_username(arg)
 
     if not u:
         return await message.reply("❌ ᴜꜱᴇʀ ɴᴏᴛ ꜰᴏᴜɴᴅ.")
+    prem = await is_premium(u[0])
+    await message.reply(format_profile(u, prem))
 
-    await message.reply(format_profile(u))
 
-
-# ═══════════════════════════════════════════════
-# /convert — same as before
-# ═══════════════════════════════════════════════
+# ═══ /convert ═══
 @router.message(F.text.regexp(r"^/convert(\s|$)"))
 async def cmd_convert(message: Message):
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
-        return await message.reply(
-            "ᴜꜱᴀɢᴇ: <code>/convert 100c</code>\n100 ᴄᴏɪɴꜱ = 1 ɢᴇᴍ"
-        )
+        return await message.reply("ᴜꜱᴀɢᴇ: <code>/convert 100c</code>\n100 ᴄᴏɪɴꜱ = 1 ɢᴇᴍ")
     arg = parts[1].strip().lower().replace("c", "").replace(" ", "")
     if not arg.isdigit():
         return await message.reply("❌ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ.")
