@@ -34,23 +34,21 @@ BOT_ADMIN_IDS = [
 ]
 
 # ═══════════════════════════════════════════════
-# 👨‍💻 CREATOR CREDITS (Clickable names)
+# 👨‍💻 CREATOR CREDITS (No preview card)
 # ═══════════════════════════════════════════════
 CREATOR_1_NAME = "⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐"
 CREATOR_1_USERNAME = "@OfficialCrazyBoy07"
-CREATOR_1_LINK = "https://t.me/OfficialCrazyBoy07"
 CREATOR_1_ID = 7790607144
 
 CREATOR_2_NAME = "𝓚𝓪𝓷𝓱𝓪࿐✨🤟"
 CREATOR_2_USERNAME = "@Lunar_kanha_4572"
-CREATOR_2_LINK = "https://t.me/Lunar_kanha_4572"
 CREATOR_2_ID = 8165863254
 
 CREDIT_HTML = (
     f'ᴘᴏᴡᴇʀᴇᴅ ʙʏ '
-    f'<a href="{CREATOR_1_LINK}">{CREATOR_1_NAME}</a> '
+    f'<a href="tg://user?id={CREATOR_1_ID}">{CREATOR_1_NAME}</a> '
     f'& '
-    f'<a href="{CREATOR_2_LINK}">{CREATOR_2_NAME}</a>'
+    f'<a href="tg://user?id={CREATOR_2_ID}">{CREATOR_2_NAME}</a>'
 )
 
 # ═══════════════════════════════════════════════
