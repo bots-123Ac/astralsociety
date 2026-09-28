@@ -12,7 +12,7 @@ from handlers import (
     shop, powers, admin, quiz, premium, tgames,
 )
 from utils.logger import setup_logger
-from utils.database import init_db
+from utils.database import init_db, close_pool
 from utils.quiz_loader import background_load
 
 
@@ -36,7 +36,6 @@ async def main():
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    # ═══ ROUTER ORDER ═══
     dp.include_router(start.router)
     dp.include_router(menu.router)
     dp.include_router(profile.router)
@@ -49,15 +48,18 @@ async def main():
     dp.include_router(powers.router)
     dp.include_router(admin.router)
     dp.include_router(quiz.router)
-    dp.include_router(premium.router)   # 👈 NEW
+    dp.include_router(premium.router)
     dp.include_router(tgames.router)
 
-    # Background tasks
     asyncio.create_task(background_load())
 
     logging.info("✅ Bot is running.")
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+
+    try:
+        await dp.start_polling(bot)
+    finally:
+        await close_pool()
 
 
 if __name__ == "__main__":
