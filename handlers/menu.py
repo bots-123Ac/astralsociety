@@ -1,11 +1,13 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, LinkPreviewOptions
 
 from config import BOT_NAME, BOT_USERNAME, CREDIT_HTML
 from keyboards.main_menu import main_menu_kb, back_main_kb
 from utils.ui import smart_edit
 
 router = Router()
+
+NO_PREVIEW = LinkPreviewOptions(is_disabled=True)
 
 
 def help_text() -> str:
@@ -27,12 +29,12 @@ def help_text() -> str:
         f"/give 10000 — ꜱᴇɴᴅ ᴄᴏɪɴꜱ (ʀᴇᴘʟʏ)\n"
         f"/robs — ʀᴏʙ ᴀ ᴜꜱᴇʀ (ʀᴇᴘʟʏ)\n"
         f"/shield 2 — ᴀᴄᴛɪᴠᴀᴛᴇ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ\n"
-        f"/shieldcheck — ᴄʜᴇᴄᴋ ꜱʜɪᴇʟᴅ\n"
+        f"/shieldcheck — ᴄʜᴇᴄᴋ ꜱʜɪᴇʟᴅ ᴛɪᴍᴇ\n"
         f"/shop — ᴏᴘᴇɴ ꜱʜᴏᴘ (ᴅᴍ)\n"
         f"/powers — ᴀᴄᴛɪᴠᴇ ᴘᴏᴡᴇʀꜱ\n\n"
         f"<b>⭐ ᴘʀᴇᴍɪᴜᴍ</b>\n"
         f"/premium — ᴘʀᴇᴍɪᴜᴍ ꜱʜᴏᴘ (ɢᴇᴍꜱ)\n"
-        f"/premiumstatus — ᴄʜᴇᴄᴋ ᴘʀᴇᴍɪᴜᴍ ꜱᴛᴀᴛᴜꜱ\n\n"
+        f"/premiumstatus — ᴄʜᴇᴄᴋ ꜱᴛᴀᴛᴜꜱ\n\n"
         f"<b>🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n"
         f"/aleaderboard — ɢʟᴏʙᴀʟ ʀᴀɴᴋɪɴɢ\n"
         f"/performance — ʏᴏᴜʀ ꜱᴛᴀᴛꜱ (ᴅᴍ)\n\n"
@@ -77,27 +79,60 @@ async def back_main(cb: CallbackQuery):
         f"━━━━━━━━━━━━━━━━━━━━━\n"
         f"👨‍💻 {CREDIT_HTML}"
     )
-    await smart_edit(cb, text, main_menu_kb())
+    # Try editing first; if fails, send new with no preview
+    try:
+        await cb.message.edit_text(text, reply_markup=main_menu_kb())
+    except Exception:
+        try:
+            await cb.message.answer(
+                text,
+                reply_markup=main_menu_kb(),
+                link_preview_options=NO_PREVIEW,
+            )
+        except Exception:
+            pass
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:help")
 async def cb_help(cb: CallbackQuery):
-    await smart_edit(cb, help_text(), back_main_kb())
+    try:
+        await cb.message.edit_text(help_text(), reply_markup=back_main_kb())
+    except Exception:
+        await cb.message.answer(
+            help_text(),
+            reply_markup=back_main_kb(),
+            link_preview_options=NO_PREVIEW,
+        )
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:about")
 async def cb_about(cb: CallbackQuery):
-    await smart_edit(cb, about_text(), back_main_kb())
+    try:
+        await cb.message.edit_text(about_text(), reply_markup=back_main_kb())
+    except Exception:
+        await cb.message.answer(
+            about_text(),
+            reply_markup=back_main_kb(),
+            link_preview_options=NO_PREVIEW,
+        )
     await cb.answer()
 
 
 @router.message(F.text.regexp(r"^/help(\s|$)"))
 async def cmd_help(message: Message):
-    await message.answer(help_text(), reply_markup=back_main_kb())
+    await message.answer(
+        help_text(),
+        reply_markup=back_main_kb(),
+        link_preview_options=NO_PREVIEW,
+    )
 
 
 @router.message(F.text.regexp(r"^/about(\s|$)"))
 async def cmd_about(message: Message):
-    await message.answer(about_text(), reply_markup=back_main_kb())
+    await message.answer(
+        about_text(),
+        reply_markup=back_main_kb(),
+        link_preview_options=NO_PREVIEW,
+    )
