@@ -14,13 +14,8 @@ from utils.database import (
 
 router = Router()
 
-QUIZ_CACHE = {}
-
-# ═══════════════════════════════════════════════
-# NUMBER CACHE — per user per chat with range tracking
-# key: (chat_id, user_id) → {"secret": int, "attempts": int, "low": int, "high": int}
-# ═══════════════════════════════════════════════
-NUMBER_CACHE = {}
+QUIZ_CACHE = {}     # (chat_id, user_id) -> quiz session
+NUMBER_CACHE = {}   # (chat_id, user_id) -> personal game
 
 NUMBER_MIN = 100
 NUMBER_MAX = 500
@@ -38,6 +33,9 @@ CATEGORY_NAMES = {
 }
 
 
+# ═══════════════════════════════════════════════
+# /tgames entry
+# ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/tgames(\s|$)"))
 async def cmd_tgames(message: Message):
     await message.answer(
@@ -47,7 +45,9 @@ async def cmd_tgames(message: Message):
     )
 
 
-# ═══ QUIZ ═══
+# ═══════════════════════════════════════════════
+# QUIZ
+# ═══════════════════════════════════════════════
 @router.callback_query(F.data == "tg:quiz")
 async def quiz_select(cb: CallbackQuery):
     total = await get_quiz_count()
@@ -211,10 +211,22 @@ async def number_start(cb: CallbackQuery):
 
 
 # ═══════════════════════════════════════════════
-# /h — PERSONAL NUMBER GUESS (fallback when no event)
+# /h — WORKS EVERYWHERE (DM + GC + Group)
+# Priority: Event (if GC has active event) → Personal Game
 # ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/h(\s|$)"))
 async def number_guess(message: Message):
+    # 1️⃣ Try event first (only in groups)
+    try:
+        from handlers.events import try_handle_event_guess
+        handled = await try_handle_event_guess(message)
+        if handled:
+            return
+    except Exception as e:
+        import logging
+        logging.error(f"event guess err: {e}")
+
+    # 2️⃣ Personal game — auto-start if none exists
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2 or not parts[1].strip().isdigit():
         return await message.reply("ᴜꜱᴀɢᴇ: <code>/h 250</code>")
@@ -222,8 +234,18 @@ async def number_guess(message: Message):
     user_id = message.from_user.id
     key = (message.chat.id, user_id)
     game = NUMBER_CACHE.get(key)
+
+    # Auto-start if not started
     if not game:
-        return await message.reply("❌ ꜱᴛᴀʀᴛ ᴀ ɢᴀᴍᴇ ᴠɪᴀ /tgames ꜰɪʀꜱᴛ.")
+        secret = random.randint(NUMBER_MIN, NUMBER_MAX)
+        game = {
+            "secret": secret,
+            "attempts": 0,
+            "low": NUMBER_MIN,
+            "high": NUMBER_MAX,
+        }
+        NUMBER_CACHE[key] = game
+        await inc_number_attempt(user_id)
 
     guess = int(parts[1].strip())
     if not (NUMBER_MIN <= guess <= NUMBER_MAX):
@@ -259,17 +281,13 @@ async def number_guess(message: Message):
             f"💀 <b>ɢᴀᴍᴇ ᴏᴠᴇʀ!</b>\n\nꜱᴇᴄʀᴇᴛ ᴡᴀꜱ <b>{secret}</b>"
         )
 
-    # ═══ UPDATE RANGE (per user tracking) ═══
+    # ═══ FEEDBACK ═══
     if guess > secret:
-        # Too HIGH → tighten upper bound
         game["high"] = min(game["high"], guess - 1)
-        arrow = "📈"
-        label = "ᴛᴏᴏ ʜɪɢʜ"
+        arrow, label = "📈", "ᴛᴏᴏ ʜɪɢʜ"
     else:
-        # Too LOW → tighten lower bound
         game["low"] = max(game["low"], guess + 1)
-        arrow = "📉"
-        label = "ᴛᴏᴏ ʟᴏᴡ"
+        arrow, label = "📉", "ᴛᴏᴏ ʟᴏᴡ"
 
     await message.reply(
         f"{arrow} [ <b>{guess}</b> ] ɪꜱ {label}!\n"
