@@ -3,7 +3,6 @@ from aiogram.types import CallbackQuery, Message, LinkPreviewOptions
 
 from config import BOT_NAME, BOT_USERNAME, CREDIT_HTML
 from keyboards.main_menu import main_menu_kb, back_main_kb
-from utils.ui import smart_edit
 
 router = Router()
 
@@ -79,19 +78,47 @@ async def back_main(cb: CallbackQuery):
         f"━━━━━━━━━━━━━━━━━━━━━\n"
         f"👨‍💻 {CREDIT_HTML}"
     )
-    await smart_edit(cb, text, main_menu_kb())
+    try:
+        await cb.message.edit_text(
+            text,
+            reply_markup=main_menu_kb(),
+            link_preview_options=NO_PREVIEW,
+        )
+    except Exception:
+        try:
+            await cb.message.answer(
+                text,
+                reply_markup=main_menu_kb(),
+                link_preview_options=NO_PREVIEW,
+            )
+        except Exception:
+            pass
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:help")
 async def cb_help(cb: CallbackQuery):
-    await smart_edit(cb, help_text(), back_main_kb())
+    try:
+        await cb.message.edit_text(
+            help_text(),
+            reply_markup=back_main_kb(),
+            link_preview_options=NO_PREVIEW,
+        )
+    except Exception:
+        pass
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:about")
 async def cb_about(cb: CallbackQuery):
-    await smart_edit(cb, about_text(), back_main_kb())
+    try:
+        await cb.message.edit_text(
+            about_text(),
+            reply_markup=back_main_kb(),
+            link_preview_options=NO_PREVIEW,
+        )
+    except Exception:
+        pass
     await cb.answer()
 
 
