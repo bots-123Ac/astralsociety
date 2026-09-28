@@ -14,6 +14,7 @@ SUPPORT_CHANNEL_LINK = "https://t.me/Astral_study_chest"
 
 BOT_ADD_LINK = f"https://t.me/{BOT_USERNAME.lstrip('@')}?startgroup=true"
 
+# ═══ OWNER & ADMINS ═══
 OWNER_ID = -1004398879964
 BOT_ADMIN_IDS = [7748285403, 7415480513, 8165863254, 7790607144, 8987845745]
 
@@ -49,12 +50,14 @@ SHIELD_FREE_DAYS = 2
 GIVE_DEDUCTION_PERCENT = 10
 
 # ═══ EVENT SETTINGS ═══
-EVENT_INTERVAL_SECONDS = 3600   # 1 hour
-EVENT_TIME_LIMIT_MINUTES = 60
+EVENT_INTERVAL_SECONDS = 3600          # 1 hour
+EVENT_TIME_LIMIT_MINUTES = 60          # 60 min per event
 EVENT_PRIZE_MIN = 500
 EVENT_PRIZE_MAX = 2000
 EVENT_NUMBER_MIN = 100
 EVENT_NUMBER_MAX = 500
+EVENT_MAX_GUESSES = 10                 # guesses per user per event
+EVENT_MAX_WINS_PER_DAY = 3             # wins per user per day per group
 
 PREMIUM_PLANS = {
     "1m": {"days": 30, "stars": 90},
