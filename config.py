@@ -49,15 +49,16 @@ ROB_PREMIUM_PERCENT = 5
 SHIELD_FREE_DAYS = 2
 GIVE_DEDUCTION_PERCENT = 10
 
-# ═══ EVENT SETTINGS ═══
-EVENT_INTERVAL_SECONDS = 3600          # 1 hour
-EVENT_TIME_LIMIT_MINUTES = 60          # 60 min per event
+# ═══ EVENT SETTINGS (automatic, no admin command needed) ═══
+# 3600 = 1 hour (production). Change to 60 for testing (1 min).
+EVENT_INTERVAL_SECONDS = 3600
+EVENT_TIME_LIMIT_MINUTES = 60
 EVENT_PRIZE_MIN = 500
 EVENT_PRIZE_MAX = 2000
 EVENT_NUMBER_MIN = 100
 EVENT_NUMBER_MAX = 500
-EVENT_MAX_GUESSES = 10                 # guesses per user per event
-EVENT_MAX_WINS_PER_DAY = 3             # wins per user per day per group
+EVENT_MAX_GUESSES = 10
+EVENT_MAX_WINS_PER_DAY = 3
 
 PREMIUM_PLANS = {
     "1m": {"days": 30, "stars": 90},
