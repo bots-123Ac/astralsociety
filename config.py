@@ -34,7 +34,7 @@ BOT_ADMIN_IDS = [
 ]
 
 # ═══════════════════════════════════════════════
-# 👨‍💻 CREATOR CREDITS (No preview card)
+# 👨‍💻 CREATOR CREDITS (ID-based, no preview card)
 # ═══════════════════════════════════════════════
 CREATOR_1_NAME = "⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐"
 CREATOR_1_USERNAME = "@OfficialCrazyBoy07"
