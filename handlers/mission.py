@@ -14,14 +14,17 @@ router = Router()
 async def cmd_mission(message: Message):
     await get_or_create_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
     m = await get_or_create_mission(message.from_user.id)
-    _, _, _, req, qdone, wplay, pyq, claimed = m
+
+    req = m["quizzes_required"]
+    qdone = m["quiz_done"]
+    pyq = m["pyq_downloaded"]
+    claimed = m["claimed"]
 
     if claimed:
         return await message.reply(
             f"✅ ʏᴏᴜ'ᴠᴇ ᴀʟʀᴇᴀᴅʏ ᴄʟᴀɪᴍᴇᴅ ᴛᴏᴅᴀʏ'ꜱ ᴍɪꜱꜱɪᴏɴ!\nᴄᴏᴍᴇ ʙᴀᴄᴋ ᴛᴏᴍᴏʀʀᴏᴡ."
         )
 
-    # Quiz line
     if req == 0:
         quiz_line = "1. 🧠 ꜱᴏʟᴠᴇ 0 ǫᴜɪᴢᴢᴇꜱ ✅ (ᴀᴜᴛᴏ-ᴅᴏɴᴇ)"
     else:
@@ -45,7 +48,6 @@ async def cmd_mission(message: Message):
         await add_coins(message.from_user.id, MISSION_REWARD_COINS)
         await add_xp(message.from_user.id, MISSION_REWARD_XP)
         await mission_claim(message.from_user.id)
-
         try:
             await message.bot.send_message(
                 message.from_user.id,
@@ -53,11 +55,10 @@ async def cmd_mission(message: Message):
                 f"━━━━━━━━━━━━━━━━━━━━━\n\n"
                 f"🪙 +{MISSION_REWARD_COINS:,} ᴄᴏɪɴꜱ\n"
                 f"📈 +{MISSION_REWARD_XP} xᴘ\n\n"
-                f"ᴄᴏᴍᴇ ʙᴀᴄᴋ ᴛᴏᴍᴏʀʀᴏᴡ ᴛᴏ ᴄᴏᴍᴘᴇᴛᴇ ᴡɪᴛʜ ʏᴏᴜʀ ꜰʀɪᴇɴᴅꜱ!"
+                f"ᴄᴏᴍᴇ ʙᴀᴄᴋ ᴛᴏᴍᴏʀʀᴏᴡ!"
             )
         except Exception:
             pass
-
         text += "\n\n✅ <b>ᴍɪꜱꜱɪᴏɴ ᴄᴏᴍᴘʟᴇᴛᴇ!</b> ʀᴇᴡᴀʀᴅ ᴄʟᴀɪᴍᴇᴅ."
 
     await message.reply(text)
