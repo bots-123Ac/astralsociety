@@ -105,7 +105,14 @@ async def cb_help(cb: CallbackQuery):
             link_preview_options=NO_PREVIEW,
         )
     except Exception:
-        pass
+        try:
+            await cb.message.answer(
+                help_text(),
+                reply_markup=back_main_kb(),
+                link_preview_options=NO_PREVIEW,
+            )
+        except Exception:
+            pass
     await cb.answer()
 
 
@@ -118,7 +125,14 @@ async def cb_about(cb: CallbackQuery):
             link_preview_options=NO_PREVIEW,
         )
     except Exception:
-        pass
+        try:
+            await cb.message.answer(
+                about_text(),
+                reply_markup=back_main_kb(),
+                link_preview_options=NO_PREVIEW,
+            )
+        except Exception:
+            pass
     await cb.answer()
 
 
