@@ -29,7 +29,7 @@ def help_text() -> str:
         f"/give 10000 — ꜱᴇɴᴅ ᴄᴏɪɴꜱ (ʀᴇᴘʟʏ)\n"
         f"/robs — ʀᴏʙ ᴀ ᴜꜱᴇʀ (ʀᴇᴘʟʏ)\n"
         f"/shield 2 — ᴀᴄᴛɪᴠᴀᴛᴇ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ\n"
-        f"/shieldcheck — ᴄʜᴇᴄᴋ ꜱʜɪᴇʟᴅ ᴛɪᴍᴇ\n"
+        f"/shieldcheck — ᴄʜᴇᴄᴋ ꜱʜɪᴇʟᴅ\n"
         f"/shop — ᴏᴘᴇɴ ꜱʜᴏᴘ (ᴅᴍ)\n"
         f"/powers — ᴀᴄᴛɪᴠᴇ ᴘᴏᴡᴇʀꜱ\n\n"
         f"<b>⭐ ᴘʀᴇᴍɪᴜᴍ</b>\n"
@@ -79,44 +79,19 @@ async def back_main(cb: CallbackQuery):
         f"━━━━━━━━━━━━━━━━━━━━━\n"
         f"👨‍💻 {CREDIT_HTML}"
     )
-    # Try editing first; if fails, send new with no preview
-    try:
-        await cb.message.edit_text(text, reply_markup=main_menu_kb())
-    except Exception:
-        try:
-            await cb.message.answer(
-                text,
-                reply_markup=main_menu_kb(),
-                link_preview_options=NO_PREVIEW,
-            )
-        except Exception:
-            pass
+    await smart_edit(cb, text, main_menu_kb())
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:help")
 async def cb_help(cb: CallbackQuery):
-    try:
-        await cb.message.edit_text(help_text(), reply_markup=back_main_kb())
-    except Exception:
-        await cb.message.answer(
-            help_text(),
-            reply_markup=back_main_kb(),
-            link_preview_options=NO_PREVIEW,
-        )
+    await smart_edit(cb, help_text(), back_main_kb())
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:about")
 async def cb_about(cb: CallbackQuery):
-    try:
-        await cb.message.edit_text(about_text(), reply_markup=back_main_kb())
-    except Exception:
-        await cb.message.answer(
-            about_text(),
-            reply_markup=back_main_kb(),
-            link_preview_options=NO_PREVIEW,
-        )
+    await smart_edit(cb, about_text(), back_main_kb())
     await cb.answer()
 
 
