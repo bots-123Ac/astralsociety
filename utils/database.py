@@ -77,22 +77,12 @@ async def init_db():
                 user_id INTEGER, date TEXT,
                 quizzes_required INTEGER,
                 quiz_done INTEGER DEFAULT 0,
-                word_played INTEGER DEFAULT 0,
                 pyq_downloaded INTEGER DEFAULT 0,
                 claimed INTEGER DEFAULT 0
             )
         """)
 
-        # ═══ DAILY WORD ATTEMPTS ═══
-        await db.execute("""
-            CREATE TABLE IF NOT EXISTS daily_word_attempts (
-                user_id INTEGER, date TEXT,
-                count INTEGER DEFAULT 0,
-                PRIMARY KEY (user_id, date)
-            )
-        """)
-
-        # ═══ ACTIVE GROUPS (for events) ═══
+        # ═══ ACTIVE GROUPS (for /start tracking) ═══
         await db.execute("""
             CREATE TABLE IF NOT EXISTS active_groups (
                 chat_id INTEGER PRIMARY KEY,
@@ -114,17 +104,6 @@ async def init_db():
             )
         """)
         await db.execute("CREATE INDEX IF NOT EXISTS idx_quiz_cat ON quiz_questions(category)")
-
-        # ═══ EVENT WINS ═══
-        await db.execute("""
-            CREATE TABLE IF NOT EXISTS event_wins (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                chat_id INTEGER,
-                prize INTEGER,
-                won_at TEXT
-            )
-        """)
 
         await db.commit()
 
@@ -210,6 +189,13 @@ async def add_xp(user_id, amount):
         await db.commit()
 
 
+async def get_user_coins(user_id):
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT coins FROM users WHERE user_id=?", (user_id,)) as cur:
+            row = await cur.fetchone()
+        return row[0] if row else 0
+
+
 async def convert_coins_to_gems(user_id, coins_amount):
     if coins_amount < COINS_PER_GEM:
         return False, "min"
@@ -245,6 +231,32 @@ async def set_premium(user_id, days):
         await db.execute("UPDATE users SET premium_until=? WHERE user_id=?", (_to_str(until), user_id))
         await db.commit()
     return until
+
+
+async def get_premium_status(user_id):
+    """Return (is_active, expires_at_str, days_left)."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT premium_until FROM users WHERE user_id=?", (user_id,)) as cur:
+            row = await cur.fetchone()
+    if not row or not row[0]:
+        return False, None, 0
+    dt = _parse(row[0])
+    if not dt or dt <= _now():
+        return False, None, 0
+    days_left = max(0, (dt - _now()).days)
+    return True, row[0], days_left
+
+
+async def deduct_gems(user_id, amount) -> bool:
+    """Deduct gems if user has enough. Returns True on success."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        async with db.execute("SELECT gems FROM users WHERE user_id=?", (user_id,)) as cur:
+            row = await cur.fetchone()
+        if not row or row[0] < amount:
+            return False
+        await db.execute("UPDATE users SET gems = gems - ? WHERE user_id=?", (amount, user_id))
+        await db.commit()
+    return True
 
 
 # ═══════════════════════════════════════════════
@@ -439,16 +451,6 @@ async def mission_quiz_done(user_id, count):
         await db.commit()
 
 
-async def mission_word_played(user_id):
-    today = _now().strftime("%Y-%m-%d")
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute(
-            "UPDATE mission_log SET word_played=1 WHERE user_id=? AND date=?",
-            (user_id, today)
-        )
-        await db.commit()
-
-
 async def mission_pyq_done(user_id):
     today = _now().strftime("%Y-%m-%d")
     async with aiosqlite.connect(DB_PATH) as db:
@@ -501,44 +503,6 @@ async def get_study_materials(class_name, section, chapter):
             (class_name, section, chapter)
         ) as cur:
             return await cur.fetchall()
-
-
-# ═══════════════════════════════════════════════
-# WORD GAME — GLOBAL DAILY LIMIT
-# ═══════════════════════════════════════════════
-async def get_daily_word_attempts(user_id) -> int:
-    today = _now().strftime("%Y-%m-%d")
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            "SELECT count FROM daily_word_attempts WHERE user_id=? AND date=?",
-            (user_id, today)
-        ) as cur:
-            row = await cur.fetchone()
-    return row[0] if row else 0
-
-
-async def inc_daily_word_attempts(user_id) -> int:
-    today = _now().strftime("%Y-%m-%d")
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            "SELECT count FROM daily_word_attempts WHERE user_id=? AND date=?",
-            (user_id, today)
-        ) as cur:
-            row = await cur.fetchone()
-        if not row:
-            await db.execute(
-                "INSERT INTO daily_word_attempts (user_id, date, count) VALUES (?,?,1)",
-                (user_id, today)
-            )
-            await db.commit()
-            return 1
-        new_count = row[0] + 1
-        await db.execute(
-            "UPDATE daily_word_attempts SET count=? WHERE user_id=? AND date=?",
-            (new_count, user_id, today)
-        )
-        await db.commit()
-        return new_count
 
 
 # ═══════════════════════════════════════════════
@@ -606,41 +570,3 @@ async def get_quiz_count():
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute("SELECT COUNT(*) FROM quiz_questions") as cur:
             return (await cur.fetchone())[0]
-
-
-# ═══════════════════════════════════════════════
-# EVENT WINS
-# ═══════════════════════════════════════════════
-async def record_event_win(user_id, chat_id, prize):
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute(
-            "INSERT INTO event_wins (user_id, chat_id, prize, won_at) VALUES (?,?,?,?)",
-            (user_id, chat_id, prize, _to_str(_now()))
-        )
-        await db.commit()
-
-
-async def count_event_wins_total(user_id, chat_id):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            "SELECT COUNT(*) FROM event_wins WHERE user_id=? AND chat_id=?",
-            (user_id, chat_id)
-        ) as cur:
-            return (await cur.fetchone())[0]
-
-
-async def count_event_wins_today(user_id, chat_id):
-    today = _now().strftime("%Y-%m-%d") + "%"
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            "SELECT COUNT(*) FROM event_wins WHERE user_id=? AND chat_id=? AND won_at LIKE ?",
-            (user_id, chat_id, today)
-        ) as cur:
-            return (await cur.fetchone())[0]
-
-
-async def get_user_coins(user_id):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute("SELECT coins FROM users WHERE user_id=?", (user_id,)) as cur:
-            row = await cur.fetchone()
-        return row[0] if row else 0
