@@ -11,7 +11,7 @@ from utils.database import (
 router = Router()
 
 
-def format_profile(u, premium: bool = False) -> str:
+def format_balance(u, premium: bool = False) -> str:
     name = u["first_name"] or "ᴜɴᴋɴᴏᴡɴ"
     uname = f"@{u['username']}" if u["username"] else "ɴᴏɴᴇ"
     astral_id = u["astral_id"] or "—"
@@ -19,7 +19,6 @@ def format_profile(u, premium: bool = False) -> str:
     gems = u["gems"] or 0
     xp = u["xp"] or 0
     quiz_solved = u["quiz_solved"] or 0
-    number_guess = u["number_guess"] or 0
 
     if premium:
         return (
@@ -40,7 +39,7 @@ def format_profile(u, premium: bool = False) -> str:
         )
 
     return (
-        f"👤 <b>ᴘʀᴏꜰɪʟᴇ</b>\n"
+        f"👤 <b>ʙᴀʟᴀɴᴄᴇ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"✨ ɴᴀᴍᴇ       — <b>{name}</b>\n"
         f"😄 ᴜꜱᴇʀɴᴀᴍᴇ  — {uname}\n"
@@ -53,10 +52,10 @@ def format_profile(u, premium: bool = False) -> str:
 
 
 # ═══════════════════════════════════════════════
-# /profile — DM + GC (with reply / @username / ID)
+# /balance — DM + GC (reply / @username / ID / self)
 # ═══════════════════════════════════════════════
-@router.message(Command("profile"))
-async def cmd_profile(message: Message):
+@router.message(Command("balance"))
+async def cmd_balance(message: Message):
     # ═══ Priority 1: Reply to a user ═══
     if message.reply_to_message and message.reply_to_message.from_user:
         target = message.reply_to_message.from_user
@@ -65,14 +64,14 @@ async def cmd_profile(message: Message):
         if not u:
             return await message.reply("❌ ᴜꜱᴇʀ ɴᴏᴛ ꜰᴏᴜɴᴅ.")
         prem = await is_premium(target.id)
-        return await message.reply(format_profile(u, prem))
+        return await message.reply(format_balance(u, prem))
 
     # ═══ Priority 2: Args ═══
     text = message.text or ""
     parts = text.split()
     args = parts[1:] if len(parts) > 1 else []
 
-    # No args — own profile
+    # No args — own balance
     if not args:
         await get_or_create_user(
             message.from_user.id,
@@ -83,7 +82,7 @@ async def cmd_profile(message: Message):
         if not u:
             return await message.reply("❌ ᴜꜱᴇʀ ɴᴏᴛ ꜰᴏᴜɴᴅ.")
         prem = await is_premium(message.from_user.id)
-        return await message.reply(format_profile(u, prem))
+        return await message.reply(format_balance(u, prem))
 
     arg = args[0].strip()
     u = None
@@ -101,7 +100,15 @@ async def cmd_profile(message: Message):
     if not u:
         return await message.reply("❌ ᴜꜱᴇʀ ɴᴏᴛ ꜰᴏᴜɴᴅ.")
     prem = await is_premium(u["user_id"])
-    await message.reply(format_profile(u, prem))
+    await message.reply(format_balance(u, prem))
+
+
+# ═══════════════════════════════════════════════
+# ALIAS: /profile → /balance (still works)
+# ═══════════════════════════════════════════════
+@router.message(Command("profile"))
+async def cmd_profile_alias(message: Message):
+    await cmd_balance(message)
 
 
 # ═══════════════════════════════════════════════
