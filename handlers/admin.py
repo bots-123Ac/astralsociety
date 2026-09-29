@@ -5,16 +5,9 @@ from aiogram.types import (
     Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton,
 )
 
-try:
-    from aiogram.dispatcher.event.bases import SkipHandler
-except ImportError:
-    class SkipHandler(Exception):
-        pass
-
 from config import BOT_NAME
 from utils.permissions import is_bot_admin
 from utils.database import save_study_material
-from utils.ui import smart_edit
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -28,50 +21,49 @@ def _clear(user_id):
 
 def admin_panel_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📤 ᴧᴅᴅ sᴛᴜᴅʏ ϻᴧᴛєʀiᴧʟ", callback_data="adm:add")],
-        [InlineKeyboardButton(text="📊 sᴛᴧᴛs", callback_data="adm:stats")],
-        [InlineKeyboardButton(text="↩️ вᴧᴄᴋ", callback_data="menu:main")],
+        [InlineKeyboardButton(text="📤 ᴀᴅᴅ ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ", callback_data="adm:add")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
 
 
 def class_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📘 ᴄʟᴧss 10", callback_data="adm:cls:10"),
-         InlineKeyboardButton(text="📗 ᴄʟᴧss 11", callback_data="adm:cls:11")],
-        [InlineKeyboardButton(text="📕 ᴄʟᴧss 12", callback_data="adm:cls:12")],
-        [InlineKeyboardButton(text="❌ ᴄᴧηᴄєʟ", callback_data="adm:cancel")],
+        [InlineKeyboardButton(text="📘 ᴄʟᴀꜱꜱ 10", callback_data="adm:cls:10"),
+         InlineKeyboardButton(text="📗 ᴄʟᴀꜱꜱ 11", callback_data="adm:cls:11")],
+        [InlineKeyboardButton(text="📕 ᴄʟᴀꜱꜱ 12", callback_data="adm:cls:12")],
+        [InlineKeyboardButton(text="❌ ᴄᴀɴᴄᴇʟ", callback_data="adm:cancel")],
     ])
 
 
 def section_10_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🔬 sᴄiєηᴄє", callback_data="adm:sec:science"),
-         InlineKeyboardButton(text="📐 ϻᴧᴛнs", callback_data="adm:sec:maths")],
-        [InlineKeyboardButton(text="🌍 ssᴛ", callback_data="adm:sec:sst"),
-         InlineKeyboardButton(text="📖 єηɢʟisн", callback_data="adm:sec:english")],
-        [InlineKeyboardButton(text="📝 ᴩʏǫ", callback_data="adm:sec:pyq")],
-        [InlineKeyboardButton(text="❌ ᴄᴧηᴄєʟ", callback_data="adm:cancel")],
+        [InlineKeyboardButton(text="🔬 ꜱᴄɪᴇɴᴄᴇ", callback_data="adm:sec:science"),
+         InlineKeyboardButton(text="📐 ᴍᴀᴛʜꜱ", callback_data="adm:sec:maths")],
+        [InlineKeyboardButton(text="🌍 ꜱꜱᴛ", callback_data="adm:sec:sst"),
+         InlineKeyboardButton(text="📖 ᴇɴɢʟɪꜱʜ", callback_data="adm:sec:english")],
+        [InlineKeyboardButton(text="📝 ᴘʏǫ", callback_data="adm:sec:pyq")],
+        [InlineKeyboardButton(text="❌ ᴄᴀɴᴄᴇʟ", callback_data="adm:cancel")],
     ])
 
 
 def section_1112_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🎯 ᴊєє", callback_data="adm:sec:jee")],
-        [InlineKeyboardButton(text="🩺 ηєєᴛ", callback_data="adm:sec:neet")],
-        [InlineKeyboardButton(text="🎯🩺 ᴊєє + ηєєᴛ", callback_data="adm:sec:both")],
-        [InlineKeyboardButton(text="📝 ᴩʏǫs", callback_data="adm:sec:pyq")],
-        [InlineKeyboardButton(text="❌ ᴄᴧηᴄєʟ", callback_data="adm:cancel")],
+        [InlineKeyboardButton(text="🎯 ᴊᴇᴇ", callback_data="adm:sec:jee")],
+        [InlineKeyboardButton(text="🩺 ɴᴇᴇᴛ", callback_data="adm:sec:neet")],
+        [InlineKeyboardButton(text="🎯🩺 ᴊᴇᴇ + ɴᴇᴇᴛ", callback_data="adm:sec:both")],
+        [InlineKeyboardButton(text="📝 ᴘʏǫꜱ", callback_data="adm:sec:pyq")],
+        [InlineKeyboardButton(text="❌ ᴄᴀɴᴄᴇʟ", callback_data="adm:cancel")],
     ])
 
 
 @router.message(Command("admin"))
 async def cmd_admin(message: Message):
     if not is_bot_admin(message.from_user.id):
-        return await message.reply("❌ sσηʟʏ ᴧᴅϻiηs ᴄᴧη ᴜsє ᴛнis.")
+        return await message.reply("❌ ꜱᴏɴʟʏ ᴀᴅᴍɪɴꜱ ᴄᴀɴ ᴜꜱᴇ ᴛʜɪꜱ.")
     _clear(message.from_user.id)
     await message.answer(
-        f"👑 <b>{BOT_NAME} — ᴧᴅϻiη ᴩᴧηєʟ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\nᴄнσσsє ᴧη ᴧᴄᴛiση:",
+        f"👑 <b>{BOT_NAME} — ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\nᴄʜᴏᴏꜱᴇ ᴀɴ ᴀᴄᴛɪᴏɴ:",
         reply_markup=admin_panel_kb()
     )
 
@@ -81,28 +73,7 @@ async def adm_cancel(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
         return await cb.answer("❌", show_alert=True)
     _clear(cb.from_user.id)
-    await smart_edit(cb, "❌ ᴄᴧηᴄєʟʟєᴅ.", admin_panel_kb())
-    await cb.answer()
-
-
-@router.callback_query(F.data == "adm:stats")
-async def adm_stats(cb: CallbackQuery):
-    if not is_bot_admin(cb.from_user.id):
-        return await cb.answer("❌", show_alert=True)
-    import aiosqlite
-    from config import DB_PATH
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute("SELECT COUNT(*) FROM study_materials") as cur:
-            materials = (await cur.fetchone())[0]
-        async with db.execute("SELECT COUNT(*) FROM users") as cur:
-            users = (await cur.fetchone())[0]
-    await smart_edit(
-        cb,
-        f"📊 <b>sᴛᴧᴛs</b>\n━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"📚 sᴛᴜᴅʏ ϻᴧᴛєʀiᴧʟs: <b>{materials}</b>\n"
-        f"👥 ᴜsєʀs: <b>{users}</b>",
-        admin_panel_kb()
-    )
+    await cb.message.edit_text("❌ ᴄᴀɴᴄᴇʟʟᴇᴅ.", reply_markup=admin_panel_kb())
     await cb.answer()
 
 
@@ -111,11 +82,10 @@ async def adm_add(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
         return await cb.answer("❌", show_alert=True)
     SESSIONS[cb.from_user.id] = {"step": "class", "data": {}}
-    await smart_edit(
-        cb,
-        "📤 <b>ᴧᴅᴅ sᴛᴜᴅʏ ϻᴧᴛєʀiᴧʟ</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━\n\nsᴛєᴩ 1/5 — ᴄнσσsє ᴄʟᴧss:",
-        class_kb()
+    await cb.message.edit_text(
+        "📤 <b>ᴀᴅᴅ ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n\nꜱᴛᴇᴘ 1/5 — ᴄʜᴏᴏꜱᴇ ᴄʟᴀꜱꜱ:",
+        reply_markup=class_kb()
     )
     await cb.answer()
 
@@ -130,9 +100,15 @@ async def adm_class(cb: CallbackQuery):
     sess["step"] = "section"
 
     if cls == "10":
-        await smart_edit(cb, f"📤 <b>ᴄʟᴧss 10</b>\n\nsᴛєᴩ 2/5 — ᴄнσσsє sєᴄᴛiση:", section_10_kb())
+        await cb.message.edit_text(
+            f"📤 <b>ᴄʟᴀꜱꜱ 10</b>\n\nꜱᴛᴇᴘ 2/5 — ᴄʜᴏᴏꜱᴇ ꜱᴇᴄᴛɪᴏɴ:",
+            reply_markup=section_10_kb()
+        )
     else:
-        await smart_edit(cb, f"📤 <b>ᴄʟᴧss {cls}</b>\n\nsᴛєᴩ 2/5 — ᴄнσσsє sєᴄᴛiση:", section_1112_kb())
+        await cb.message.edit_text(
+            f"📤 <b>ᴄʟᴀꜱꜱ {cls}</b>\n\nꜱᴛᴇᴘ 2/5 — ᴄʜᴏᴏꜱᴇ ꜱᴇᴄᴛɪᴏɴ:",
+            reply_markup=section_1112_kb()
+        )
     await cb.answer()
 
 
@@ -148,15 +124,15 @@ async def adm_section(cb: CallbackQuery):
     if cls == "10" and section in ("science", "maths", "sst", "english"):
         sess["step"] = "subject"
         await cb.message.answer(
-            "📤 <b>sᴛєᴩ 3/5</b> — sєηᴅ sᴜвᴊєᴄᴛ ηᴧϻє (ᴛєxᴛ):\n"
-            "ᴇxᴧϻᴩʟє: <code>Biology</code> σʀ <code>Algebra</code>"
+            "📤 <b>ꜱᴛᴇᴘ 3/5</b> — ꜱᴇɴᴅ ꜱᴜʙᴊᴇᴄᴛ ɴᴀᴍᴇ (ᴛᴇxᴛ):\n"
+            "ᴇxᴀᴍᴘʟᴇ: <code>Biology</code>"
         )
     else:
         sess["data"]["subject"] = ""
         sess["step"] = "chapter"
         await cb.message.answer(
-            "📤 <b>sᴛєᴩ 4/5</b> — sєηᴅ ᴄнᴧᴩᴛєʀ ηᴧϻє (ᴛєxᴛ):\n"
-            "ᴇxᴧϻᴩʟє: <code>Chapter 1: Life Processes</code>"
+            "📤 <b>ꜱᴛᴇᴘ 4/5</b> — ꜱᴇɴᴅ ᴄʜᴀᴘᴛᴇʀ ɴᴀᴍᴇ (ᴛᴇxᴛ):\n"
+            "ᴇxᴀᴍᴘʟᴇ: <code>Chapter 1: Life Processes</code>"
         )
     await cb.answer()
 
@@ -167,31 +143,31 @@ async def adm_content_handler(message: Message):
     sess = SESSIONS.get(user_id)
 
     if not sess:
-        raise SkipHandler()
+        return
     if not is_bot_admin(user_id):
         _clear(user_id)
-        raise SkipHandler()
+        return
 
     step = sess.get("step")
 
     if step == "subject":
         if not message.text:
-            return await message.reply("❌ sєηᴅ тєxᴛ σηʟʏ.")
+            return await message.reply("❌ ꜱᴇɴᴅ ᴛᴇxᴛ ᴏɴʟʏ.")
         sess["data"]["subject"] = message.text.strip()
         sess["step"] = "chapter"
         return await message.answer(
-            "📤 <b>sᴛєᴩ 4/5</b> — sєηᴅ ᴄнᴧᴩᴛєʀ ηᴧϻє (ᴛєxᴛ):\n"
-            "ᴇxᴧϻᴩʟє: <code>Chapter 1: Life Processes</code>"
+            "📤 <b>ꜱᴛᴇᴘ 4/5</b> — ꜱᴇɴᴅ ᴄʜᴀᴘᴛᴇʀ ɴᴀᴍᴇ (ᴛᴇxᴛ):\n"
+            "ᴇxᴀᴍᴘʟᴇ: <code>Chapter 1: Life Processes</code>"
         )
 
     if step == "chapter":
         if not message.text:
-            return await message.reply("❌ sєηᴅ тєxᴛ σηʟʏ.")
+            return await message.reply("❌ ꜱᴇɴᴅ ᴛᴇxᴛ ᴏɴʟʏ.")
         sess["data"]["chapter"] = message.text.strip()
         sess["step"] = "content"
         return await message.answer(
-            "📤 <b>sᴛєᴩ 5/5</b> — sєηᴅ тнє ϻᴧᴛєʀiᴧʟ:\n"
-            "📄 PDF | 🎥 ᴠiᴅєσ | 🖼️ ᴩнσᴛσ | 🔗 ʟiηᴋ"
+            "📤 <b>ꜱᴛᴇᴘ 5/5</b> — ꜱᴇɴᴅ ᴛʜᴇ ᴍᴀᴛᴇʀɪᴀʟ:\n"
+            "📄 PDF | 🎥 ᴠɪᴅᴇᴏ | 🖼️ ᴘʜᴏᴛᴏ | 🔗 ʟɪɴᴋ"
         )
 
     if step == "content":
@@ -206,17 +182,16 @@ async def adm_content_handler(message: Message):
             ctype, content = "link", message.text.strip()
 
         if not content:
-            return await message.reply("❌ sєηᴅ PDF/ᴠiᴅєσ/ᴩнσᴛσ σʀ ᴠᴧʟiᴅ ʟiηᴋ.")
+            return await message.reply("❌ ꜱᴇɴᴅ PDF/ᴠɪᴅᴇᴏ/ᴘʜᴏᴛᴏ ᴏʀ ᴠᴀʟɪᴅ ʟɪɴᴋ.")
 
         data = sess["data"]
-        # Merge subject into chapter name so user UX is clean
         subj = data.get("subject", "")
         chapter_final = f"{subj} — {data['chapter']}" if subj else data["chapter"]
 
         await save_study_material(
             data["class_name"],
             data["section"],
-            "",  # subject left empty
+            "",
             chapter_final,
             ctype,
             content,
@@ -225,13 +200,11 @@ async def adm_content_handler(message: Message):
         )
         _clear(user_id)
         return await message.answer(
-            f"✅ <b>ϻᴧᴛєʀiᴧʟ sᴧᴠєᴅ!</b>\n"
+            f"✅ <b>ᴍᴀᴛᴇʀɪᴀʟ ꜱᴀᴠᴇᴅ!</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"📘 ᴄʟᴧss: <b>{data['class_name']}</b>\n"
-            f"📂 sєᴄᴛiση: <b>{data['section']}</b>\n"
-            f"📄 ᴄнᴧᴩᴛєʀ: <b>{chapter_final}</b>\n\n"
-            f"ᴜsєʀs ᴄᴧη ησω ᴧᴄᴄєss iᴛ ᴠiᴧ /study.",
+            f"📘 ᴄʟᴀꜱꜱ: <b>{data['class_name']}</b>\n"
+            f"📂 ꜱᴇᴄᴛɪᴏɴ: <b>{data['section']}</b>\n"
+            f"📄 ᴄʜᴀᴘᴛᴇʀ: <b>{chapter_final}</b>\n\n"
+            f"ᴜꜱᴇʀꜱ ᴄᴀɴ ɴᴏᴡ ᴀᴄᴄᴇꜱꜱ ᴠɪᴀ /study.",
             reply_markup=admin_panel_kb()
         )
-
-    raise SkipHandler()
