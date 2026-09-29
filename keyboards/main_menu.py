@@ -2,6 +2,9 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from config import SUPPORT_GROUP_LINK, SUPPORT_CHANNEL_LINK, BOT_ADD_LINK
 
 
+# ═══════════════════════════════════════════════
+# MAIN MENU
+# ═══════════════════════════════════════════════
 def main_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🆘 ʜᴇʟᴘ", callback_data="menu:help"),
@@ -84,12 +87,22 @@ def quiz_options_kb(qid, a, b, c, d):
 
 
 # ═══════════════════════════════════════════════
-# LEADERBOARD
+# LEADERBOARD — 4 TABS
 # ═══════════════════════════════════════════════
 def leaderboard_kb():
+    """4 tabs for leaderboard (Today / Weekly / Monthly / All-Time)."""
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="👥 ɢʀᴏᴜᴘ ᴛᴏᴘ 10", callback_data="lb:group")],
-        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
+        [
+            InlineKeyboardButton(text="📅 ᴛᴏᴅᴀʏ", callback_data="lb:today"),
+            InlineKeyboardButton(text="📆 ᴡᴇᴇᴋʟʏ", callback_data="lb:weekly"),
+        ],
+        [
+            InlineKeyboardButton(text="🗓️ ᴍᴏɴᴛʜʟʏ", callback_data="lb:monthly"),
+            InlineKeyboardButton(text="🌐 ᴀʟʟ-ᴛɪᴍᴇ", callback_data="lb:alltime"),
+        ],
+        [
+            InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main"),
+        ],
     ])
 
 
@@ -97,7 +110,6 @@ def leaderboard_kb():
 # STUDY — Proper Back Navigation
 # ═══════════════════════════════════════════════
 def study_class_kb():
-    """Level 1: Class selection. Back → Main menu."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📘 ᴄʟᴀꜱꜱ 10", callback_data="study:10"),
          InlineKeyboardButton(text="📗 ᴄʟᴀꜱꜱ 11", callback_data="study:11")],
@@ -107,7 +119,6 @@ def study_class_kb():
 
 
 def study_class10_kb():
-    """Level 2: Class 10 sections. Back → Class selection."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔬 ꜱᴄɪᴇɴᴄᴇ", callback_data="st10:subject:science"),
          InlineKeyboardButton(text="📐 ᴍᴀᴛʜꜱ", callback_data="st10:subject:maths")],
@@ -119,7 +130,6 @@ def study_class10_kb():
 
 
 def study_class1112_kb(class_name):
-    """Level 2: Class 11/12 sections. Back → Class selection."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎯 ᴊᴇᴇ", callback_data=f"st{class_name}:section:jee")],
         [InlineKeyboardButton(text="🩺 ɴᴇᴇᴛ", callback_data=f"st{class_name}:section:neet")],
@@ -130,7 +140,6 @@ def study_class1112_kb(class_name):
 
 
 def chapters_kb(class_name, section, chapters):
-    """Level 3: Chapters list. Back → Sections of that class."""
     rows = []
     for i, ch in enumerate(chapters):
         rows.append([InlineKeyboardButton(
