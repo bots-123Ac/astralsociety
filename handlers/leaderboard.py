@@ -23,7 +23,7 @@ def _format_lb(rows, period: str, rank) -> str:
 
     if not rows:
         lines.append("")
-        lines.append("ηᴏ ᴇᴀʀɴɪηɢs ʏєᴛ.")
+        lines.append("ηᴏ ᴇᴀʀɴɪηɢs ʏᴇᴛ.")
     else:
         lines.append("")
         for i, row in enumerate(rows):
@@ -49,9 +49,6 @@ async def _build_lb_text(period: str, user_id: int) -> str:
     return _format_lb(rows, period, rank)
 
 
-# ═══════════════════════════════════════════════
-# /aleaderboard — DM + GC
-# ═══════════════════════════════════════════════
 @router.message(Command("aleaderboard"))
 async def cmd_aleaderboard(message: Message):
     text = await _build_lb_text("alltime", message.from_user.id)
@@ -63,9 +60,6 @@ async def cmd_leaderboard_alias(message: Message):
     await cmd_aleaderboard(message)
 
 
-# ═══════════════════════════════════════════════
-# Tab switching (edit same message)
-# ═══════════════════════════════════════════════
 @router.callback_query(F.data.startswith("lb:"))
 async def cb_lb_tab(cb: CallbackQuery):
     period = cb.data.split(":")[1]
