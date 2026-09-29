@@ -25,7 +25,7 @@ def help_text() -> str:
         f"<b>🪙 ᴇᴄᴏɴᴏᴍʏ</b>\n"
         f"/profile — ᴠɪᴇᴡ ᴘʀᴏꜰɪʟᴇ\n"
         f"/convert 100c — ᴄᴏɪɴꜱ → ɢᴇᴍꜱ\n"
-        f"/give 10000 — ꜱᴇɴᴅ ᴄᴏɪɴꜱ (ʀᴇᴘʟʏ)\n"
+        f"/gives 10000 — ꜱᴇɴᴅ ᴄᴏɪɴꜱ (ʀᴇᴘʟʏ)\n"
         f"/robs — ʀᴏʙ ᴀ ᴜꜱᴇʀ (ʀᴇᴘʟʏ)\n"
         f"/shield 2 — ᴀᴄᴛɪᴠᴀᴛᴇ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ\n"
         f"/shieldcheck — ᴄʜᴇᴄᴋ ꜱʜɪᴇʟᴅ\n"
@@ -43,12 +43,24 @@ def help_text() -> str:
     )
 
 
-def about_text() -> str:
+async def get_about_text() -> str:
+    """Generate about text with live stats."""
+    try:
+        from utils.database import get_total_users, get_monthly_active_users
+        total_users = await get_total_users()
+        monthly_users = await get_monthly_active_users()
+    except Exception:
+        total_users = 0
+        monthly_users = 0
+
     return (
         f"ℹ️ <b>ᴀʙᴏᴜᴛ {BOT_NAME}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"🤖 <b>ʙᴏᴛ ɴᴀᴍᴇ:</b> {BOT_NAME}\n"
         f"🔗 <b>ᴜꜱᴇʀɴᴀᴍᴇ:</b> {BOT_USERNAME}\n\n"
+        f"📊 <b>ʟɪᴠᴇ ꜱᴛᴀᴛꜱ:</b>\n"
+        f"👥 ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ   : <b>{total_users:,}</b>\n"
+        f"📅 ᴍᴏɴᴛʜʟʏ ᴀᴄᴛɪᴠᴇ: <b>{monthly_users:,}</b>\n\n"
         f"<b>✨ ꜰᴇᴀᴛᴜʀᴇꜱ:</b>\n"
         f"📚 ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ\n"
         f"📝 ǫᴜɪᴢ (15 ᴄᴀᴛᴇɢᴏʀɪᴇꜱ)\n"
@@ -118,16 +130,17 @@ async def cb_help(cb: CallbackQuery):
 
 @router.callback_query(F.data == "menu:about")
 async def cb_about(cb: CallbackQuery):
+    text = await get_about_text()
     try:
         await cb.message.edit_text(
-            about_text(),
+            text,
             reply_markup=back_main_kb(),
             link_preview_options=NO_PREVIEW,
         )
     except Exception:
         try:
             await cb.message.answer(
-                about_text(),
+                text,
                 reply_markup=back_main_kb(),
                 link_preview_options=NO_PREVIEW,
             )
@@ -147,8 +160,9 @@ async def cmd_help(message: Message):
 
 @router.message(F.text.regexp(r"^/about(\s|$)"))
 async def cmd_about(message: Message):
+    text = await get_about_text()
     await message.answer(
-        about_text(),
+        text,
         reply_markup=back_main_kb(),
         link_preview_options=NO_PREVIEW,
     )
