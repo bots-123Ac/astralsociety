@@ -10,14 +10,15 @@ from config import (
 )
 from utils.database import (
     get_or_create_user, add_coins, add_xp, is_premium, is_shielded,
-    set_shield, shield_remaining, get_user_coins,
+    set_shield, shield_remaining, shield_remaining_seconds,
+    format_shield_time, get_user_coins,
 )
 
 router = Router()
 
 
 # ═══════════════════════════════════════════════
-# /gives [amount] — send coins (reply)
+# /gives [amount] — reply only (transfer, no leaderboard log)
 # ═══════════════════════════════════════════════
 @router.message(Command("gives"))
 async def cmd_gives(message: Message, bot: Bot):
@@ -56,8 +57,9 @@ async def cmd_gives(message: Message, bot: Bot):
     deduction = (amount * GIVE_DEDUCTION_PERCENT) // 100
     received = amount - deduction
 
-    await add_coins(sender.id, -amount)
-    await add_coins(receiver.id, received)
+    # is_earning=False → don't log to leaderboard (it's a transfer)
+    await add_coins(sender.id, -amount, is_earning=False)
+    await add_coins(receiver.id, received, is_earning=False)
 
     await message.reply(
         f"✅ <b>ᴄᴏɪɴꜱ ꜱᴇɴᴛ!</b>\n"
@@ -66,7 +68,6 @@ async def cmd_gives(message: Message, bot: Bot):
         f"ᴀꜰᴛᴇʀ 10% ᴏꜰ ᴅᴇᴅᴜᴄᴛɪᴏɴ."
     )
 
-    # DM notification
     group_name = message.chat.title or SUPPORT_GROUP_NAME
     try:
         await bot.send_message(
@@ -82,7 +83,7 @@ async def cmd_gives(message: Message, bot: Bot):
 
 
 # ═══════════════════════════════════════════════
-# /robs [amount] — reply ONLY, amount REQUIRED
+# /robs [amount] — reply only (transfer, no leaderboard log)
 # ═══════════════════════════════════════════════
 @router.message(Command("robs"))
 async def cmd_robs(message: Message, bot: Bot):
@@ -101,11 +102,10 @@ async def cmd_robs(message: Message, bot: Bot):
     if victim.is_bot:
         return await message.reply("❌ ᴄᴀɴ'ᴛ ʀᴏʙ ᴀ ʙᴏᴛ.")
 
-    # ═══ Amount is REQUIRED ═══
     parts = message.text.split()
     if len(parts) < 2 or not parts[1].isdigit():
         return await message.reply(
-            "❌ ᴀᴍᴏᴜɴᴛ ʀᴇQᴜɪʀᴇᴅ!\n\n"
+            "❌ ᴀᴍᴏᴜɴᴛ ʀᴇǫᴜɪʀᴇᴅ!\n\n"
             "ᴜꜱᴀɢᴇ: <code>/robs 5000</code> (ʀᴇᴘʟʏ ᴛᴏ ᴛᴀʀɢᴇᴛ)"
         )
 
@@ -129,20 +129,19 @@ async def cmd_robs(message: Message, bot: Bot):
             f"⚠️ <b>{victim.mention_html()} ʜᴀꜱ ᴏɴʟʏ 0 ᴄᴏɪɴꜱ</b>"
         )
 
-    # ═══ Amount exceeds victim's balance ═══
     if amount > victim_coins:
         return await message.reply(
             f"⚠️ <b>{victim.mention_html()} ʜᴀꜱ ᴏɴʟʏ {victim_coins:,} ᴄᴏɪɴꜱ</b>\n\n"
             f"ʏᴏᴜ ᴛʀɪᴇᴅ ᴛᴏ ʀᴏʙ <b>{amount:,}</b> ᴄᴏɪɴꜱ."
         )
 
-    # ═══ Proceed with rob ═══
     pct = ROB_PREMIUM_PERCENT if await is_premium(robber.id) else ROB_NORMAL_PERCENT
     deduction = (amount * pct) // 100
     robber_receives = amount - deduction
 
-    await add_coins(victim.id, -amount)
-    await add_coins(robber.id, robber_receives)
+    # is_earning=False → don't log to leaderboard (transfer)
+    await add_coins(victim.id, -amount, is_earning=False)
+    await add_coins(robber.id, robber_receives, is_earning=False)
 
     xp_gain = random.randint(0, 10)
     await add_xp(robber.id, xp_gain)
@@ -170,7 +169,7 @@ async def cmd_robs(message: Message, bot: Bot):
 
 
 # ═══════════════════════════════════════════════
-# /shield
+# /shield [days]
 # ═══════════════════════════════════════════════
 @router.message(Command("shield"))
 async def cmd_shield(message: Message):
@@ -179,6 +178,14 @@ async def cmd_shield(message: Message):
         message.from_user.username,
         message.from_user.first_name,
     )
+
+    # ═══ Check if already shielded ═══
+    remaining_sec = await shield_remaining_seconds(message.from_user.id)
+    if remaining_sec > 0:
+        return await message.reply(
+            f"🛡️ <b>ʏᴏᴜ ᴀʀᴇ ᴀʟʀᴇᴀᴅʏ ᴘʀᴏᴛᴇᴄᴛᴇᴅ.</b>\n"
+            f"⏳ ʀᴇᴍᴀɪɴɪɴɢ: <b>{format_shield_time(remaining_sec)}</b>"
+        )
 
     is_prem = await is_premium(message.from_user.id)
     max_days = SHIELD_PREMIUM_MAX_DAYS if is_prem else SHIELD_NORMAL_MAX_DAYS
@@ -222,21 +229,32 @@ async def cmd_shieldcheck(message: Message):
     checker = message.from_user
     checker_premium = await is_premium(checker.id)
 
-    if not checker_premium:
-        rem = await shield_remaining(checker.id)
-        if rem <= 0:
+    # ═══ If checking own shield and already active ═══
+    has_target = message.reply_to_message and message.reply_to_message.from_user
+
+    if not checker_premium and not has_target:
+        rem_sec = await shield_remaining_seconds(checker.id)
+        if rem_sec <= 0:
             return await message.reply(
                 "🛡️ ʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ.\n\n"
                 "⭐ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀꜱ ᴄᴀɴ ᴄʜᴇᴄᴋ ᴏᴛʜᴇʀꜱ' ꜱʜɪᴇʟᴅ ᴛɪᴍᴇ."
             )
-        return await message.reply(f"🛡️ ʏᴏᴜʀ ꜱʜɪᴇʟᴅ: <b>{rem} ᴅᴀʏꜱ ʟᴇꜰᴛ</b>")
+        return await message.reply(
+            f"🛡️ <b>ʏᴏᴜ ᴀʀᴇ ᴀʟʀᴇᴀᴅʏ ᴘʀᴏᴛᴇᴄᴛᴇᴅ.</b>\n"
+            f"⏳ ʀᴇᴍᴀɪɴɪɴɢ: <b>{format_shield_time(rem_sec)}</b>"
+        )
 
-    if not message.reply_to_message or not message.reply_to_message.from_user:
-        rem = await shield_remaining(checker.id)
-        if rem <= 0:
+    # Premium user / no target → own shield
+    if not has_target:
+        rem_sec = await shield_remaining_seconds(checker.id)
+        if rem_sec <= 0:
             return await message.reply("🛡️ ʏᴏᴜ ᴅᴏ ɴᴏᴛ ʜᴀᴠᴇ ᴀɴ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ.")
-        return await message.reply(f"🛡️ ʏᴏᴜʀ ꜱʜɪᴇʟᴅ: <b>{rem} ᴅᴀʏꜱ ʟᴇꜰᴛ</b>")
+        return await message.reply(
+            f"🛡️ <b>ʏᴏᴜ ᴀʀᴇ ᴀʟʀᴇᴀᴅʏ ᴘʀᴏᴛᴇᴄᴛᴇᴅ.</b>\n"
+            f"⏳ ʀᴇᴍᴀɪɴɪɴɢ: <b>{format_shield_time(rem_sec)}</b>"
+        )
 
+    # Target given
     target = message.reply_to_message.from_user
 
     if await is_premium(target.id):
@@ -244,11 +262,12 @@ async def cmd_shieldcheck(message: Message):
             "❌ ᴄᴀɴ'ᴛ ᴄʜᴇᴄᴋ ᴀɴᴏᴛʜᴇʀ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀ'ꜱ ꜱʜɪᴇʟᴅ."
         )
 
-    rem = await shield_remaining(target.id)
-    if rem <= 0:
+    rem_sec = await shield_remaining_seconds(target.id)
+    if rem_sec <= 0:
         return await message.reply(
             f"🛡️ {target.mention_html()}: <b>ɴᴏ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ</b>"
         )
     await message.reply(
-        f"🛡️ {target.mention_html()}: <b>{rem} ᴅᴀʏꜱ ʟᴇꜰᴛ</b>"
+        f"🛡️ {target.mention_html()}:\n"
+        f"⏳ <b>{format_shield_time(rem_sec)}</b> ʀᴇᴍᴀɪɴɪɴɢ"
     )
