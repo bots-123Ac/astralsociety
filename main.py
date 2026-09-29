@@ -9,16 +9,13 @@ from aiogram.types import ErrorEvent
 from config import BOT_TOKEN, BOT_NAME
 from handlers import (
     start, menu, profile, robs, leaderboard, daily, study, mission,
-    shop, powers, quiz, premium, tgames, botstats, admin,
+    shop, powers, quiz, premium, tgames, botstats, treasure, admin,
 )
 from utils.logger import setup_logger
 from utils.database import init_db, close_pool, get_pool, log_user_activity
 from utils.quiz_loader import background_load
 
 
-# ═══════════════════════════════════════════════
-# ACTIVITY MIDDLEWARE
-# ═══════════════════════════════════════════════
 _activity_cache = set()
 
 
@@ -59,25 +56,23 @@ async def main():
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    # ═══════════════════════════════════════════════
-    # ROUTER ORDER — VERY IMPORTANT
-    # admin.router MUST be LAST (has wildcard handler)
-    # ═══════════════════════════════════════════════
-    dp.include_router(start.router)         # 1. /start
-    dp.include_router(menu.router)          # 2. /help, /about
-    dp.include_router(profile.router)       # 3. /profile, /convert
-    dp.include_router(robs.router)          # 4. /gives, /robs, /shield
-    dp.include_router(leaderboard.router)   # 5. /aleaderboard
-    dp.include_router(daily.router)         # 6. /daily, /performance
-    dp.include_router(study.router)         # 7. /study
-    dp.include_router(mission.router)       # 8. /mission
-    dp.include_router(shop.router)          # 9. /shop
-    dp.include_router(powers.router)        # 10. /powers
-    dp.include_router(quiz.router)          # 11. /quiz
-    dp.include_router(premium.router)       # 12. /premium
-    dp.include_router(botstats.router)      # 13. /botstatus, /users
-    dp.include_router(tgames.router)        # 14. /tgames, /h
-    dp.include_router(admin.router)         # 15. LAST — /admin + wildcard
+    # ═══ ROUTER ORDER — admin.router MUST be LAST ═══
+    dp.include_router(start.router)
+    dp.include_router(menu.router)
+    dp.include_router(profile.router)
+    dp.include_router(robs.router)
+    dp.include_router(leaderboard.router)
+    dp.include_router(daily.router)
+    dp.include_router(study.router)
+    dp.include_router(mission.router)
+    dp.include_router(shop.router)
+    dp.include_router(powers.router)
+    dp.include_router(quiz.router)
+    dp.include_router(premium.router)
+    dp.include_router(botstats.router)
+    dp.include_router(treasure.router)      # 👈 NEW
+    dp.include_router(tgames.router)
+    dp.include_router(admin.router)         # 👈 LAST
 
     asyncio.create_task(background_load())
 
