@@ -28,7 +28,6 @@ async def get_pool() -> asyncpg.Pool:
             statement_cache_size=100,
             max_inactive_connection_lifetime=300,
         )
-        # Warm-up connection
         async with _pool.acquire() as conn:
             await conn.fetchval("SELECT 1")
         print("✅ PostgreSQL pool warmed up (3 conns ready)")
@@ -44,9 +43,9 @@ async def close_pool():
 
 
 # ═══════════════════════════════════════════════
-# IN-MEMORY CACHE (short TTL for hot reads)
+# IN-MEMORY CACHE
 # ═══════════════════════════════════════════════
-CACHE_TTL = 5  # seconds
+CACHE_TTL = 5
 
 _premium_cache: dict[int, tuple] = {}
 _shield_cache: dict[int, tuple] = {}
@@ -108,6 +107,7 @@ async def init_db():
     pool = await get_pool()
 
     async with pool.acquire() as conn:
+        # ═══ USERS ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id BIGINT PRIMARY KEY,
@@ -130,6 +130,8 @@ async def init_db():
                 created_at TEXT
             )
         """)
+
+        # ═══ STUDY ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS study_materials (
                 id SERIAL PRIMARY KEY,
@@ -138,12 +140,16 @@ async def init_db():
                 uploaded_by BIGINT, uploaded_at TEXT
             )
         """)
+
+        # ═══ POWERS ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS powers (
                 id SERIAL PRIMARY KEY,
                 user_id BIGINT, power_type TEXT, expires_at TEXT
             )
         """)
+
+        # ═══ MISSION ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS mission_log (
                 id SERIAL PRIMARY KEY,
@@ -154,12 +160,16 @@ async def init_db():
                 claimed INTEGER DEFAULT 0
             )
         """)
+
+        # ═══ ACTIVE GROUPS ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS active_groups (
                 chat_id BIGINT PRIMARY KEY,
                 title TEXT, added_at TEXT
             )
         """)
+
+        # ═══ QUIZ QUESTIONS ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS quiz_questions (
                 id SERIAL PRIMARY KEY,
@@ -175,6 +185,19 @@ async def init_db():
             "CREATE INDEX IF NOT EXISTS idx_quiz_cat ON quiz_questions(category)"
         )
 
+        # ═══ USER ACTIVITY (for monthly/daily stats) ═══
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS user_activity (
+                user_id BIGINT,
+                activity_date TEXT,
+                PRIMARY KEY (user_id, activity_date)
+            )
+        """)
+        await conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_activity_date ON user_activity(activity_date)"
+        )
+
+    # ═══ SEED BUNDLED QUESTIONS ON FIRST RUN ═══
     cnt = await get_quiz_count()
     if cnt == 0:
         try:
@@ -223,7 +246,6 @@ async def get_or_create_user(user_id, username, first_name):
             user_id, username or "", first_name or "", astral_id, _to_str(_now())
         )
     else:
-        # Fire-and-forget update (don't block response)
         try:
             await pool.execute(
                 "UPDATE users SET username = $1, first_name = $2 WHERE user_id = $3",
@@ -321,13 +343,12 @@ async def convert_coins_to_gems(user_id, coins_amount):
 
 
 # ═══════════════════════════════════════════════
-# PREMIUM (cached)
+# PREMIUM
 # ═══════════════════════════════════════════════
 async def is_premium(user_id) -> bool:
     cached = _cache_get(_premium_cache, user_id)
     if cached is not None:
         return cached
-
     pool = await get_pool()
     val = await pool.fetchval(
         "SELECT premium_until FROM users WHERE user_id = $1", user_id
@@ -381,13 +402,12 @@ async def deduct_gems(user_id, amount) -> bool:
 
 
 # ═══════════════════════════════════════════════
-# SHIELD (cached)
+# SHIELD
 # ═══════════════════════════════════════════════
 async def is_shielded(user_id) -> bool:
     cached = _cache_get(_shield_cache, user_id)
     if cached is not None:
         return cached
-
     pool = await get_pool()
     val = await pool.fetchval(
         "SELECT shield_until FROM users WHERE user_id = $1", user_id
@@ -712,3 +732,68 @@ async def get_quiz_count() -> int:
     pool = await get_pool()
     val = await pool.fetchval("SELECT COUNT(*) FROM quiz_questions")
     return val or 0
+
+
+# ═══════════════════════════════════════════════
+# BOT STATS (for /botstats and /about)
+# ═══════════════════════════════════════════════
+async def log_user_activity(user_id):
+    """Log user as active today (once per day)."""
+    today = _now().strftime("%Y-%m-%d")
+    pool = await get_pool()
+    try:
+        await pool.execute(
+            """INSERT INTO user_activity (user_id, activity_date)
+               VALUES ($1, $2)
+               ON CONFLICT (user_id, activity_date) DO NOTHING""",
+            user_id, today
+        )
+    except Exception:
+        pass
+
+
+async def get_total_users() -> int:
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COUNT(*) FROM users")
+    return val or 0
+
+
+async def get_daily_active_users() -> int:
+    today = _now().strftime("%Y-%m-%d")
+    pool = await get_pool()
+    val = await pool.fetchval(
+        "SELECT COUNT(DISTINCT user_id) FROM user_activity WHERE activity_date = $1",
+        today
+    )
+    return val or 0
+
+
+async def get_weekly_active_users() -> int:
+    cutoff = (_now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    pool = await get_pool()
+    val = await pool.fetchval(
+        "SELECT COUNT(DISTINCT user_id) FROM user_activity WHERE activity_date >= $1",
+        cutoff
+    )
+    return val or 0
+
+
+async def get_monthly_active_users() -> int:
+    cutoff = (_now() - timedelta(days=30)).strftime("%Y-%m-%d")
+    pool = await get_pool()
+    val = await pool.fetchval(
+        "SELECT COUNT(DISTINCT user_id) FROM user_activity WHERE activity_date >= $1",
+        cutoff
+    )
+    return val or 0
+
+
+async def get_bot_full_stats() -> dict:
+    """Return all stats in one call."""
+    return {
+        "total_users": await get_total_users(),
+        "daily_active": await get_daily_active_users(),
+        "weekly_active": await get_weekly_active_users(),
+        "monthly_active": await get_monthly_active_users(),
+        "quiz_count": await get_quiz_count(),
+    }
