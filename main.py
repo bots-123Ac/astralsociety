@@ -17,6 +17,9 @@ from utils.database import init_db, close_pool, get_pool, log_user_activity
 from utils.quiz_loader import background_load
 
 
+# ═══════════════════════════════════════════════
+# ACTIVITY MIDDLEWARE
+# ═══════════════════════════════════════════════
 _activity_cache = set()
 
 
@@ -36,45 +39,57 @@ class ActivityMiddleware(BaseMiddleware):
 async def main():
     setup_logger()
     logging.info(f"🚀 Starting {BOT_NAME} ...")
+
     if not BOT_TOKEN:
         raise RuntimeError("❌ BOT_TOKEN missing!")
+
     await init_db()
     await get_pool()
 
-    bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    bot = Bot(
+        token=BOT_TOKEN,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+    )
     dp = Dispatcher()
 
+    # Register middleware
     dp.message.middleware(ActivityMiddleware())
     dp.callback_query.middleware(ActivityMiddleware())
 
+    # Global error handler
     @dp.errors()
     async def on_error(event: ErrorEvent):
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    # ═══ ROUTER ORDER — admin LAST ═══
-    dp.include_router(start.router)
-    dp.include_router(menu.router)
-    dp.include_router(profile.router)
-    dp.include_router(robs.router)
-    dp.include_router(leaderboard.router)
-    dp.include_router(daily.router)
-    dp.include_router(study.router)
-    dp.include_router(mission.router)
-    dp.include_router(shop.router)
-    dp.include_router(powers.router)
-    dp.include_router(quiz.router)
-    dp.include_router(premium.router)
-    dp.include_router(botstats.router)
-    dp.include_router(treasure.router)
-    dp.include_router(luckydoor.router)   # 👈 NEW
-    dp.include_router(tgames.router)
-    dp.include_router(admin.router)
+    # ═══════════════════════════════════════════════
+    # ROUTER ORDER — VERY IMPORTANT
+    # admin.router MUST be LAST (has wildcard handler)
+    # ═══════════════════════════════════════════════
+    dp.include_router(start.router)          # 1.  /start
+    dp.include_router(menu.router)           # 2.  /help, /about
+    dp.include_router(profile.router)        # 3.  /balance, /profile, /convert
+    dp.include_router(robs.router)           # 4.  /gives, /robs, /shield, /shieldcheck
+    dp.include_router(leaderboard.router)    # 5.  /aleaderboard
+    dp.include_router(daily.router)          # 6.  /daily, /performance
+    dp.include_router(study.router)          # 7.  /study
+    dp.include_router(mission.router)        # 8.  /mission
+    dp.include_router(shop.router)           # 9.  /shop, /shieldtime
+    dp.include_router(powers.router)         # 10. /powers
+    dp.include_router(quiz.router)           # 11. /quiz
+    dp.include_router(premium.router)        # 12. /premium, /premiumstatus
+    dp.include_router(botstats.router)       # 13. /botstatus, /users
+    dp.include_router(treasure.router)       # 14. /treasure
+    dp.include_router(luckydoor.router)      # 15. /luckydoor
+    dp.include_router(tgames.router)         # 16. /tgames, /h
+    dp.include_router(admin.router)          # 17. LAST — /admin + wildcard
 
+    # Background task: auto-fetch quiz questions
     asyncio.create_task(background_load())
 
     logging.info("✅ Bot is running.")
     await bot.delete_webhook(drop_pending_updates=True)
+
     try:
         await dp.start_polling(bot)
     finally:
