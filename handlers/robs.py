@@ -17,18 +17,20 @@ router = Router()
 
 
 # ═══════════════════════════════════════════════
-# /give [amount] — reply only
+# /gives [amount] — send coins (reply) — WORKS IN GC
 # ═══════════════════════════════════════════════
-@router.message(Command("give"))
-async def cmd_give(message: Message, bot: Bot):
+@router.message(Command("gives"))
+async def cmd_gives(message: Message, bot: Bot):
     if not message.reply_to_message or not message.reply_to_message.from_user:
         return await message.reply(
-            "❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜꜱᴇʀ ᴡɪᴛʜ <code>/give [ᴀᴍᴏᴜɴᴛ]</code>"
+            "❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜꜱᴇʀ ᴡɪᴛʜ <code>/gives [ᴀᴍᴏᴜɴᴛ]</code>"
         )
 
     parts = message.text.split()
     if len(parts) < 2 or not parts[1].isdigit():
-        return await message.reply("ᴜꜱᴀɢᴇ: <code>/give 10000</code> (ʀᴇᴘʟʏ ᴛᴏ ᴛᴀʀɢᴇᴛ)")
+        return await message.reply(
+            "ᴜꜱᴀɢᴇ: <code>/gives 10000</code>\n(ʀᴇᴘʟʏ ᴛᴏ ᴛᴀʀɢᴇᴛ ᴜꜱᴇʀ)"
+        )
 
     sender = message.from_user
     receiver = message.reply_to_message.from_user
@@ -66,7 +68,7 @@ async def cmd_give(message: Message, bot: Bot):
 
 
 # ═══════════════════════════════════════════════
-# /robs — reply only (full or specific amount)
+# /robs [amount] — reply only — WORKS IN GC
 # ═══════════════════════════════════════════════
 @router.message(Command("robs"))
 async def cmd_robs(message: Message, bot: Bot):
@@ -115,7 +117,6 @@ async def cmd_robs(message: Message, bot: Bot):
     if base_amount < 1:
         return await message.reply("❌ ᴀᴍᴏᴜɴᴛ ᴛᴏᴏ ꜱᴍᴀʟʟ.")
 
-    # Deduction based on robber's premium
     pct = ROB_PREMIUM_PERCENT if await is_premium(robber.id) else ROB_NORMAL_PERCENT
     deduction = (base_amount * pct) // 100
     robber_receives = base_amount - deduction
@@ -134,7 +135,6 @@ async def cmd_robs(message: Message, bot: Bot):
         f"📈 xᴘ: <b>+{xp_gain}</b>"
     )
 
-    # DM victim
     try:
         await bot.send_message(
             victim.id,
@@ -148,7 +148,7 @@ async def cmd_robs(message: Message, bot: Bot):
 
 
 # ═══════════════════════════════════════════════
-# /shield [days]
+# /shield [days] — works in DM + GC
 # ═══════════════════════════════════════════════
 @router.message(Command("shield"))
 async def cmd_shield(message: Message):
@@ -187,7 +187,7 @@ async def cmd_shield(message: Message):
 
 
 # ═══════════════════════════════════════════════
-# /shieldcheck
+# /shieldcheck — premium can check others
 # ═══════════════════════════════════════════════
 @router.message(Command("shieldcheck"))
 async def cmd_shieldcheck(message: Message):
@@ -200,7 +200,6 @@ async def cmd_shieldcheck(message: Message):
     checker = message.from_user
     checker_premium = await is_premium(checker.id)
 
-    # Normal user → only own shield
     if not checker_premium:
         rem = await shield_remaining(checker.id)
         if rem <= 0:
@@ -210,7 +209,6 @@ async def cmd_shieldcheck(message: Message):
             )
         return await message.reply(f"🛡️ ʏᴏᴜʀ ꜱʜɪᴇʟᴅ: <b>{rem} ᴅᴀʏꜱ ʟᴇꜰᴛ</b>")
 
-    # Premium user
     if not message.reply_to_message or not message.reply_to_message.from_user:
         rem = await shield_remaining(checker.id)
         if rem <= 0:
