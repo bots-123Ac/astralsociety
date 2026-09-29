@@ -17,7 +17,7 @@ router = Router()
 
 
 # ═══════════════════════════════════════════════
-# /gives [amount] — send coins (reply) — WORKS IN GC
+# /gives [amount] — send coins + DM notification
 # ═══════════════════════════════════════════════
 @router.message(Command("gives"))
 async def cmd_gives(message: Message, bot: Bot):
@@ -59,6 +59,7 @@ async def cmd_gives(message: Message, bot: Bot):
     await add_coins(sender.id, -amount)
     await add_coins(receiver.id, received)
 
+    # ═══ Public reply in GC ═══
     await message.reply(
         f"✅ <b>ᴄᴏɪɴꜱ ꜱᴇɴᴛ!</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -66,9 +67,23 @@ async def cmd_gives(message: Message, bot: Bot):
         f"ᴀꜰᴛᴇʀ 10% ᴏꜰ ᴅᴇᴅᴜᴄᴛɪᴏɴ."
     )
 
+    # ═══ DM Notification to Receiver ═══
+    group_name = message.chat.title or SUPPORT_GROUP_NAME
+    try:
+        await bot.send_message(
+            receiver.id,
+            f"💸 <b>ꜱᴏᴍᴇᴏɴᴇ ɢᴀᴠᴇ ʏᴏᴜ ᴍᴏɴᴇʏ</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"👤 ɢɪᴠᴇʀ: {sender.mention_html()}\n"
+            f"💰 ᴀᴍᴏᴜɴᴛ: <b>{received:,}</b> 🪙\n"
+            f"📍 ɢʀᴏᴜᴘ: <b>{group_name}</b>"
+        )
+    except Exception:
+        pass
+
 
 # ═══════════════════════════════════════════════
-# /robs [amount] — reply only — WORKS IN GC
+# /robs [amount] — rob + DM notification
 # ═══════════════════════════════════════════════
 @router.message(Command("robs"))
 async def cmd_robs(message: Message, bot: Bot):
@@ -135,20 +150,23 @@ async def cmd_robs(message: Message, bot: Bot):
         f"📈 xᴘ: <b>+{xp_gain}</b>"
     )
 
+    # DM Notification to victim
+    group_name = message.chat.title or SUPPORT_GROUP_NAME
     try:
         await bot.send_message(
             victim.id,
-            f"⚠️ <b>ʏᴏᴜ ᴡᴇʀᴇ ʀᴏʙʙᴇᴅ!</b>\n\n"
+            f"⚠️ <b>ʏᴏᴜ ᴡᴇʀᴇ ʀᴏʙʙᴇᴅ!</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"👤 ʀᴏʙʙᴇʀ: {robber.mention_html()}\n"
             f"💸 ꜱᴛᴏʟᴇɴ: <b>{base_amount:,}</b> 🪙\n"
-            f"📍 ɢʀᴏᴜᴘ: <b>{message.chat.title or SUPPORT_GROUP_NAME}</b>"
+            f"📍 ɢʀᴏᴜᴘ: <b>{group_name}</b>"
         )
     except Exception:
         pass
 
 
 # ═══════════════════════════════════════════════
-# /shield [days] — works in DM + GC
+# /shield
 # ═══════════════════════════════════════════════
 @router.message(Command("shield"))
 async def cmd_shield(message: Message):
@@ -187,7 +205,7 @@ async def cmd_shield(message: Message):
 
 
 # ═══════════════════════════════════════════════
-# /shieldcheck — premium can check others
+# /shieldcheck
 # ═══════════════════════════════════════════════
 @router.message(Command("shieldcheck"))
 async def cmd_shieldcheck(message: Message):
