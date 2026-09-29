@@ -1,15 +1,14 @@
 import time
 import platform
-import psutil_placeholder  # type: ignore  # noqa - we don't actually use this
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from config import BOT_NAME, BOT_ADMIN_IDS, OWNER_ID
+from config import BOT_NAME
 from utils.permissions import is_bot_admin
-from utils.database import get_pool, get_bot_full_stats
+from utils.database import get_pool
 
 router = Router()
 
@@ -38,26 +37,25 @@ def get_uptime() -> str:
 # ═══════════════════════════════════════════════
 async def get_db_analytics() -> dict:
     pool = await get_pool()
-
     stats = {}
+
+    now_str = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    week_cutoff = (datetime.utcnow() - timedelta(days=7)).strftime("%Y-%m-%d")
+    month_cutoff = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%d")
 
     # ─── Users ───
     stats["total_users"] = await pool.fetchval("SELECT COUNT(*) FROM users") or 0
     stats["premium_users"] = await pool.fetchval(
         "SELECT COUNT(*) FROM users WHERE premium_until IS NOT NULL AND premium_until > $1",
-        datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        now_str
     ) or 0
     stats["shielded_users"] = await pool.fetchval(
         "SELECT COUNT(*) FROM users WHERE shield_until IS NOT NULL AND shield_until > $1",
-        datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        now_str
     ) or 0
 
     # ─── Activity ───
-    today = datetime.utcnow().strftime("%Y-%m-%d")
-    from datetime import timedelta
-    week_cutoff = (datetime.utcnow() - timedelta(days=7)).strftime("%Y-%m-%d")
-    month_cutoff = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%d")
-
     stats["daily_active"] = await pool.fetchval(
         "SELECT COUNT(DISTINCT user_id) FROM user_activity WHERE activity_date = $1",
         today
@@ -80,7 +78,6 @@ async def get_db_analytics() -> dict:
     # ─── Quiz ───
     stats["quiz_count"] = await pool.fetchval("SELECT COUNT(*) FROM quiz_questions") or 0
 
-    # Quiz per category
     rows = await pool.fetch(
         "SELECT category, COUNT(*) AS c FROM quiz_questions GROUP BY category ORDER BY c DESC"
     )
@@ -89,13 +86,11 @@ async def get_db_analytics() -> dict:
     # ─── Study Materials ───
     stats["total_materials"] = await pool.fetchval("SELECT COUNT(*) FROM study_materials") or 0
 
-    # Materials by class
     rows = await pool.fetch(
         "SELECT class_name, COUNT(*) AS c FROM study_materials GROUP BY class_name ORDER BY class_name"
     )
     stats["materials_by_class"] = [(r["class_name"], r["c"]) for r in rows]
 
-    # Materials by section
     rows = await pool.fetch(
         "SELECT class_name, section, COUNT(*) AS c FROM study_materials GROUP BY class_name, section ORDER BY class_name, section"
     )
@@ -118,22 +113,14 @@ async def get_db_analytics() -> dict:
 
     # ─── Top premium users ───
     prem_rows = await pool.fetch(
-        """SELECT first_name, premium_until FROM users 
-           WHERE premium_until IS NOT NULL AND premium_until > $1 
+        """SELECT first_name, premium_until FROM users
+           WHERE premium_until IS NOT NULL AND premium_until > $1
            ORDER BY premium_until DESC LIMIT 5""",
-        datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        now_str
     )
     stats["top_premium"] = [(r["first_name"], r["premium_until"]) for r in prem_rows]
 
     return stats
-
-
-def _safe_ping() -> str:
-    try:
-        import psutil  # noqa
-        return "N/A"
-    except Exception:
-        return "N/A"
 
 
 # ═══════════════════════════════════════════════
@@ -144,10 +131,9 @@ async def cmd_botstatus(message: Message):
     if not is_bot_admin(message.from_user.id):
         return await message.reply("❌ sᴏɴʟʏ ᴀᴅᴍɪɴs ᴄᴀɴ ᴜsᴇ ᴛʜɪs ᴄᴏᴍᴍᴀɴᴅ.")
 
-    # Send "loading" message
     loading = await message.reply("⏳ <i>ᴄᴏʟʟᴇᴄᴛɪɴɢ ꜱᴛᴀᴛꜱ...</i>")
 
-    # ─── Ping test ───
+    # Ping test
     start = time.time()
     try:
         s = await get_db_analytics()
@@ -160,7 +146,6 @@ async def cmd_botstatus(message: Message):
     uptime = get_uptime()
     python_ver = platform.python_version()
 
-    # ─── Build text ───
     lines = [
         f"📊 <b>{BOT_NAME} — ʙᴏᴛ ꜱᴛᴀᴛᴜꜱ</b>",
         f"━━━━━━━━━━━━━━━━━━━━━",
@@ -197,9 +182,8 @@ async def cmd_botstatus(message: Message):
         f"• ᴛᴏᴛᴀʟ ǫᴜᴇꜱᴛɪᴏɴꜱ: <b>{s['quiz_count']:,}</b>",
     ]
 
-    # Quiz by category (top 5)
     if s["quiz_by_category"]:
-        for cat, count in s["quiz_by_category"][:5]:
+        for cat, count in s["quiz_by_category"][:8]:
             lines.append(f"  └ {cat}: <b>{count:,}</b>")
 
     lines += [
@@ -208,26 +192,22 @@ async def cmd_botstatus(message: Message):
         f"• ᴛᴏᴛᴀʟ ꜰɪʟᴇꜱ: <b>{s['total_materials']:,}</b>",
     ]
 
-    # Materials by class
     if s["materials_by_class"]:
         for cls, count in s["materials_by_class"]:
             lines.append(f"  └ ᴄʟᴀꜱꜱ {cls}: <b>{count:,}</b> ꜰɪʟᴇꜱ")
 
-    # Materials by section (if any)
     if s["materials_by_section"]:
         lines.append(f"")
         lines.append(f"<b>📂 ꜱᴇᴄᴛɪᴏɴ ᴡɪꜱᴇ:</b>")
         for cls, sec, count in s["materials_by_section"][:10]:
             lines.append(f"  └ {cls} — {sec}: <b>{count}</b>")
 
-    # Top users
     if s["top_users"]:
         lines += [f"", f"<b>🏆 ᴛᴏᴘ 5 ʀɪᴄʜ:</b>"]
         medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"]
         for i, (name, coins) in enumerate(s["top_users"]):
             lines.append(f"{medals[i]} {name}: <b>{coins:,}</b> 🪙")
 
-    # Top premium users
     if s["top_premium"]:
         lines += [f"", f"<b>⭐ ᴛᴏᴘ ᴘʀᴇᴍɪᴜᴍ:</b>"]
         for name, until in s["top_premium"]:
@@ -246,27 +226,28 @@ async def cmd_botstatus(message: Message):
 
     final_text = "\n".join(lines)
 
-    # Telegram message limit = 4096, so split if needed
     if len(final_text) > 4000:
-        # Send first part
         await loading.edit_text(final_text[:4000])
-        # Send second part
         await message.answer(final_text[4000:])
     else:
         await loading.edit_text(final_text)
 
 
 # ═══════════════════════════════════════════════
-# /users — PUBLIC (anyone can use)
+# /users — PUBLIC
 # ═══════════════════════════════════════════════
 @router.message(Command("users"))
 async def cmd_users(message: Message):
-    from utils.database import (
-        get_total_users, get_monthly_active_users, get_quiz_count
-    )
-    total = await get_total_users()
-    monthly = await get_monthly_active_users()
-    quiz = await get_quiz_count()
+    pool = await get_pool()
+    total = await pool.fetchval("SELECT COUNT(*) FROM users") or 0
+
+    month_cutoff = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%d")
+    monthly = await pool.fetchval(
+        "SELECT COUNT(DISTINCT user_id) FROM user_activity WHERE activity_date >= $1",
+        month_cutoff
+    ) or 0
+
+    quiz = await pool.fetchval("SELECT COUNT(*) FROM quiz_questions") or 0
 
     await message.answer(
         f"👥 <b>ᴜꜱᴇʀ ꜱᴛᴀᴛꜱ</b>\n"
