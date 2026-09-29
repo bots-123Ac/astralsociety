@@ -22,25 +22,31 @@ def back_main_kb():
     return back_kb("menu:main")
 
 
+# ═══════════════════════════════════════════════
+# GAMES MENU
+# ═══════════════════════════════════════════════
 def tgames_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🧠 ǫᴜɪᴢ", callback_data="tg:quiz")],
         [InlineKeyboardButton(text="🔢 ɢᴜᴇꜱꜱ ᴛʜᴇ ɴᴜᴍʙᴇʀ", callback_data="tg:number")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
 
 
+# ═══════════════════════════════════════════════
+# QUIZ
+# ═══════════════════════════════════════════════
 def quiz_count_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="5 ǫᴜᴇꜱᴛɪᴏɴꜱ", callback_data="qzcount:5"),
          InlineKeyboardButton(text="10 ǫᴜᴇꜱᴛɪᴏɴꜱ", callback_data="qzcount:10")],
         [InlineKeyboardButton(text="15 ǫᴜᴇꜱᴛɪᴏɴꜱ", callback_data="qzcount:15"),
          InlineKeyboardButton(text="20 ǫᴜᴇꜱᴛɪᴏɴꜱ", callback_data="qzcount:20")],
-        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:games")],
     ])
 
 
 def quiz_menu_kb():
-    """15 categories in 2-column layout."""
     categories = [
         ("🚀 ꜱᴘᴀᴄᴇ", "quiz:space"),
         ("🌍 ɢᴇɴᴇʀᴀʟ", "quiz:general"),
@@ -60,13 +66,11 @@ def quiz_menu_kb():
     ]
     rows = []
     for i in range(0, len(categories), 2):
-        row = [
-            InlineKeyboardButton(text=categories[i][0], callback_data=categories[i][1]),
-        ]
+        row = [InlineKeyboardButton(text=categories[i][0], callback_data=categories[i][1])]
         if i + 1 < len(categories):
             row.append(InlineKeyboardButton(text=categories[i + 1][0], callback_data=categories[i + 1][1]))
         rows.append(row)
-    rows.append([InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")])
+    rows.append([InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="tg:quiz")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
@@ -79,6 +83,9 @@ def quiz_options_kb(qid, a, b, c, d):
     ])
 
 
+# ═══════════════════════════════════════════════
+# LEADERBOARD
+# ═══════════════════════════════════════════════
 def leaderboard_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="👥 ɢʀᴏᴜᴘ ᴛᴏᴘ 10", callback_data="lb:group")],
@@ -86,7 +93,11 @@ def leaderboard_kb():
     ])
 
 
+# ═══════════════════════════════════════════════
+# STUDY — Proper Back Navigation
+# ═══════════════════════════════════════════════
 def study_class_kb():
+    """Level 1: Class selection. Back → Main menu."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📘 ᴄʟᴀꜱꜱ 10", callback_data="study:10"),
          InlineKeyboardButton(text="📗 ᴄʟᴀꜱꜱ 11", callback_data="study:11")],
@@ -96,6 +107,7 @@ def study_class_kb():
 
 
 def study_class10_kb():
+    """Level 2: Class 10 sections. Back → Class selection."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔬 ꜱᴄɪᴇɴᴄᴇ", callback_data="st10:subject:science"),
          InlineKeyboardButton(text="📐 ᴍᴀᴛʜꜱ", callback_data="st10:subject:maths")],
@@ -107,6 +119,7 @@ def study_class10_kb():
 
 
 def study_class1112_kb(class_name):
+    """Level 2: Class 11/12 sections. Back → Class selection."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🎯 ᴊᴇᴇ", callback_data=f"st{class_name}:section:jee")],
         [InlineKeyboardButton(text="🩺 ɴᴇᴇᴛ", callback_data=f"st{class_name}:section:neet")],
@@ -117,13 +130,20 @@ def study_class1112_kb(class_name):
 
 
 def chapters_kb(class_name, section, chapters):
+    """Level 3: Chapters list. Back → Sections of that class."""
     rows = []
     for i, ch in enumerate(chapters):
-        rows.append([InlineKeyboardButton(text=f"📄 {ch}", callback_data=f"stch:{class_name}:{section}:{i}")])
-    rows.append([InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:study")])
+        rows.append([InlineKeyboardButton(
+            text=f"📄 {ch}",
+            callback_data=f"stch:{class_name}:{section}:{i}"
+        )])
+    rows.append([InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data=f"study:{class_name}")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
+# ═══════════════════════════════════════════════
+# SHOP
+# ═══════════════════════════════════════════════
 def shop_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="👁️ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ ᴄʜᴇᴄᴋᴇʀ (6💎)", callback_data="shop:checker")],
@@ -141,10 +161,13 @@ def xpboost_kb():
     ])
 
 
+# ═══════════════════════════════════════════════
+# PREMIUM
+# ═══════════════════════════════════════════════
 def premium_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="1 ᴍᴏɴᴛʜ — 90⭐", callback_data="prem:1m")],
-        [InlineKeyboardButton(text="4 ᴍᴏɴᴛʜꜱ — 140⭐", callback_data="prem:4m")],
-        [InlineKeyboardButton(text="12 ᴍᴏɴᴛʜꜱ — 175⭐", callback_data="prem:12m")],
+        [InlineKeyboardButton(text="1 ᴡᴇᴇᴋ — 1,000 💎", callback_data="prem_buy:1w")],
+        [InlineKeyboardButton(text="1 ᴍᴏɴᴛʜ — 10,000 💎", callback_data="prem_buy:1m")],
+        [InlineKeyboardButton(text="1 ʏᴇᴀʀ — 100,000 💎", callback_data="prem_buy:1y")],
         [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
