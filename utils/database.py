@@ -617,19 +617,18 @@ def _period_start(period: str):
 async def get_leaderboard(period: str = "alltime", limit: int = 10):
     pool = await get_pool()
 
+    # ═══ ALL-TIME: current balance from users table ═══
     if period == "alltime":
         return await pool.fetch(
-            """SELECT u.first_name, u.username, u.astral_id,
-                      COALESCE(SUM(t.amount), 0)::BIGINT AS coins
-               FROM users u
-               LEFT JOIN coin_transactions t ON t.user_id = u.user_id
-               GROUP BY u.user_id, u.first_name, u.username, u.astral_id
-               HAVING COALESCE(SUM(t.amount), 0) > 0
+            """SELECT first_name, username, astral_id, coins
+               FROM users
+               WHERE coins > 0
                ORDER BY coins DESC
                LIMIT $1""",
             limit
         )
 
+    # ═══ TODAY/WEEKLY/MONTHLY: earnings from transactions ═══
     since = _period_start(period)
     if since is None:
         return []
@@ -651,22 +650,19 @@ async def get_leaderboard(period: str = "alltime", limit: int = 10):
 async def get_user_leaderboard_rank(user_id: int, period: str = "alltime"):
     pool = await get_pool()
 
+    # ═══ ALL-TIME: current balance rank ═══
     if period == "alltime":
-        my_sum = await pool.fetchval(
-            "SELECT COALESCE(SUM(amount), 0) FROM coin_transactions WHERE user_id = $1",
-            user_id
+        coins = await pool.fetchval(
+            "SELECT coins FROM users WHERE user_id = $1", user_id
         )
-        if not my_sum or my_sum <= 0:
+        if not coins or coins <= 0:
             return None
         ahead = await pool.fetchval(
-            """SELECT COUNT(*) FROM (
-                SELECT user_id, SUM(amount) AS s FROM coin_transactions
-                GROUP BY user_id HAVING SUM(amount) > $1
-            ) AS sub""",
-            my_sum
+            "SELECT COUNT(*) FROM users WHERE coins > $1", coins
         )
         return (ahead or 0) + 1
 
+    # ═══ TODAY/WEEKLY/MONTHLY: earnings rank ═══
     since = _period_start(period)
     if since is None:
         return None
@@ -687,16 +683,6 @@ async def get_user_leaderboard_rank(user_id: int, period: str = "alltime"):
         _to_str(since), my_sum
     )
     return (ahead or 0) + 1
-
-
-async def get_global_leaderboard(limit=10):
-    """Legacy — kept for compatibility."""
-    return await get_leaderboard("alltime", limit)
-
-
-async def get_user_rank(user_id):
-    """Legacy — kept for compatibility."""
-    return await get_user_leaderboard_rank(user_id, "alltime")
 
 
 # ═══════════════════════════════════════════════
