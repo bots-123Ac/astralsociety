@@ -9,15 +9,14 @@ from utils.database import (
     get_or_create_user, add_coins, add_xp, is_premium,
     can_claim_daily, mark_daily_claimed, get_pool,
 )
+from utils.checks import dm_only
 
 router = Router()
 
 
-@router.message(F.text.regexp(r"^/daily(\s|$)"))
+@router.message(F.text.regexp(r"^/daily(@\w+)?(\s|$)"))
+@dm_only
 async def cmd_daily(message: Message):
-    if message.chat.type != "private":
-        return await message.reply("📩 ᴜꜱᴇ ᴛʜɪꜱ ɪɴ ʙᴏᴛ ᴅᴍ ᴏɴʟʏ.")
-
     await get_or_create_user(
         message.from_user.id,
         message.from_user.username,
@@ -50,12 +49,9 @@ async def cmd_daily(message: Message):
     )
 
 
-# ═══ /performance ═══
-@router.message(F.text.regexp(r"^/performance(\s|$)"))
+@router.message(F.text.regexp(r"^/performance(@\w+)?(\s|$)"))
+@dm_only
 async def cmd_performance(message: Message):
-    if message.chat.type != "private":
-        return await message.reply("📩 ᴜꜱᴇ ᴛʜɪꜱ ɪɴ ʙᴏᴛ ᴅᴍ ᴏɴʟʏ.")
-
     pool = await get_pool()
     row = await pool.fetchrow(
         """SELECT quiz_attempted, quiz_solved, word_attempted, word_solved,
