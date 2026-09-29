@@ -9,7 +9,8 @@ from aiogram.types import ErrorEvent
 from config import BOT_TOKEN, BOT_NAME
 from handlers import (
     start, menu, profile, robs, leaderboard, daily, study, mission,
-    shop, powers, quiz, premium, tgames, botstats, treasure, admin,
+    shop, powers, quiz, premium, tgames, treasure, luckydoor,
+    botstats, admin,
 )
 from utils.logger import setup_logger
 from utils.database import init_db, close_pool, get_pool, log_user_activity
@@ -35,17 +36,12 @@ class ActivityMiddleware(BaseMiddleware):
 async def main():
     setup_logger()
     logging.info(f"🚀 Starting {BOT_NAME} ...")
-
     if not BOT_TOKEN:
         raise RuntimeError("❌ BOT_TOKEN missing!")
-
     await init_db()
     await get_pool()
 
-    bot = Bot(
-        token=BOT_TOKEN,
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
-    )
+    bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher()
 
     dp.message.middleware(ActivityMiddleware())
@@ -56,7 +52,7 @@ async def main():
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    # ═══ ROUTER ORDER — admin.router MUST be LAST ═══
+    # ═══ ROUTER ORDER — admin LAST ═══
     dp.include_router(start.router)
     dp.include_router(menu.router)
     dp.include_router(profile.router)
@@ -70,15 +66,15 @@ async def main():
     dp.include_router(quiz.router)
     dp.include_router(premium.router)
     dp.include_router(botstats.router)
-    dp.include_router(treasure.router)      # 👈 NEW
+    dp.include_router(treasure.router)
+    dp.include_router(luckydoor.router)   # 👈 NEW
     dp.include_router(tgames.router)
-    dp.include_router(admin.router)         # 👈 LAST
+    dp.include_router(admin.router)
 
     asyncio.create_task(background_load())
 
     logging.info("✅ Bot is running.")
     await bot.delete_webhook(drop_pending_updates=True)
-
     try:
         await dp.start_polling(bot)
     finally:
