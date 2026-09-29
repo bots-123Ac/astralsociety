@@ -31,7 +31,7 @@ def class_kb():
         [InlineKeyboardButton(text="📘 ᴄʟᴀꜱꜱ 10", callback_data="adm:cls:10"),
          InlineKeyboardButton(text="📗 ᴄʟᴀꜱꜱ 11", callback_data="adm:cls:11")],
         [InlineKeyboardButton(text="📕 ᴄʟᴀꜱꜱ 12", callback_data="adm:cls:12")],
-        [InlineKeyboardButton(text="❌ ᴄᴀɴᴄᴇʟ", callback_data="adm:cancel")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="adm:panel")],
     ])
 
 
@@ -42,7 +42,7 @@ def section_10_kb():
         [InlineKeyboardButton(text="🌍 ꜱꜱᴛ", callback_data="adm:sec:sst"),
          InlineKeyboardButton(text="📖 ᴇɴɢʟɪꜱʜ", callback_data="adm:sec:english")],
         [InlineKeyboardButton(text="📝 ᴘʏǫ", callback_data="adm:sec:pyq")],
-        [InlineKeyboardButton(text="❌ ᴄᴀɴᴄᴇʟ", callback_data="adm:cancel")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="adm:add")],
     ])
 
 
@@ -52,10 +52,13 @@ def section_1112_kb():
         [InlineKeyboardButton(text="🩺 ɴᴇᴇᴛ", callback_data="adm:sec:neet")],
         [InlineKeyboardButton(text="🎯🩺 ᴊᴇᴇ + ɴᴇᴇᴛ", callback_data="adm:sec:both")],
         [InlineKeyboardButton(text="📝 ᴘʏǫꜱ", callback_data="adm:sec:pyq")],
-        [InlineKeyboardButton(text="❌ ᴄᴀɴᴄᴇʟ", callback_data="adm:cancel")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="adm:add")],
     ])
 
 
+# ═══════════════════════════════════════════════
+# /admin
+# ═══════════════════════════════════════════════
 @router.message(Command("admin"))
 async def cmd_admin(message: Message):
     if not is_bot_admin(message.from_user.id):
@@ -68,15 +71,21 @@ async def cmd_admin(message: Message):
     )
 
 
-@router.callback_query(F.data == "adm:cancel")
-async def adm_cancel(cb: CallbackQuery):
+# ═══ BACK to admin panel ═══
+@router.callback_query(F.data == "adm:panel")
+async def adm_panel(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
         return await cb.answer("❌", show_alert=True)
     _clear(cb.from_user.id)
-    await cb.message.edit_text("❌ ᴄᴀɴᴄᴇʟʟᴇᴅ.", reply_markup=admin_panel_kb())
+    await cb.message.edit_text(
+        f"👑 <b>{BOT_NAME} — ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\nᴄʜᴏᴏꜱᴇ ᴀɴ ᴀᴄᴛɪᴏɴ:",
+        reply_markup=admin_panel_kb()
+    )
     await cb.answer()
 
 
+# ═══ STEP 1: Add Material → Choose Class ═══
 @router.callback_query(F.data == "adm:add")
 async def adm_add(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
@@ -90,6 +99,7 @@ async def adm_add(cb: CallbackQuery):
     await cb.answer()
 
 
+# ═══ STEP 2: Choose Section ═══
 @router.callback_query(F.data.startswith("adm:cls:"))
 async def adm_class(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
@@ -112,6 +122,7 @@ async def adm_class(cb: CallbackQuery):
     await cb.answer()
 
 
+# ═══ STEP 3: Subject / Step 4: Chapter ═══
 @router.callback_query(F.data.startswith("adm:sec:"))
 async def adm_section(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
@@ -137,6 +148,7 @@ async def adm_section(cb: CallbackQuery):
     await cb.answer()
 
 
+# ═══ STEP 3/4/5: Text/file handler ═══
 @router.message(F.text | F.photo | F.document | F.video)
 async def adm_content_handler(message: Message):
     user_id = message.from_user.id
