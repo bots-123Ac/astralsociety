@@ -1,12 +1,15 @@
 import random
 from aiogram import Router, F
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import (
+    Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton,
+)
 
 from utils.database import (
     get_or_create_user, add_coins, add_xp,
     get_treasure_plays, inc_treasure_play,
 )
+from utils.checks import dm_only
 
 router = Router()
 
@@ -16,12 +19,10 @@ NORMAL_MAX = 1000
 SPECIAL_COINS = 15000
 SPECIAL_XP = 100
 
-# In-memory active games: user_id -> {"boxes": {idx: reward_dict}}
 ACTIVE_GAMES = {}
 
 
 def boxes_kb(game_id: str, disabled: bool = False):
-    """16 boxes in 4x4 grid."""
     rows = []
     for r in range(4):
         row = []
@@ -33,13 +34,8 @@ def boxes_kb(game_id: str, disabled: bool = False):
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
-def format_reward(reward: dict) -> str:
-    if reward["special"]:
-        return f"🎁 <b>🎉 ᴊᴀᴄᴋᴘᴏᴛ! 🎉</b>\n\n🪙 +{reward['coins']:,} ᴄᴏɪɴꜱ\n📈 +{reward['xp']} xᴘ"
-    return f"🎁 <b>ᴛʀᴇᴀꜱᴜʀᴇ ᴏᴘᴇɴᴇᴅ!</b>\n\n🪙 +{reward['coins']:,} ᴄᴏɪɴꜱ"
-
-
 @router.message(Command("treasure"))
+@dm_only
 async def cmd_treasure(message: Message):
     await get_or_create_user(
         message.from_user.id,
@@ -57,10 +53,7 @@ async def cmd_treasure(message: Message):
             f"ᴄᴏᴍᴇ ʙᴀᴄᴋ ᴛᴏᴍᴏʀʀᴏᴡ!"
         )
 
-    # ═══ Create game ═══
     game_id = f"{message.from_user.id}_{random.randint(1000, 9999)}"
-
-    # Special box index (random)
     special_idx = random.randint(0, 15)
 
     boxes = {}
@@ -70,8 +63,7 @@ async def cmd_treasure(message: Message):
         else:
             boxes[i] = {
                 "coins": random.randint(NORMAL_MIN, NORMAL_MAX),
-                "xp": 0,
-                "special": False,
+                "xp": 0, "special": False,
             }
 
     ACTIVE_GAMES[message.from_user.id] = {"game_id": game_id, "boxes": boxes}
@@ -112,7 +104,6 @@ async def cb_treasure(cb: CallbackQuery):
     if not reward:
         return await cb.answer("❌ ɪɴᴠᴀʟɪᴅ ʙᴏx.", show_alert=True)
 
-    # ═══ Apply reward ═══
     await add_coins(user_id, reward["coins"])
     if reward["xp"] > 0:
         await add_xp(user_id, reward["xp"])
@@ -120,7 +111,6 @@ async def cb_treasure(cb: CallbackQuery):
     await inc_treasure_play(user_id)
     ACTIVE_GAMES.pop(user_id, None)
 
-    # ═══ Show result ═══
     if reward["special"]:
         result_text = (
             f"🎉🎉🎉 <b>ᴊᴀᴄᴋᴘᴏᴛ!</b> 🎉🎉🎉\n"
@@ -136,7 +126,6 @@ async def cb_treasure(cb: CallbackQuery):
             f"🪙 +{reward['coins']:,} ᴄᴏɪɴꜱ"
         )
 
-    # Show all boxes now
     try:
         await cb.message.edit_text(result_text)
     except Exception:
