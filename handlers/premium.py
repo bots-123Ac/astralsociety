@@ -4,9 +4,9 @@ from datetime import datetime
 
 from config import PREMIUM_PLANS
 from utils.database import (
-    get_or_create_user, get_premium_status, deduct_gems, set_premium,
+    get_or_create_user, get_premium_status, deduct_gems, set_premium, get_pool,
 )
-from utils.ui import smart_edit
+from utils.checks import dm_only
 
 router = Router()
 
@@ -36,9 +36,12 @@ def premium_main_text() -> str:
     )
 
 
-@router.message(F.text.regexp(r"^/premium(\s|$)"))
+@router.message(F.text.regexp(r"^/premium(@\w+)?(\s|$)"))
+@dm_only
 async def cmd_premium(message: Message):
-    await get_or_create_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
+    await get_or_create_user(
+        message.from_user.id, message.from_user.username, message.from_user.first_name
+    )
     await message.answer(premium_main_text(), reply_markup=premium_menu_kb())
 
 
@@ -51,32 +54,23 @@ async def cb_prem_buy(cb: CallbackQuery):
 
     user_id = cb.from_user.id
 
-    # Check if already premium — stacking not allowed
     is_active, expires_at, days_left = await get_premium_status(user_id)
     if is_active:
         return await cb.answer(
-            f"⚠️ ʏᴏᴜ ᴀʀᴇ ᴀʟʀᴇᴀᴅʏ ᴘʀᴇᴍɪᴜᴍ!\n"
-            f"ᴇxᴘɪʀᴇꜱ ɪɴ {days_left} ᴅᴀʏꜱ.",
+            f"⚠️ ʏᴏᴜ ᴀʀᴇ ᴀʟʀᴇᴀᴅʏ ᴘʀᴇᴍɪᴜᴍ!\nᴇxᴘɪʀᴇꜱ ɪɴ {days_left} ᴅᴀʏꜱ.",
             show_alert=True
         )
 
-    # Check gems
-    from utils.database import DB_PATH
-    import aiosqlite
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute("SELECT gems FROM users WHERE user_id=?", (user_id,)) as cur:
-            row = await cur.fetchone()
-    current_gems = row[0] if row else 0
+    pool = await get_pool()
+    current_gems = await pool.fetchval("SELECT gems FROM users WHERE user_id = $1", user_id)
+    current_gems = current_gems or 0
 
     if current_gems < plan["gems"]:
         return await cb.answer(
-            f"❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ɢᴇᴍꜱ!\n\n"
-            f"ʏᴏᴜ ʜᴀᴠᴇ: {current_gems:,} 💎\n"
-            f"ɴᴇᴇᴅ: {plan['gems']:,} 💎",
+            f"❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ɢᴇᴍꜱ!\n\nʏᴏᴜ ʜᴀᴠᴇ: {current_gems:,} 💎\nɴᴇᴇᴅ: {plan['gems']:,} 💎",
             show_alert=True
         )
 
-    # Deduct gems + set premium
     ok = await deduct_gems(user_id, plan["gems"])
     if not ok:
         return await cb.answer("❌ ʟᴏꜱᴛ ɢᴇᴍꜱ ɪɴ ᴛʀᴀɴꜱᴀᴄᴛɪᴏɴ.", show_alert=True)
@@ -97,10 +91,12 @@ async def cb_prem_buy(cb: CallbackQuery):
     await cb.answer("✅ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴛɪᴠᴇ!")
 
 
-# ═══ /premiumstatus ═══
-@router.message(F.text.regexp(r"^/premiumstatus(\s|$)"))
+@router.message(F.text.regexp(r"^/premiumstatus(@\w+)?(\s|$)"))
+@dm_only
 async def cmd_premium_status(message: Message):
-    await get_or_create_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
+    await get_or_create_user(
+        message.from_user.id, message.from_user.username, message.from_user.first_name
+    )
     is_active, expires_at, days_left = await get_premium_status(message.from_user.id)
 
     if not is_active:
@@ -111,7 +107,6 @@ async def cmd_premium_status(message: Message):
             f"💫 ᴜꜱᴇ /premium ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ."
         )
 
-    # Format nicely
     try:
         dt = datetime.strptime(expires_at, "%Y-%m-%d %H:%M:%S")
         expiry_str = dt.strftime("%d %b %Y, %H:%M UTC")
