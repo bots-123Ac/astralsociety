@@ -1,6 +1,6 @@
 import logging
 from aiogram import Router, F
-from aiogram.filters import Command
+from aiogram.filters import Command, BaseFilter
 from aiogram.types import (
     Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton,
 )
@@ -17,6 +17,16 @@ SESSIONS = {}
 
 def _clear(user_id):
     SESSIONS.pop(user_id, None)
+
+
+# ═══════════════════════════════════════════════
+# CUSTOM FILTER — Only fire when user has active session
+# ═══════════════════════════════════════════════
+class InAdminSession(BaseFilter):
+    async def __call__(self, message: Message) -> bool:
+        if not message.from_user:
+            return False
+        return message.from_user.id in SESSIONS
 
 
 def admin_panel_kb():
@@ -71,7 +81,6 @@ async def cmd_admin(message: Message):
     )
 
 
-# ═══ BACK to admin panel ═══
 @router.callback_query(F.data == "adm:panel")
 async def adm_panel(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
@@ -85,7 +94,6 @@ async def adm_panel(cb: CallbackQuery):
     await cb.answer()
 
 
-# ═══ STEP 1: Add Material → Choose Class ═══
 @router.callback_query(F.data == "adm:add")
 async def adm_add(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
@@ -99,7 +107,6 @@ async def adm_add(cb: CallbackQuery):
     await cb.answer()
 
 
-# ═══ STEP 2: Choose Section ═══
 @router.callback_query(F.data.startswith("adm:cls:"))
 async def adm_class(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
@@ -122,7 +129,6 @@ async def adm_class(cb: CallbackQuery):
     await cb.answer()
 
 
-# ═══ STEP 3: Subject / Step 4: Chapter ═══
 @router.callback_query(F.data.startswith("adm:sec:"))
 async def adm_section(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
@@ -148,12 +154,13 @@ async def adm_section(cb: CallbackQuery):
     await cb.answer()
 
 
-# ═══ STEP 3/4/5: Text/file handler ═══
-@router.message(F.text | F.photo | F.document | F.video)
+# ═══════════════════════════════════════════════
+# CRITICAL FIX: Only fire when user in SESSIONS
+# ═══════════════════════════════════════════════
+@router.message(InAdminSession())
 async def adm_content_handler(message: Message):
     user_id = message.from_user.id
     sess = SESSIONS.get(user_id)
-
     if not sess:
         return
     if not is_bot_admin(user_id):
