@@ -207,7 +207,17 @@ async def init_db():
             )
         """)
 
-        # ═══ COIN TRANSACTIONS (for leaderboards) ═══
+        # ═══ LUCKY DOOR PLAYS ═══
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS luckydoor_plays (
+                user_id BIGINT,
+                play_date TEXT,
+                count INTEGER DEFAULT 0,
+                PRIMARY KEY (user_id, play_date)
+            )
+        """)
+
+        # ═══ COIN TRANSACTIONS ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS coin_transactions (
                 id SERIAL PRIMARY KEY,
@@ -246,29 +256,6 @@ async def init_db():
             print(f"✅ Seeded {await get_quiz_count()} questions")
         except Exception as e:
             print(f"⚠️ Seed failed: {e}")
-
-    # ═══ MIGRATION: Seed existing balances into coin_transactions ═══
-    try:
-        async with pool.acquire() as conn:
-            ct_count = await conn.fetchval("SELECT COUNT(*) FROM coin_transactions")
-
-            if ct_count == 0:
-                print("🔄 Migrating existing balances to coin_transactions...")
-                rows = await conn.fetch(
-                    "SELECT user_id, coins FROM users WHERE coins > 0"
-                )
-                now_str = _to_str(_now())
-                for r in rows:
-                    await conn.execute(
-                        """INSERT INTO coin_transactions (user_id, amount, created_at)
-                           VALUES ($1, $2, $3)""",
-                        r["user_id"], r["coins"], now_str
-                    )
-                print(f"✅ Migrated {len(rows)} users' balances")
-            else:
-                print(f"✅ coin_transactions already has {ct_count} entries — no migration needed")
-    except Exception as e:
-        print(f"⚠️ Migration failed: {e}")
 
 
 # ═══════════════════════════════════════════════
@@ -324,7 +311,11 @@ async def get_user_by_id(user_id):
     return await pool.fetchrow("SELECT * FROM users WHERE user_id = $1", user_id)
 
 
-async def add_coins(user_id, amount):
+async def add_coins(user_id, amount, is_earning=True):
+    """
+    Add coins. is_earning=True → also log to coin_transactions for leaderboards.
+    is_earning=False → only update balance (transfers like robs/gives).
+    """
     pool = await get_pool()
     await pool.execute(
         "UPDATE users SET coins = coins + $1 WHERE user_id = $2",
@@ -332,8 +323,7 @@ async def add_coins(user_id, amount):
     )
     _cache_invalidate(_coins_cache, user_id)
 
-    # Track positive earnings for leaderboards
-    if amount > 0:
+    if is_earning and amount > 0:
         try:
             await pool.execute(
                 "INSERT INTO coin_transactions (user_id, amount, created_at) VALUES ($1, $2, $3)",
@@ -504,6 +494,29 @@ async def shield_remaining(user_id) -> int:
     return max(0, (dt - _now()).days)
 
 
+async def shield_remaining_seconds(user_id) -> int:
+    pool = await get_pool()
+    val = await pool.fetchval(
+        "SELECT shield_until FROM users WHERE user_id = $1", user_id
+    )
+    if not val:
+        return 0
+    dt = _parse(val)
+    if not dt or dt <= _now():
+        return 0
+    return max(0, int((dt - _now()).total_seconds()))
+
+
+def format_shield_time(total_seconds: int) -> str:
+    if total_seconds <= 0:
+        return "0ᴅ 0ʜ 0ᴍ 0ꜱ"
+    d = total_seconds // 86400
+    h = (total_seconds % 86400) // 3600
+    m = (total_seconds % 3600) // 60
+    s = total_seconds % 60
+    return f"{d}ᴅ {h}ʜ {m}ᴍ {s}ꜱ"
+
+
 # ═══════════════════════════════════════════════
 # DAILY
 # ═══════════════════════════════════════════════
@@ -597,7 +610,7 @@ def _today_start():
 
 def _week_start():
     today = _now().replace(hour=0, minute=0, second=0, microsecond=0)
-    return today - timedelta(days=today.weekday())  # Monday
+    return today - timedelta(days=today.weekday())
 
 
 def _month_start():
@@ -611,24 +624,23 @@ def _period_start(period: str):
         return _week_start()
     if period == "monthly":
         return _month_start()
-    return None  # alltime
+    return None
 
 
 async def get_leaderboard(period: str = "alltime", limit: int = 10):
+    """Fetch top users for given period."""
     pool = await get_pool()
 
-    # ═══ ALL-TIME: current balance from users table ═══
+    # All-time: current balance
     if period == "alltime":
         return await pool.fetch(
             """SELECT first_name, username, astral_id, coins
-               FROM users
-               WHERE coins > 0
-               ORDER BY coins DESC
-               LIMIT $1""",
+               FROM users WHERE coins > 0
+               ORDER BY coins DESC LIMIT $1""",
             limit
         )
 
-    # ═══ TODAY/WEEKLY/MONTHLY: earnings from transactions ═══
+    # Today/Weekly/Monthly: sum of earnings in that period
     since = _period_start(period)
     if since is None:
         return []
@@ -641,16 +653,15 @@ async def get_leaderboard(period: str = "alltime", limit: int = 10):
            WHERE t.created_at >= $1
            GROUP BY u.user_id, u.first_name, u.username, u.astral_id
            HAVING SUM(t.amount) > 0
-           ORDER BY coins DESC
-           LIMIT $2""",
+           ORDER BY coins DESC LIMIT $2""",
         _to_str(since), limit
     )
 
 
 async def get_user_leaderboard_rank(user_id: int, period: str = "alltime"):
+    """Get user's rank for given period."""
     pool = await get_pool()
 
-    # ═══ ALL-TIME: current balance rank ═══
     if period == "alltime":
         coins = await pool.fetchval(
             "SELECT coins FROM users WHERE user_id = $1", user_id
@@ -662,7 +673,6 @@ async def get_user_leaderboard_rank(user_id: int, period: str = "alltime"):
         )
         return (ahead or 0) + 1
 
-    # ═══ TODAY/WEEKLY/MONTHLY: earnings rank ═══
     since = _period_start(period)
     if since is None:
         return None
@@ -683,6 +693,36 @@ async def get_user_leaderboard_rank(user_id: int, period: str = "alltime"):
         _to_str(since), my_sum
     )
     return (ahead or 0) + 1
+
+
+async def get_user_period_balance(user_id: int, period: str = "alltime") -> int:
+    """Get user's balance for a specific period (today/weekly/monthly/alltime)."""
+    pool = await get_pool()
+
+    if period == "alltime":
+        val = await pool.fetchval(
+            "SELECT coins FROM users WHERE user_id = $1", user_id
+        )
+        return val or 0
+
+    since = _period_start(period)
+    if since is None:
+        return 0
+
+    val = await pool.fetchval(
+        """SELECT COALESCE(SUM(amount), 0) FROM coin_transactions
+           WHERE user_id = $1 AND created_at >= $2""",
+        user_id, _to_str(since)
+    )
+    return val or 0
+
+
+async def get_global_leaderboard(limit=10):
+    return await get_leaderboard("alltime", limit)
+
+
+async def get_user_rank(user_id):
+    return await get_user_leaderboard_rank(user_id, "alltime")
 
 
 # ═══════════════════════════════════════════════
@@ -957,6 +997,40 @@ async def inc_treasure_play(user_id) -> int:
     new_count = (row["count"] or 0) + 1
     await pool.execute(
         "UPDATE treasure_plays SET count = $1 WHERE user_id = $2 AND play_date = $3",
+        new_count, user_id, today
+    )
+    return new_count
+
+
+# ═══════════════════════════════════════════════
+# LUCKY DOOR
+# ═══════════════════════════════════════════════
+async def get_luckydoor_plays(user_id) -> int:
+    today = _now().strftime("%Y-%m-%d")
+    pool = await get_pool()
+    val = await pool.fetchval(
+        "SELECT count FROM luckydoor_plays WHERE user_id = $1 AND play_date = $2",
+        user_id, today
+    )
+    return val or 0
+
+
+async def inc_luckydoor_play(user_id) -> int:
+    today = _now().strftime("%Y-%m-%d")
+    pool = await get_pool()
+    row = await pool.fetchrow(
+        "SELECT count FROM luckydoor_plays WHERE user_id = $1 AND play_date = $2",
+        user_id, today
+    )
+    if not row:
+        await pool.execute(
+            "INSERT INTO luckydoor_plays (user_id, play_date, count) VALUES ($1, $2, 1)",
+            user_id, today
+        )
+        return 1
+    new_count = (row["count"] or 0) + 1
+    await pool.execute(
+        "UPDATE luckydoor_plays SET count = $1 WHERE user_id = $2 AND play_date = $3",
         new_count, user_id, today
     )
     return new_count
