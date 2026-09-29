@@ -32,17 +32,29 @@ CATEGORY_NAMES = {
 }
 
 
+# ═══ /tgames COMMAND ═══
 @router.message(F.text.regexp(r"^/tgames(@\w+)?(\s|$)"))
 async def cmd_tgames(message: Message):
-    # DM only
     if message.chat.type != "private":
         return await message.reply("📩 ɢᴀᴍᴇꜱ ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ ᴅᴍ.")
-
     await message.answer(
         "🎮 <b>ᴀꜱᴛʀᴀʟ ᴛ-ɢᴀᴍᴇꜱ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\nᴄʜᴏᴏꜱᴇ ᴀ ɢᴀᴍᴇ:",
         reply_markup=tgames_menu_kb()
     )
+
+
+# ═══ menu:games CALLBACK (Back to Games menu) ═══
+@router.callback_query(F.data == "menu:games")
+async def cb_games_menu(cb: CallbackQuery):
+    if cb.message.chat.type != "private":
+        return await cb.answer("📩 ᴅᴍ ᴏɴʟʏ", show_alert=True)
+    await cb.message.edit_text(
+        "🎮 <b>ᴀꜱᴛʀᴀʟ ᴛ-ɢᴀᴍᴇꜱ</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n\nᴄʜᴏᴏꜱᴇ ᴀ ɢᴀᴍᴇ:",
+        reply_markup=tgames_menu_kb()
+    )
+    await cb.answer()
 
 
 # ═══ QUIZ ═══
@@ -210,7 +222,8 @@ async def number_start(cb: CallbackQuery):
         f"🎯 ʀᴀɴɢᴇ: <b>{NUMBER_MIN}–{NUMBER_MAX}</b>\n"
         f"🎲 ᴍᴀx ᴄʜᴀɴᴄᴇꜱ: <b>{NUMBER_MAX_ATTEMPTS}</b>\n\n"
         "ᴜꜱᴇ <code>/h &lt;ɴᴜᴍʙᴇʀ&gt;</code> ᴛᴏ ɢᴜᴇꜱꜱ.\n"
-        "ᴇxᴀᴍᴘʟᴇ: <code>/h 250</code>"
+        "ᴇxᴀᴍᴘʟᴇ: <code>/h 250</code>",
+        reply_markup=back_main_kb()
     )
     await cb.answer()
 
