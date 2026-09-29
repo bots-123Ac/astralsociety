@@ -19,7 +19,7 @@ def format_profile(u, premium: bool = False) -> str:
     gems = u["gems"] or 0
     xp = u["xp"] or 0
     quiz_solved = u["quiz_solved"] or 0
-    word_score = u["word_score"] or 0
+    number_guess = u["number_guess"] or 0
 
     if premium:
         return (
@@ -33,8 +33,7 @@ def format_profile(u, premium: bool = False) -> str:
             f"🪙 ᴄᴏɪɴꜱ       — <b>{coins:,}</b>\n"
             f"💎 ɢᴇᴍꜱ         — <b>{gems:,}</b>\n"
             f"📈 xᴘ          — <b>{xp:,}</b>\n"
-            f"🧠 ǫᴜɪᴢ ꜱᴏʟᴠᴇᴅ — <b>{quiz_solved}</b>\n"
-            f"🏆 ᴡᴏʀᴅ sᴄᴏʀᴇ  — <b>{word_score:,}</b>\n\n"
+            f"🧠 ǫᴜɪᴢ ꜱᴏʟᴠᴇᴅ — <b>{quiz_solved}</b>\n\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n"
             f"⭐ ᴘʀᴇᴍɪᴜᴍ ᴘᴇʀᴋꜱ ᴀᴄᴛɪᴠᴇ\n"
             f"━━━━━━━━━━━━━━━━━━━━━"
@@ -54,12 +53,11 @@ def format_profile(u, premium: bool = False) -> str:
 
 
 # ═══════════════════════════════════════════════
-# /profile — works in DM AND GC
-# Priority: reply → @username → astral_id → self
+# /profile — DM + GC (with reply / @username / ID)
 # ═══════════════════════════════════════════════
 @router.message(Command("profile"))
 async def cmd_profile(message: Message):
-    # ═══ Reply to a user's message ═══
+    # ═══ Priority 1: Reply to a user ═══
     if message.reply_to_message and message.reply_to_message.from_user:
         target = message.reply_to_message.from_user
         await get_or_create_user(target.id, target.username, target.first_name)
@@ -69,12 +67,12 @@ async def cmd_profile(message: Message):
         prem = await is_premium(target.id)
         return await message.reply(format_profile(u, prem))
 
-    # ═══ Parse args ═══
+    # ═══ Priority 2: Args ═══
     text = message.text or ""
     parts = text.split()
     args = parts[1:] if len(parts) > 1 else []
 
-    # ═══ No args — own profile ═══
+    # No args — own profile
     if not args:
         await get_or_create_user(
             message.from_user.id,
@@ -87,7 +85,6 @@ async def cmd_profile(message: Message):
         prem = await is_premium(message.from_user.id)
         return await message.reply(format_profile(u, prem))
 
-    # ═══ Has arg — resolve target ═══
     arg = args[0].strip()
     u = None
 
