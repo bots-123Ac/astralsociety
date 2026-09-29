@@ -1,6 +1,6 @@
 import logging
 from aiogram import Router, F
-from aiogram.filters import Command, BaseFilter
+from aiogram.filters import Command
 from aiogram.types import (
     Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton,
 )
@@ -12,21 +12,14 @@ from utils.database import save_study_material
 router = Router()
 logger = logging.getLogger(__name__)
 
+# ═══════════════════════════════════════════════
+# SESSIONS — user_id -> {step, data}
+# ═══════════════════════════════════════════════
 SESSIONS = {}
 
 
 def _clear(user_id):
     SESSIONS.pop(user_id, None)
-
-
-# ═══════════════════════════════════════════════
-# CUSTOM FILTER — Only fire when user has active session
-# ═══════════════════════════════════════════════
-class InAdminSession(BaseFilter):
-    async def __call__(self, message: Message) -> bool:
-        if not message.from_user:
-            return False
-        return message.from_user.id in SESSIONS
 
 
 def admin_panel_kb():
@@ -155,18 +148,22 @@ async def adm_section(cb: CallbackQuery):
 
 
 # ═══════════════════════════════════════════════
-# CRITICAL FIX: Only fire when user in SESSIONS
+# TEXT / FILE — Only process if user in SESSIONS
+# (checks SESSIONS dict directly, no filter needed)
 # ═══════════════════════════════════════════════
-@router.message(InAdminSession())
+@router.message(F.text | F.photo | F.document | F.video)
 async def adm_content_handler(message: Message):
-    user_id = message.from_user.id
-    sess = SESSIONS.get(user_id)
-    if not sess:
+    user_id = message.from_user.id if message.from_user else 0
+
+    # ⚠️ CRITICAL: If user NOT in SESSIONS, silently skip
+    if user_id not in SESSIONS:
         return
+
     if not is_bot_admin(user_id):
         _clear(user_id)
         return
 
+    sess = SESSIONS[user_id]
     step = sess.get("step")
 
     if step == "subject":
