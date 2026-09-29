@@ -207,6 +207,22 @@ async def init_db():
             )
         """)
 
+        # ═══ COIN TRANSACTIONS (for leaderboards) ═══
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS coin_transactions (
+                id SERIAL PRIMARY KEY,
+                user_id BIGINT,
+                amount BIGINT,
+                created_at TEXT
+            )
+        """)
+        await conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_ct_user ON coin_transactions(user_id)"
+        )
+        await conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_ct_created ON coin_transactions(created_at)"
+        )
+
     # ═══ SEED BUNDLED QUESTIONS ═══
     cnt = await get_quiz_count()
     if cnt == 0:
@@ -292,6 +308,16 @@ async def add_coins(user_id, amount):
         amount, user_id
     )
     _cache_invalidate(_coins_cache, user_id)
+
+    # Track positive earnings for leaderboards
+    if amount > 0:
+        try:
+            await pool.execute(
+                "INSERT INTO coin_transactions (user_id, amount, created_at) VALUES ($1, $2, $3)",
+                user_id, amount, _to_str(_now())
+            )
+        except Exception:
+            pass
 
 
 async def add_gems(user_id, amount):
@@ -540,28 +566,114 @@ async def inc_number_guess(user_id):
 
 
 # ═══════════════════════════════════════════════
-# LEADERBOARD
+# LEADERBOARD — 4 TABS
 # ═══════════════════════════════════════════════
-async def get_global_leaderboard(limit=10):
+def _today_start():
+    return _now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def _week_start():
+    today = _now().replace(hour=0, minute=0, second=0, microsecond=0)
+    return today - timedelta(days=today.weekday())  # Monday
+
+
+def _month_start():
+    return _now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+
+def _period_start(period: str):
+    if period == "today":
+        return _today_start()
+    if period == "weekly":
+        return _week_start()
+    if period == "monthly":
+        return _month_start()
+    return None  # alltime
+
+
+async def get_leaderboard(period: str = "alltime", limit: int = 10):
     pool = await get_pool()
+
+    if period == "alltime":
+        return await pool.fetch(
+            """SELECT u.first_name, u.username, u.astral_id,
+                      COALESCE(SUM(t.amount), 0)::BIGINT AS coins
+               FROM users u
+               LEFT JOIN coin_transactions t ON t.user_id = u.user_id
+               GROUP BY u.user_id, u.first_name, u.username, u.astral_id
+               HAVING COALESCE(SUM(t.amount), 0) > 0
+               ORDER BY coins DESC
+               LIMIT $1""",
+            limit
+        )
+
+    since = _period_start(period)
+    if since is None:
+        return []
+
     return await pool.fetch(
-        """SELECT first_name, username, astral_id, coins
-           FROM users ORDER BY coins DESC LIMIT $1""",
-        limit
+        """SELECT u.first_name, u.username, u.astral_id,
+                  SUM(t.amount)::BIGINT AS coins
+           FROM coin_transactions t
+           JOIN users u ON u.user_id = t.user_id
+           WHERE t.created_at >= $1
+           GROUP BY u.user_id, u.first_name, u.username, u.astral_id
+           HAVING SUM(t.amount) > 0
+           ORDER BY coins DESC
+           LIMIT $2""",
+        _to_str(since), limit
     )
+
+
+async def get_user_leaderboard_rank(user_id: int, period: str = "alltime"):
+    pool = await get_pool()
+
+    if period == "alltime":
+        my_sum = await pool.fetchval(
+            "SELECT COALESCE(SUM(amount), 0) FROM coin_transactions WHERE user_id = $1",
+            user_id
+        )
+        if not my_sum or my_sum <= 0:
+            return None
+        ahead = await pool.fetchval(
+            """SELECT COUNT(*) FROM (
+                SELECT user_id, SUM(amount) AS s FROM coin_transactions
+                GROUP BY user_id HAVING SUM(amount) > $1
+            ) AS sub""",
+            my_sum
+        )
+        return (ahead or 0) + 1
+
+    since = _period_start(period)
+    if since is None:
+        return None
+
+    my_sum = await pool.fetchval(
+        """SELECT COALESCE(SUM(amount), 0) FROM coin_transactions
+           WHERE user_id = $1 AND created_at >= $2""",
+        user_id, _to_str(since)
+    )
+    if not my_sum or my_sum <= 0:
+        return None
+
+    ahead = await pool.fetchval(
+        """SELECT COUNT(*) FROM (
+            SELECT user_id, SUM(amount) AS s FROM coin_transactions
+            WHERE created_at >= $1 GROUP BY user_id HAVING SUM(amount) > $2
+        ) AS sub""",
+        _to_str(since), my_sum
+    )
+    return (ahead or 0) + 1
+
+
+async def get_global_leaderboard(limit=10):
+    """Legacy — kept for compatibility."""
+    return await get_leaderboard("alltime", limit)
 
 
 async def get_user_rank(user_id):
-    pool = await get_pool()
-    coins = await pool.fetchval(
-        "SELECT coins FROM users WHERE user_id = $1", user_id
-    )
-    if coins is None:
-        return None
-    ahead = await pool.fetchval(
-        "SELECT COUNT(*) FROM users WHERE coins > $1", coins
-    )
-    return (ahead or 0) + 1
+    """Legacy — kept for compatibility."""
+    return await get_user_leaderboard_rank(user_id, "alltime")
 
 
 # ═══════════════════════════════════════════════
