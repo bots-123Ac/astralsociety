@@ -47,9 +47,9 @@ async def close_pool():
 # ═══════════════════════════════════════════════
 CACHE_TTL = 5
 
-_premium_cache: dict[int, tuple] = {}
-_shield_cache: dict[int, tuple] = {}
-_coins_cache: dict[int, tuple] = {}
+_premium_cache: dict = {}
+_shield_cache: dict = {}
+_coins_cache: dict = {}
 
 
 def _cache_get(cache: dict, key):
@@ -185,7 +185,7 @@ async def init_db():
             "CREATE INDEX IF NOT EXISTS idx_quiz_cat ON quiz_questions(category)"
         )
 
-        # ═══ USER ACTIVITY (for monthly/daily stats) ═══
+        # ═══ USER ACTIVITY ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS user_activity (
                 user_id BIGINT,
@@ -197,7 +197,17 @@ async def init_db():
             "CREATE INDEX IF NOT EXISTS idx_activity_date ON user_activity(activity_date)"
         )
 
-    # ═══ SEED BUNDLED QUESTIONS ON FIRST RUN ═══
+        # ═══ TREASURE PLAYS ═══
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS treasure_plays (
+                user_id BIGINT,
+                play_date TEXT,
+                count INTEGER DEFAULT 0,
+                PRIMARY KEY (user_id, play_date)
+            )
+        """)
+
+    # ═══ SEED BUNDLED QUESTIONS ═══
     cnt = await get_quiz_count()
     if cnt == 0:
         try:
@@ -735,10 +745,9 @@ async def get_quiz_count() -> int:
 
 
 # ═══════════════════════════════════════════════
-# BOT STATS (for /botstats and /about)
+# BOT STATS
 # ═══════════════════════════════════════════════
 async def log_user_activity(user_id):
-    """Log user as active today (once per day)."""
     today = _now().strftime("%Y-%m-%d")
     pool = await get_pool()
     try:
@@ -789,7 +798,6 @@ async def get_monthly_active_users() -> int:
 
 
 async def get_bot_full_stats() -> dict:
-    """Return all stats in one call."""
     return {
         "total_users": await get_total_users(),
         "daily_active": await get_daily_active_users(),
@@ -797,3 +805,37 @@ async def get_bot_full_stats() -> dict:
         "monthly_active": await get_monthly_active_users(),
         "quiz_count": await get_quiz_count(),
     }
+
+
+# ═══════════════════════════════════════════════
+# TREASURE
+# ═══════════════════════════════════════════════
+async def get_treasure_plays(user_id) -> int:
+    today = _now().strftime("%Y-%m-%d")
+    pool = await get_pool()
+    val = await pool.fetchval(
+        "SELECT count FROM treasure_plays WHERE user_id = $1 AND play_date = $2",
+        user_id, today
+    )
+    return val or 0
+
+
+async def inc_treasure_play(user_id) -> int:
+    today = _now().strftime("%Y-%m-%d")
+    pool = await get_pool()
+    row = await pool.fetchrow(
+        "SELECT count FROM treasure_plays WHERE user_id = $1 AND play_date = $2",
+        user_id, today
+    )
+    if not row:
+        await pool.execute(
+            "INSERT INTO treasure_plays (user_id, play_date, count) VALUES ($1, $2, 1)",
+            user_id, today
+        )
+        return 1
+    new_count = (row["count"] or 0) + 1
+    await pool.execute(
+        "UPDATE treasure_plays SET count = $1 WHERE user_id = $2 AND play_date = $3",
+        new_count, user_id, today
+    )
+    return new_count
