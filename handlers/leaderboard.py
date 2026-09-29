@@ -1,4 +1,5 @@
 from aiogram import Router, F
+from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 
 from keyboards.main_menu import leaderboard_kb, back_main_kb
@@ -25,7 +26,10 @@ def _format_lb(rows, title):
     return "\n".join(lines)
 
 
-@router.message(F.text.regexp(r"^/aleaderboard(\s|$)"))
+# ═══════════════════════════════════════════════
+# /aleaderboard — DM + GC
+# ═══════════════════════════════════════════════
+@router.message(Command("aleaderboard"))
 async def cmd_aleaderboard(message: Message):
     rows = await get_global_leaderboard(10)
     text = _format_lb(rows, "🌐 <b>ɢʟᴏʙᴀʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>")
@@ -40,6 +44,17 @@ async def cmd_aleaderboard(message: Message):
         await message.answer(text, reply_markup=leaderboard_kb())
 
 
+# ═══════════════════════════════════════════════
+# ALIAS: /leaderboard → same as /aleaderboard
+# ═══════════════════════════════════════════════
+@router.message(Command("leaderboard"))
+async def cmd_leaderboard_alias(message: Message):
+    await cmd_aleaderboard(message)
+
+
+# ═══════════════════════════════════════════════
+# Group Top 10 button (only in GC)
+# ═══════════════════════════════════════════════
 @router.callback_query(F.data == "lb:group")
 async def cb_group_lb(cb: CallbackQuery):
     rows = await get_global_leaderboard(10)
