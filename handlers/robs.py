@@ -17,7 +17,7 @@ router = Router()
 
 
 # ═══════════════════════════════════════════════
-# /gives [amount] — send coins + DM notification
+# /gives [amount] — send coins (reply)
 # ═══════════════════════════════════════════════
 @router.message(Command("gives"))
 async def cmd_gives(message: Message, bot: Bot):
@@ -50,7 +50,7 @@ async def cmd_gives(message: Message, bot: Bot):
 
     if sender_coins < amount:
         return await message.reply(
-            f"❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ᴄᴏɪɴꜱ!\n\nʏᴏᴜ ʜᴀᴠᴇ: <b>{sender_coins:,}</b> 🪙"
+            f"⚠️ <b>ʏᴏᴜ ʜᴀᴠᴇ ᴏɴʟʏ {sender_coins:,} ᴄᴏɪɴꜱ</b>"
         )
 
     deduction = (amount * GIVE_DEDUCTION_PERCENT) // 100
@@ -59,7 +59,6 @@ async def cmd_gives(message: Message, bot: Bot):
     await add_coins(sender.id, -amount)
     await add_coins(receiver.id, received)
 
-    # ═══ Public reply in GC ═══
     await message.reply(
         f"✅ <b>ᴄᴏɪɴꜱ ꜱᴇɴᴛ!</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -67,7 +66,7 @@ async def cmd_gives(message: Message, bot: Bot):
         f"ᴀꜰᴛᴇʀ 10% ᴏꜰ ᴅᴇᴅᴜᴄᴛɪᴏɴ."
     )
 
-    # ═══ DM Notification to Receiver ═══
+    # DM notification
     group_name = message.chat.title or SUPPORT_GROUP_NAME
     try:
         await bot.send_message(
@@ -83,7 +82,7 @@ async def cmd_gives(message: Message, bot: Bot):
 
 
 # ═══════════════════════════════════════════════
-# /robs [amount] — rob + DM notification
+# /robs [amount] — reply ONLY, amount REQUIRED
 # ═══════════════════════════════════════════════
 @router.message(Command("robs"))
 async def cmd_robs(message: Message, bot: Bot):
@@ -91,8 +90,7 @@ async def cmd_robs(message: Message, bot: Bot):
         return await message.reply(
             "❌ ʀᴇᴘʟʏ ᴛᴏ ᴀ ᴜꜱᴇʀ.\n\n"
             "📌 <b>ᴜꜱᴀɢᴇ:</b>\n"
-            "• <code>/robs</code> — ꜰᴜʟʟ ʙᴀʟᴀɴᴄᴇ\n"
-            "• <code>/robs 5000</code> — ꜱᴘᴇᴄɪꜰɪᴄ ᴀᴍᴏᴜɴᴛ"
+            "• <code>/robs 5000</code> — ʀᴏʙ ꜱᴘᴇᴄɪꜰɪᴄ ᴀᴍᴏᴜɴᴛ"
         )
 
     robber = message.from_user
@@ -102,6 +100,18 @@ async def cmd_robs(message: Message, bot: Bot):
         return await message.reply("❌ ᴄᴀɴ'ᴛ ʀᴏʙ ʏᴏᴜʀꜱᴇʟꜰ.")
     if victim.is_bot:
         return await message.reply("❌ ᴄᴀɴ'ᴛ ʀᴏʙ ᴀ ʙᴏᴛ.")
+
+    # ═══ Amount is REQUIRED ═══
+    parts = message.text.split()
+    if len(parts) < 2 or not parts[1].isdigit():
+        return await message.reply(
+            "❌ ᴀᴍᴏᴜɴᴛ ʀᴇQᴜɪʀᴇᴅ!\n\n"
+            "ᴜꜱᴀɢᴇ: <code>/robs 5000</code> (ʀᴇᴘʟʏ ᴛᴏ ᴛᴀʀɢᴇᴛ)"
+        )
+
+    amount = int(parts[1])
+    if amount < 1:
+        return await message.reply("❌ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ.")
 
     await get_or_create_user(robber.id, robber.username, robber.first_name)
     await get_or_create_user(victim.id, victim.username, victim.first_name)
@@ -114,29 +124,24 @@ async def cmd_robs(message: Message, bot: Bot):
 
     victim_coins = await get_user_coins(victim.id)
 
-    if victim_coins < 10:
+    if victim_coins < 1:
         return await message.reply(
-            f"❌ {victim.mention_html()} ʜᴀꜱ ɴᴏᴛʜɪɴɢ ᴡᴏʀᴛʜ ʀᴏʙʙɪɴɢ."
+            f"⚠️ <b>{victim.mention_html()} ʜᴀꜱ ᴏɴʟʏ 0 ᴄᴏɪɴꜱ</b>"
         )
 
-    parts = message.text.split()
-    if len(parts) >= 2 and parts[1].isdigit():
-        base_amount = int(parts[1])
-        if base_amount < 1:
-            return await message.reply("❌ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ.")
-        if base_amount > victim_coins:
-            base_amount = victim_coins
-    else:
-        base_amount = victim_coins
+    # ═══ Amount exceeds victim's balance ═══
+    if amount > victim_coins:
+        return await message.reply(
+            f"⚠️ <b>{victim.mention_html()} ʜᴀꜱ ᴏɴʟʏ {victim_coins:,} ᴄᴏɪɴꜱ</b>\n\n"
+            f"ʏᴏᴜ ᴛʀɪᴇᴅ ᴛᴏ ʀᴏʙ <b>{amount:,}</b> ᴄᴏɪɴꜱ."
+        )
 
-    if base_amount < 1:
-        return await message.reply("❌ ᴀᴍᴏᴜɴᴛ ᴛᴏᴏ ꜱᴍᴀʟʟ.")
-
+    # ═══ Proceed with rob ═══
     pct = ROB_PREMIUM_PERCENT if await is_premium(robber.id) else ROB_NORMAL_PERCENT
-    deduction = (base_amount * pct) // 100
-    robber_receives = base_amount - deduction
+    deduction = (amount * pct) // 100
+    robber_receives = amount - deduction
 
-    await add_coins(victim.id, -base_amount)
+    await add_coins(victim.id, -amount)
     await add_coins(robber.id, robber_receives)
 
     xp_gain = random.randint(0, 10)
@@ -150,7 +155,6 @@ async def cmd_robs(message: Message, bot: Bot):
         f"📈 xᴘ: <b>+{xp_gain}</b>"
     )
 
-    # DM Notification to victim
     group_name = message.chat.title or SUPPORT_GROUP_NAME
     try:
         await bot.send_message(
@@ -158,7 +162,7 @@ async def cmd_robs(message: Message, bot: Bot):
             f"⚠️ <b>ʏᴏᴜ ᴡᴇʀᴇ ʀᴏʙʙᴇᴅ!</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"👤 ʀᴏʙʙᴇʀ: {robber.mention_html()}\n"
-            f"💸 ꜱᴛᴏʟᴇɴ: <b>{base_amount:,}</b> 🪙\n"
+            f"💸 ꜱᴛᴏʟᴇɴ: <b>{amount:,}</b> 🪙\n"
             f"📍 ɢʀᴏᴜᴘ: <b>{group_name}</b>"
         )
     except Exception:
