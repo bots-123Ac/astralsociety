@@ -14,6 +14,7 @@ from utils.database import (
     inc_number_attempt, inc_number_guess, has_xp_boost, mission_quiz_done,
     get_random_quiz_question, get_quiz_count,
 )
+from utils.checks import dm_only
 
 router = Router()
 
@@ -32,11 +33,10 @@ CATEGORY_NAMES = {
 }
 
 
-# ═══ /tgames COMMAND ═══
+# ═══ /tgames — DM only ═══
 @router.message(F.text.regexp(r"^/tgames(@\w+)?(\s|$)"))
+@dm_only
 async def cmd_tgames(message: Message):
-    if message.chat.type != "private":
-        return await message.reply("📩 ɢᴀᴍᴇꜱ ᴏɴʟʏ ᴡᴏʀᴋ ɪɴ ᴅᴍ.")
     await message.answer(
         "🎮 <b>ᴀꜱᴛʀᴀʟ ᴛ-ɢᴀᴍᴇꜱ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\nᴄʜᴏᴏꜱᴇ ᴀ ɢᴀᴍᴇ:",
@@ -44,7 +44,6 @@ async def cmd_tgames(message: Message):
     )
 
 
-# ═══ menu:games CALLBACK (Back to Games menu) ═══
 @router.callback_query(F.data == "menu:games")
 async def cb_games_menu(cb: CallbackQuery):
     if cb.message.chat.type != "private":
@@ -229,10 +228,8 @@ async def number_start(cb: CallbackQuery):
 
 
 @router.message(F.text.regexp(r"^/h(@\w+)?(\s|$)"))
+@dm_only
 async def number_guess(message: Message):
-    if message.chat.type != "private":
-        return
-
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2 or not parts[1].strip().isdigit():
         return await message.reply("ᴜꜱᴀɢᴇ: <code>/h 250</code>")
