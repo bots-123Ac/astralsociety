@@ -12,8 +12,9 @@ from utils.database import (
 
 router = Router()
 
-DAILY_LIMIT = 2
-DOORS_PER_GAME = 4
+DAILY_LIMIT = 2          # 2 games per day
+DOORS_PER_GAME = 4       # 4 doors per game
+TOTAL_DOORS = 25
 
 DOOR_NAMES = [
     "PRO", "RISKY", "SECRET", "HACKER", "MYSTERY",
@@ -23,11 +24,22 @@ DOOR_NAMES = [
     "GOLDEN", "MASTER", "GOD MODE", "FINAL", "JACKPOT",
 ]
 
+# Active games: (chat_id, user_id) -> game_dict
 ACTIVE_GAMES = {}
 
 
+# ═══════════════════════════════════════════════
+# HELPERS
+# ═══════════════════════════════════════════════
 def _generate_rewards():
-    """10 zero, 7 common, 5 medium, 2 big, 1 jackpot = 25"""
+    """
+    25 doors:
+      - 10 zero
+      - 7 common  200-500
+      - 5 medium  800-1600
+      - 2 big     3000-5000
+      - 1 jackpot 40000 + 400 XP
+    """
     rewards = []
     for _ in range(10):
         rewards.append({"type": "zero", "coins": 0, "xp": 0})
@@ -42,18 +54,26 @@ def _generate_rewards():
     return rewards
 
 
+def _opened_indexes(game):
+    return {i for i, _ in game["opened"]}
+
+
 def _icon_for(idx, game):
-    """Return button emoji for the door."""
     for i, r in game["opened"]:
         if i == idx:
             return {
-                "zero": "❌", "common": "🪙", "medium": "💰",
-                "big": "💎", "jackpot": "👑"
+                "zero": "❌",
+                "common": "🪙",
+                "medium": "💰",
+                "big": "💎",
+                "jackpot": "👑",
             }.get(r["type"], "✅")
     return "🚪"
 
 
 def doors_kb(game_id: str, game: dict):
+    """Build 5x5 keyboard for 25 doors."""
+    opened = _opened_indexes(game)
     rows = []
     for r in range(5):
         row = []
@@ -61,7 +81,10 @@ def doors_kb(game_id: str, game: dict):
             idx = r * 5 + c
             icon = _icon_for(idx, game)
             name = DOOR_NAMES[idx]
-            cb_data = f"ld:noop" if any(i == idx for i, _ in game["opened"]) else f"ld:{game_id}:{idx}"
+            if idx in opened:
+                cb_data = "ld:noop"
+            else:
+                cb_data = f"ld:{game_id}:{idx}"
             row.append(InlineKeyboardButton(
                 text=f"{icon} {name}",
                 callback_data=cb_data
@@ -117,9 +140,16 @@ def _intro_text(remaining_after: int) -> str:
     )
 
 
+# ═══════════════════════════════════════════════
+# /luckydoor — Works in DM + GC
+# ═══════════════════════════════════════════════
 @router.message(Command("luckydoor"))
 async def cmd_luckydoor(message: Message):
-    await get_or_create_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
+    await get_or_create_user(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
+    )
 
     plays = await get_luckydoor_plays(message.from_user.id)
     if plays >= DAILY_LIMIT:
@@ -132,7 +162,9 @@ async def cmd_luckydoor(message: Message):
 
     key = (message.chat.id, message.from_user.id)
     if key in ACTIVE_GAMES:
-        return await message.reply("⚠️ ʏᴏᴜ ᴀʟʀᴇᴀᴅʏ ʜᴀᴠᴇ ᴀɴ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ. ꜰɪɴɪꜱʜ ɪᴛ ꜰɪʀꜱᴛ!")
+        return await message.reply(
+            "⚠️ ʏᴏᴜ ᴀʟʀᴇᴀᴅʏ ʜᴀᴠᴇ ᴀɴ ᴀᴄᴛɪᴠᴇ ɢᴀᴍᴇ. ꜰɪɴɪꜱʜ ɪᴛ ꜰɪʀꜱᴛ!"
+        )
 
     game_id = f"{message.from_user.id}_{random.randint(10000, 99999)}"
     rewards = _generate_rewards()
@@ -140,7 +172,7 @@ async def cmd_luckydoor(message: Message):
     ACTIVE_GAMES[key] = {
         "game_id": game_id,
         "rewards": rewards,
-        "opened": [],  # list of (idx, reward)
+        "opened": [],
     }
 
     remaining_after = DAILY_LIMIT - plays - 1
@@ -151,6 +183,9 @@ async def cmd_luckydoor(message: Message):
     )
 
 
+# ═══════════════════════════════════════════════
+# Callback — Door Open
+# ═══════════════════════════════════════════════
 @router.callback_query(F.data.startswith("ld:"))
 async def cb_luckydoor(cb: CallbackQuery):
     parts = cb.data.split(":")
@@ -169,22 +204,25 @@ async def cb_luckydoor(cb: CallbackQuery):
     if not game or game["game_id"] != game_id:
         return await cb.answer("❌ ɢᴀᴍᴇ ᴇxᴘɪʀᴇᴅ. ᴜꜱᴇ /luckydoor ᴀɢᴀɪɴ.", show_alert=True)
 
+    # Already opened?
     if any(i == idx for i, _ in game["opened"]):
         return await cb.answer("🔒 ᴅᴏᴏʀ ᴀʟʀᴇᴀᴅʏ ᴏᴘᴇɴᴇᴅ")
 
+    # Max doors?
     if len(game["opened"]) >= DOORS_PER_GAME:
         return await cb.answer("ᴍᴀx ᴅᴏᴏʀꜱ ᴏᴘᴇɴᴇᴅ", show_alert=True)
 
+    # Open door
     reward = game["rewards"][idx]
     game["opened"].append((idx, reward))
 
     # Apply reward
     if reward["coins"] > 0:
-        await add_coins(cb.from_user.id, reward["coins"], is_earning=True)
+        await add_coins(cb.from_user.id, reward["coins"])
     if reward["xp"] > 0:
         await add_xp(cb.from_user.id, reward["xp"])
 
-    # Show result
+    # Show result message
     door_name = DOOR_NAMES[idx]
     result_text = f"🚪 <b>ᴅᴏᴏʀ: {door_name}</b>\n\n" + _format_result(reward)
 
@@ -201,7 +239,10 @@ async def cb_luckydoor(cb: CallbackQuery):
         total_xp = sum(r["xp"] for _, r in game["opened"])
 
         # Find jackpot index
-        jackpot_idx = next((i for i, r in enumerate(game["rewards"]) if r["type"] == "jackpot"), None)
+        jackpot_idx = next(
+            (i for i, r in enumerate(game["rewards"]) if r["type"] == "jackpot"),
+            None,
+        )
         jackpot_info = ""
         if jackpot_idx is not None:
             jackpot_info = (
@@ -225,14 +266,14 @@ async def cb_luckydoor(cb: CallbackQuery):
 
         ACTIVE_GAMES.pop(key, None)
 
-        # Also disable door grid
+        # Remove keyboard
         try:
             await cb.message.edit_reply_markup(reply_markup=None)
         except Exception:
             pass
 
     else:
-        # Update door grid
+        # Update door grid with opened door marked
         try:
             await cb.message.edit_reply_markup(reply_markup=doors_kb(game_id, game))
         except Exception:
