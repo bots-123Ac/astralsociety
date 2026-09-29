@@ -2,28 +2,51 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 
-from keyboards.main_menu import leaderboard_kb, back_main_kb
-from utils.database import get_global_leaderboard, get_user_rank
-from utils.ui import smart_edit
+from keyboards.main_menu import leaderboard_kb
+from utils.database import get_leaderboard, get_user_leaderboard_rank
 
 router = Router()
 
 MEDALS = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
+PERIOD_TITLES = {
+    "today": "📅 <b>ᴛᴏᴅᴀʏ's ᴛᴏᴘ 10</b>",
+    "weekly": "📆 <b>ᴡᴇᴇᴋʟʏ ᴛᴏᴘ 10</b>",
+    "monthly": "🗓️ <b>ᴍᴏɴᴛʜʟʏ ᴛᴏᴘ 10</b>",
+    "alltime": "🌐 <b>ᴀʟʟ-ᴛɪᴍᴇ ᴛᴏᴘ 10</b>",
+}
 
-def _format_lb(rows, title):
-    lines = [f"{title}\n━━━━━━━━━━━━━━━━━━━━━\n"]
+
+def _format_lb(rows, period: str, user_id: int, rank) -> str:
+    title = PERIOD_TITLES.get(period, "🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ")
+    lines = [title, "━━━━━━━━━━━━━━━━━━━━━"]
+
     if not rows:
-        lines.append("ησ ᴜsєʀs ʏєᴛ.")
+        lines.append("")
+        lines.append("ησ ᴇᴀʀɴɪηɢs ʏєᴛ.")
     else:
+        lines.append("")
         for i, row in enumerate(rows):
             name = row["first_name"]
             uname = row["username"]
             astral_id = row["astral_id"]
-            coins = row["coins"]
+            coins = row["coins"] or 0
             display = f"@{uname}" if uname else (name or f"ID {astral_id}")
             lines.append(f"{MEDALS[i]} {display} — <b>{coins:,}</b> 🪙")
+
+    lines.append("━━━━━━━━━━━━━━━━━━━━━")
+    if rank:
+        lines.append(f"👤 ʏᴏᴜʀ ʀᴀɴᴋ: <b>#{rank}</b>")
+    else:
+        lines.append("👤 ʏᴏᴜʀ ʀᴀɴᴋ: ηᴏᴛ ʀᴧηᴋєᴅ ʏєᴛ")
+
     return "\n".join(lines)
+
+
+async def _build_lb_text(period: str, user_id: int) -> str:
+    rows = await get_leaderboard(period, 10)
+    rank = await get_user_leaderboard_rank(user_id, period)
+    return _format_lb(rows, period, user_id, rank)
 
 
 # ═══════════════════════════════════════════════
@@ -31,33 +54,46 @@ def _format_lb(rows, title):
 # ═══════════════════════════════════════════════
 @router.message(Command("aleaderboard"))
 async def cmd_aleaderboard(message: Message):
-    rows = await get_global_leaderboard(10)
-    text = _format_lb(rows, "🌐 <b>ɢʟᴏʙᴀʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>")
-
-    rank = await get_user_rank(message.from_user.id)
-    if rank:
-        text += f"\n\n👤 ʏᴏᴜʀ ʀᴀɴᴋ: <b>#{rank}</b>"
-
-    if message.chat.type == "private":
-        await message.answer(text, reply_markup=back_main_kb())
-    else:
-        await message.answer(text, reply_markup=leaderboard_kb())
+    text = await _build_lb_text("alltime", message.from_user.id)
+    await message.answer(text, reply_markup=leaderboard_kb())
 
 
-# ═══════════════════════════════════════════════
-# ALIAS: /leaderboard → same as /aleaderboard
-# ═══════════════════════════════════════════════
+# Alias
 @router.message(Command("leaderboard"))
 async def cmd_leaderboard_alias(message: Message):
     await cmd_aleaderboard(message)
 
 
 # ═══════════════════════════════════════════════
-# Group Top 10 button (only in GC)
+# Tab switching (edit same message)
+# ═══════════════════════════════════════════════
+@router.callback_query(F.data.startswith("lb:"))
+async def cb_lb_tab(cb: CallbackQuery):
+    period = cb.data.split(":")[1]
+    if period not in PERIOD_TITLES:
+        return await cb.answer()
+
+    text = await _build_lb_text(period, cb.from_user.id)
+
+    try:
+        await cb.message.edit_text(text, reply_markup=leaderboard_kb())
+    except Exception:
+        try:
+            await cb.message.answer(text, reply_markup=leaderboard_kb())
+        except Exception:
+            pass
+
+    await cb.answer(f"✅ {period.upper()}")
+
+
+# ═══════════════════════════════════════════════
+# Legacy button (old lb:group) → redirect to alltime
 # ═══════════════════════════════════════════════
 @router.callback_query(F.data == "lb:group")
-async def cb_group_lb(cb: CallbackQuery):
-    rows = await get_global_leaderboard(10)
-    text = _format_lb(rows, "👥 <b>ɢʀᴏᴜᴘ ᴛᴏᴘ 10</b>")
-    await smart_edit(cb, text, leaderboard_kb())
+async def cb_lb_group_legacy(cb: CallbackQuery):
+    text = await _build_lb_text("alltime", cb.from_user.id)
+    try:
+        await cb.message.edit_text(text, reply_markup=leaderboard_kb())
+    except Exception:
+        pass
     await cb.answer()
