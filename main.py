@@ -59,7 +59,7 @@ async def main():
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    dp.include_router(start.router)
+        dp.include_router(start.router)
     dp.include_router(menu.router)
     dp.include_router(profile.router)
     dp.include_router(robs.router)
@@ -69,11 +69,11 @@ async def main():
     dp.include_router(mission.router)
     dp.include_router(shop.router)
     dp.include_router(powers.router)
-    dp.include_router(admin.router)
     dp.include_router(quiz.router)
     dp.include_router(premium.router)
-    dp.include_router(botstats.router)   # 👈 NEW
+    dp.include_router(botstats.router)
     dp.include_router(tgames.router)
+    dp.include_router(admin.router)   # 👈 LAST
 
     asyncio.create_task(background_load())
 
