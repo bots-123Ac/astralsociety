@@ -17,13 +17,13 @@ PERIOD_TITLES = {
 }
 
 
-def _format_lb(rows, period: str, user_id: int, rank) -> str:
+def _format_lb(rows, period: str, rank) -> str:
     title = PERIOD_TITLES.get(period, "🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ")
     lines = [title, "━━━━━━━━━━━━━━━━━━━━━"]
 
     if not rows:
         lines.append("")
-        lines.append("ησ ᴇᴀʀɴɪηɢs ʏєᴛ.")
+        lines.append("ηᴏ ᴇᴀʀɴɪηɢs ʏєᴛ.")
     else:
         lines.append("")
         for i, row in enumerate(rows):
@@ -38,7 +38,7 @@ def _format_lb(rows, period: str, user_id: int, rank) -> str:
     if rank:
         lines.append(f"👤 ʏᴏᴜʀ ʀᴀɴᴋ: <b>#{rank}</b>")
     else:
-        lines.append("👤 ʏᴏᴜʀ ʀᴀɴᴋ: ηᴏᴛ ʀᴧηᴋєᴅ ʏєᴛ")
+        lines.append("👤 ʏᴏᴜʀ ʀᴀɴᴋ: ηᴏᴛ ʀᴀɴᴋᴇᴅ ʏᴇᴛ")
 
     return "\n".join(lines)
 
@@ -46,7 +46,7 @@ def _format_lb(rows, period: str, user_id: int, rank) -> str:
 async def _build_lb_text(period: str, user_id: int) -> str:
     rows = await get_leaderboard(period, 10)
     rank = await get_user_leaderboard_rank(user_id, period)
-    return _format_lb(rows, period, user_id, rank)
+    return _format_lb(rows, period, rank)
 
 
 # ═══════════════════════════════════════════════
@@ -58,7 +58,6 @@ async def cmd_aleaderboard(message: Message):
     await message.answer(text, reply_markup=leaderboard_kb())
 
 
-# Alias
 @router.message(Command("leaderboard"))
 async def cmd_leaderboard_alias(message: Message):
     await cmd_aleaderboard(message)
@@ -84,16 +83,3 @@ async def cb_lb_tab(cb: CallbackQuery):
             pass
 
     await cb.answer(f"✅ {period.upper()}")
-
-
-# ═══════════════════════════════════════════════
-# Legacy button (old lb:group) → redirect to alltime
-# ═══════════════════════════════════════════════
-@router.callback_query(F.data == "lb:group")
-async def cb_lb_group_legacy(cb: CallbackQuery):
-    text = await _build_lb_text("alltime", cb.from_user.id)
-    try:
-        await cb.message.edit_text(text, reply_markup=leaderboard_kb())
-    except Exception:
-        pass
-    await cb.answer()
