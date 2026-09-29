@@ -247,6 +247,29 @@ async def init_db():
         except Exception as e:
             print(f"⚠️ Seed failed: {e}")
 
+    # ═══ MIGRATION: Seed existing balances into coin_transactions ═══
+    try:
+        async with pool.acquire() as conn:
+            ct_count = await conn.fetchval("SELECT COUNT(*) FROM coin_transactions")
+
+            if ct_count == 0:
+                print("🔄 Migrating existing balances to coin_transactions...")
+                rows = await conn.fetch(
+                    "SELECT user_id, coins FROM users WHERE coins > 0"
+                )
+                now_str = _to_str(_now())
+                for r in rows:
+                    await conn.execute(
+                        """INSERT INTO coin_transactions (user_id, amount, created_at)
+                           VALUES ($1, $2, $3)""",
+                        r["user_id"], r["coins"], now_str
+                    )
+                print(f"✅ Migrated {len(rows)} users' balances")
+            else:
+                print(f"✅ coin_transactions already has {ct_count} entries — no migration needed")
+    except Exception as e:
+        print(f"⚠️ Migration failed: {e}")
+
 
 # ═══════════════════════════════════════════════
 # USERS
