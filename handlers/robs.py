@@ -16,6 +16,9 @@ from utils.database import (
 router = Router()
 
 
+# ═══════════════════════════════════════════════
+# /gives [amount] — send coins (reply)
+# ═══════════════════════════════════════════════
 @router.message(Command("gives"))
 async def cmd_gives(message: Message, bot: Bot):
     if not message.reply_to_message or not message.reply_to_message.from_user:
@@ -56,6 +59,9 @@ async def cmd_gives(message: Message, bot: Bot):
         pass
 
 
+# ═══════════════════════════════════════════════
+# /robs [amount] — rob a user (reply)
+# ═══════════════════════════════════════════════
 @router.message(Command("robs"))
 async def cmd_robs(message: Message, bot: Bot):
     if not message.reply_to_message or not message.reply_to_message.from_user:
@@ -107,6 +113,9 @@ async def cmd_robs(message: Message, bot: Bot):
         pass
 
 
+# ═══════════════════════════════════════════════
+# /shield [days]
+# ═══════════════════════════════════════════════
 @router.message(Command("shield"))
 async def cmd_shield(message: Message):
     await get_or_create_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
@@ -137,28 +146,82 @@ async def cmd_shield(message: Message):
     )
 
 
+# ═══════════════════════════════════════════════
+# /shieldcheck — PREMIUM ONLY + Sends result in DM
+# ═══════════════════════════════════════════════
 @router.message(Command("shieldcheck"))
-async def cmd_shieldcheck(message: Message):
+async def cmd_shieldcheck(message: Message, bot: Bot):
     await get_or_create_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
-    prem = await is_premium(message.from_user.id)
-    has_t = message.reply_to_message and message.reply_to_message.from_user
 
-    if not has_t:
-        rem = await shield_remaining_seconds(message.from_user.id)
-        if rem <= 0:
-            if not prem:
-                return await message.reply("🛡️ ɴᴏ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ.\n\n⭐ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀꜱ ᴄᴀɴ ᴄʜᴇᴄᴋ ᴏᴛʜᴇʀꜱ' ꜱʜɪᴇʟᴅ.")
-            return await message.reply("🛡️ ɴᴏ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ.")
+    # ═══ Premium check ═══
+    is_prem = await is_premium(message.from_user.id)
+    if not is_prem:
         return await message.reply(
-            f"🛡️ <b>ʏᴏᴜ ᴀʀᴇ ᴀʟʀᴇᴀᴅʏ ᴘʀᴏᴛᴇᴄᴛᴇᴅ.</b>\n⏳ ʀᴇᴍᴀɪɴɪɴɢ: <b>{format_shield_time(rem)}</b>"
+            "❌ <b>ᴘʀᴇᴍɪᴜᴍ ᴏɴʟʏ!</b>\n\n"
+            "sʜɪᴇʟᴅ ᴄʜᴇᴄᴋ ɪꜱ ᴀ <b>ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇ</b>.\n\n"
+            "⭐ ᴜꜱᴇ /premium ᴛᴏ ꜱᴜʙꜱᴄʀɪʙᴇ."
         )
 
-    target = message.reply_to_message.from_user
-    if await is_premium(target.id):
-        return await message.reply("❌ ᴄᴀɴ'ᴛ ᴄʜᴇᴄᴋ ᴀɴᴏᴛʜᴇʀ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀ'ꜱ ꜱʜɪᴇʟᴅ.")
-    rem = await shield_remaining_seconds(target.id)
+    has_target = message.reply_to_message and message.reply_to_message.from_user
+
+    # ═══ If reply to someone → DM the result ═══
+    if has_target:
+        target = message.reply_to_message.from_user
+
+        # Can't check other premium user's shield
+        if await is_premium(target.id):
+            return await message.reply(
+                "❌ ᴄᴀɴ'ᴛ ᴄʜᴇᴄᴋ ᴀɴᴏᴛʜᴇʀ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀ'ꜱ ꜱʜɪᴇʟᴅ."
+            )
+
+        rem = await shield_remaining_seconds(target.id)
+
+        if rem <= 0:
+            result_text = (
+                f"🛡️ <b>ꜱʜɪᴇʟᴅ ᴄʜᴇᴄᴋ</b>\n"
+                f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"👤 ᴜꜱᴇʀ: {target.mention_html()}\n"
+                f"❌ ꜱᴛᴀᴛᴜꜱ: <b>ηᴏ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ</b>"
+            )
+        else:
+            result_text = (
+                f"🛡️ <b>ꜱʜɪᴇʟᴅ ᴄʜᴇᴄᴋ</b>\n"
+                f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"👤 ᴜꜱᴇʀ: {target.mention_html()}\n"
+                f"⏳ ʀᴇᴍᴀɪɴɪɴɢ: <b>{format_shield_time(rem)}</b>"
+            )
+
+        # ═══ Send in DM (not GC) ═══
+        if message.chat.type == "private":
+            # Already in DM
+            await message.reply(result_text)
+        else:
+            # In GC → send to premium user's DM
+            try:
+                await bot.send_message(
+                    message.from_user.id,
+                    result_text
+                )
+                # Brief notice in GC without exposing shield time
+                await message.reply("📩 <i>ꜱʜɪᴇʟᴅ ᴅᴇᴛᴀɪʟꜱ ꜱᴇɴᴛ ᴛᴏ ʏᴏᴜʀ ᴅᴍ.</i>")
+            except Exception:
+                await message.reply(
+                    "❌ ᴄᴀɴ'ᴛ ꜱᴇɴᴅ ᴅᴍ. ᴘʟᴇᴀꜱᴇ ꜱᴛᴀʀᴛ ᴛʜᴇ ʙᴏᴛ ɪɴ ᴅᴍ ꜰɪʀꜱᴛ."
+                )
+        return
+
+    # ═══ No reply → show own shield (works in DM and GC) ═══
+    rem = await shield_remaining_seconds(message.from_user.id)
+
     if rem <= 0:
-        return await message.reply(f"🛡️ {target.mention_html()}: ɴᴏ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ")
+        return await message.reply(
+            f"🛡️ <b>ʏᴏᴜʀ ꜱʜɪᴇʟᴅ</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"❌ ꜱᴛᴀᴛᴜꜱ: <b>ηᴏ ᴀᴄᴛɪᴠᴇ ꜱʜɪᴇʟᴅ</b>"
+        )
+
     await message.reply(
-        f"🛡️ {target.mention_html()}:\n⏳ <b>{format_shield_time(rem)}</b> ʀᴇᴍᴀɪɴɪɴɢ"
+        f"🛡️ <b>ʏᴏᴜʀ ꜱʜɪᴇʟᴅ</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"⏳ ʀᴇᴍᴀɪɴɪɴɢ: <b>{format_shield_time(rem)}</b>"
     )
