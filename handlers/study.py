@@ -3,7 +3,7 @@ from aiogram.types import CallbackQuery, Message
 
 from keyboards.main_menu import (
     study_class_kb, study_class10_kb, study_class1112_kb, chapters_kb,
-    back_main_kb,
+    back_main_kb, back_kb,
 )
 from utils.database import get_study_chapters, get_study_materials
 
@@ -60,6 +60,7 @@ async def study_12(cb: CallbackQuery):
     await cb.answer()
 
 
+# ═══ LEVEL 3: Chapter list for Class 10 subject ═══
 @router.callback_query(F.data.startswith("st10:subject:"))
 async def st10_subject(cb: CallbackQuery):
     section = cb.data.split(":")[2]
@@ -90,6 +91,7 @@ async def st10_pyq(cb: CallbackQuery):
     await cb.answer()
 
 
+# ═══ LEVEL 3: Chapter list for Class 11 ═══
 @router.callback_query(F.data.startswith("st11:section:"))
 async def st11_section(cb: CallbackQuery):
     section = cb.data.split(":")[2]
@@ -105,6 +107,7 @@ async def st11_section(cb: CallbackQuery):
     await cb.answer()
 
 
+# ═══ LEVEL 3: Chapter list for Class 12 ═══
 @router.callback_query(F.data.startswith("st12:section:"))
 async def st12_section(cb: CallbackQuery):
     section = cb.data.split(":")[2]
@@ -120,6 +123,7 @@ async def st12_section(cb: CallbackQuery):
     await cb.answer()
 
 
+# ═══ LEVEL 4: File list (after chapter clicked) ═══
 @router.callback_query(F.data.startswith("stch:"))
 async def st_chapter(cb: CallbackQuery):
     parts = cb.data.split(":")
@@ -136,10 +140,20 @@ async def st_chapter(cb: CallbackQuery):
     if not materials:
         return await cb.answer("ησ ғiʟєs ʏєᴛ.", show_alert=True)
 
+    # Build back target = chapters view of the same section
+    if class_name == "10":
+        if section == "pyq":
+            back_target = f"st10:section:{section}"
+        else:
+            back_target = f"st10:subject:{section}"
+    else:
+        back_target = f"st{class_name}:section:{section}"
+
     await cb.message.edit_text(
         f"📄 <b>{chapter}</b> — {len(materials)} ғɪʟᴇ(ꜱ)",
-        reply_markup=back_main_kb()
+        reply_markup=back_kb(back_target)
     )
+
     for m in materials:
         content_type = m["content_type"]
         content = m["content"]
