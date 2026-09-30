@@ -217,6 +217,16 @@ async def init_db():
             )
         """)
 
+        # ═══ BOMB DEFUSE PLAYS ═══
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS bombdefuse_plays (
+                user_id BIGINT,
+                play_date TEXT,
+                count INTEGER DEFAULT 0,
+                PRIMARY KEY (user_id, play_date)
+            )
+        """)
+
         # ═══ COIN TRANSACTIONS ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS coin_transactions (
@@ -631,7 +641,6 @@ async def get_leaderboard(period: str = "alltime", limit: int = 10):
     """Fetch top users for given period."""
     pool = await get_pool()
 
-    # All-time: current balance
     if period == "alltime":
         return await pool.fetch(
             """SELECT first_name, username, astral_id, coins
@@ -640,7 +649,6 @@ async def get_leaderboard(period: str = "alltime", limit: int = 10):
             limit
         )
 
-    # Today/Weekly/Monthly: sum of earnings in that period
     since = _period_start(period)
     if since is None:
         return []
@@ -696,7 +704,7 @@ async def get_user_leaderboard_rank(user_id: int, period: str = "alltime"):
 
 
 async def get_user_period_balance(user_id: int, period: str = "alltime") -> int:
-    """Get user's balance for a specific period (today/weekly/monthly/alltime)."""
+    """Get user's balance for a specific period."""
     pool = await get_pool()
 
     if period == "alltime":
@@ -1034,24 +1042,37 @@ async def inc_luckydoor_play(user_id) -> int:
         new_count, user_id, today
     )
     return new_count
+
+
 # ═══════════════════════════════════════════════
-# SHIELD ALERT SUPPORT
+# BOMB DEFUSE
 # ═══════════════════════════════════════════════
-async def get_active_shields():
-    """Return list of (user_id, shield_until_str) for all active shields."""
+async def get_bombdefuse_plays(user_id) -> int:
+    today = _now().strftime("%Y-%m-%d")
     pool = await get_pool()
-    rows = await pool.fetch(
-        "SELECT user_id, shield_until FROM users WHERE shield_until IS NOT NULL AND shield_until > $1",
-        _to_str(_now())
+    val = await pool.fetchval(
+        "SELECT count FROM bombdefuse_plays WHERE user_id = $1 AND play_date = $2",
+        user_id, today
     )
-    return [(r["user_id"], r["shield_until"]) for r in rows]
+    return val or 0
 
 
-def parse_dt(s):
-    """Public helper — parse datetime string."""
-    return _parse(s)
-
-
-def now_utc():
-    """Public helper — current UTC datetime."""
-    return _now()
+async def inc_bombdefuse_play(user_id) -> int:
+    today = _now().strftime("%Y-%m-%d")
+    pool = await get_pool()
+    row = await pool.fetchrow(
+        "SELECT count FROM bombdefuse_plays WHERE user_id = $1 AND play_date = $2",
+        user_id, today
+    )
+    if not row:
+        await pool.execute(
+            "INSERT INTO bombdefuse_plays (user_id, play_date, count) VALUES ($1, $2, 1)",
+            user_id, today
+        )
+        return 1
+    new_count = (row["count"] or 0) + 1
+    await pool.execute(
+        "UPDATE bombdefuse_plays SET count = $1 WHERE user_id = $2 AND play_date = $3",
+        new_count, user_id, today
+    )
+    return new_count
