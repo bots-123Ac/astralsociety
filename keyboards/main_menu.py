@@ -1,5 +1,10 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import SUPPORT_GROUP_LINK, SUPPORT_CHANNEL_LINK, BOT_ADD_LINK
+from config import (
+    SUPPORT_GROUP_LINK,
+    SUPPORT_CHANNEL_LINK,
+    BOT_ADD_LINK,
+    WEBSITE_URL,
+)
 
 
 # ═══════════════════════════════════════════════
@@ -7,6 +12,7 @@ from config import SUPPORT_GROUP_LINK, SUPPORT_CHANNEL_LINK, BOT_ADD_LINK
 # ═══════════════════════════════════════════════
 def main_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🌐 ᴠɪsɪᴛ ᴡᴇʙsɪᴛᴇ", url=WEBSITE_URL)],
         [InlineKeyboardButton(text="🆘 ʜᴇʟᴘ", callback_data="menu:help"),
          InlineKeyboardButton(text="ℹ️ ᴀʙᴏᴜᴛ", callback_data="menu:about")],
         [InlineKeyboardButton(text="👥 ꜱᴜᴘᴘᴏʀᴛɪᴠᴇ ɢᴄ", url=SUPPORT_GROUP_LINK)],
@@ -71,7 +77,10 @@ def quiz_menu_kb():
     for i in range(0, len(categories), 2):
         row = [InlineKeyboardButton(text=categories[i][0], callback_data=categories[i][1])]
         if i + 1 < len(categories):
-            row.append(InlineKeyboardButton(text=categories[i + 1][0], callback_data=categories[i + 1][1]))
+            row.append(InlineKeyboardButton(
+                text=categories[i + 1][0],
+                callback_data=categories[i + 1][1]
+            ))
         rows.append(row)
     rows.append([InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="tg:quiz")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -90,7 +99,6 @@ def quiz_options_kb(qid, a, b, c, d):
 # LEADERBOARD — 4 TABS
 # ═══════════════════════════════════════════════
 def leaderboard_kb():
-    """4 tabs for leaderboard (Today / Weekly / Monthly / All-Time)."""
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="📅 ᴛᴏᴅᴀʏ", callback_data="lb:today"),
@@ -107,7 +115,7 @@ def leaderboard_kb():
 
 
 # ═══════════════════════════════════════════════
-# STUDY — Proper Back Navigation
+# STUDY
 # ═══════════════════════════════════════════════
 def study_class_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
