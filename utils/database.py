@@ -1034,3 +1034,24 @@ async def inc_luckydoor_play(user_id) -> int:
         new_count, user_id, today
     )
     return new_count
+# ═══════════════════════════════════════════════
+# SHIELD ALERT SUPPORT
+# ═══════════════════════════════════════════════
+async def get_active_shields():
+    """Return list of (user_id, shield_until_str) for all active shields."""
+    pool = await get_pool()
+    rows = await pool.fetch(
+        "SELECT user_id, shield_until FROM users WHERE shield_until IS NOT NULL AND shield_until > $1",
+        _to_str(_now())
+    )
+    return [(r["user_id"], r["shield_until"]) for r in rows]
+
+
+def parse_dt(s):
+    """Public helper — parse datetime string."""
+    return _parse(s)
+
+
+def now_utc():
+    """Public helper — current UTC datetime."""
+    return _now()
