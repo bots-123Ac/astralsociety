@@ -18,6 +18,11 @@ SUPPORT_GROUP_LINK = "https://t.me/+-j8FiVjAUXExMmM1"
 SUPPORT_CHANNEL_NAME = "˹𝐀𝐬𝐭𝐫𝐚𝐥 ꭙ 𝐒𝐭𝐮𝐝𝐲 𝐂𝐡𝐞𝐬𝐭˼"
 SUPPORT_CHANNEL_LINK = "https://t.me/Astral_study_chest"
 
+# ═══════════════════════════════════════════════
+# 🌐 WEBSITE
+# ═══════════════════════════════════════════════
+WEBSITE_URL = "https://crazycore.vercel.app/"
+
 BOT_ADD_LINK = f"https://t.me/{BOT_USERNAME.lstrip('@')}?startgroup=true"
 
 # ═══════════════════════════════════════════════
@@ -34,21 +39,21 @@ BOT_ADMIN_IDS = [
 ]
 
 # ═══════════════════════════════════════════════
-# 👨‍💻 CREATOR CREDITS (ID-based, no preview card)
+# 👨‍💻 CREATOR CREDITS
 # ═══════════════════════════════════════════════
 CREATOR_1_NAME = "⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐"
 CREATOR_1_USERNAME = "@OfficialCrazyBoy07"
 CREATOR_1_ID = 7790607144
 
-CREATOR_2_NAME = "𝓚𝓪𝓷𝓱𝓪࿐✨🤟"
+CREATOR_2_NAME = "𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟"
 CREATOR_2_USERNAME = "@Lunar_kanha_4572"
 CREATOR_2_ID = 8165863254
 
 CREDIT_HTML = (
     f'ᴘᴏᴡᴇʀᴇᴅ ʙʏ '
-    f'<a href="tg://user?id={CREATOR_2_ID}">{CREATOR_2_NAME}</a>'
+    f'<a href="tg://user?id={CREATOR_1_ID}">{CREATOR_1_NAME}</a> '
     f'& '
-    f'<a href="https://t.me/OfficialCrazyBoy07">{CREATOR_1_NAME}</a> '
+    f'<a href="tg://user?id={CREATOR_2_ID}">{CREATOR_2_NAME}</a>'
 )
 
 # ═══════════════════════════════════════════════
