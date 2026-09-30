@@ -15,6 +15,10 @@ from utils.database import (
 
 router = Router()
 
+# ═══ ROB LIMITS ═══
+MAX_ROB_NORMAL = 15000
+MAX_ROB_PREMIUM = 100000
+
 
 # ═══════════════════════════════════════════════
 # /gives [amount] — send coins (reply)
@@ -72,36 +76,62 @@ async def cmd_robs(message: Message, bot: Bot):
         return await message.reply("❌ ᴄᴀɴ'ᴛ ʀᴏʙ ʏᴏᴜʀꜱᴇʟꜰ.")
     if victim.is_bot:
         return await message.reply("❌ ᴄᴀɴ'ᴛ ʀᴏʙ ᴀ ʙᴏᴛ.")
+
     parts = message.text.split()
     if len(parts) < 2 or not parts[1].isdigit():
         return await message.reply("❌ ᴀᴍᴏᴜɴᴛ ʀᴇǫᴜɪʀᴇᴅ!\nᴜꜱᴀɢᴇ: <code>/robs 5000</code>")
+
     amount = int(parts[1])
     if amount < 1:
         return await message.reply("❌ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ.")
+
     await get_or_create_user(robber.id, robber.username, robber.first_name)
     await get_or_create_user(victim.id, victim.username, victim.first_name)
+
+    # ═══ ROB LIMIT CHECK ═══
+    is_prem = await is_premium(robber.id)
+    limit = MAX_ROB_PREMIUM if is_prem else MAX_ROB_NORMAL
+
+    if amount > limit:
+        if is_prem:
+            return await message.reply(
+                f"⚠️ ʏᴏᴜ ᴄᴀɴ'ᴛ ʀᴏʙ ᴍᴏʀᴇ ᴛʜᴀɴ <b>{limit:,}</b> ᴀᴛ ᴏɴᴄᴇ."
+            )
+        else:
+            return await message.reply(
+                f"⚠️ <b>ʏᴏᴜ ᴄᴀɴ'ᴛ ʀᴏʙ ᴍᴏʀᴇ ᴛʜᴀɴ {limit:,} ᴀᴛ ᴏɴᴄᴇ</b>\n\n"
+                f"⭐ ꜱᴜʙꜱᴄʀɪʙᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ ᴛᴏ ɪɴᴄʀᴇᴀꜱᴇ ᴛʜɪꜱ ʟɪᴍɪᴛ ᴛᴏ <b>1,00,000</b>"
+            )
+
     if await is_shielded(victim.id):
         return await message.reply("🛡️ ᴛᴀʀɢᴇᴛ ɪꜱ ᴜɴᴅᴇʀ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ.\nᴡᴀɪᴛ ᴛɪʟʟ ꜱʜɪᴇʟᴅ ᴇxᴘɪʀᴇꜱ.")
+
     vc = await get_user_coins(victim.id)
     if vc < 1:
         return await message.reply(f"⚠️ <b>{victim.mention_html()} ʜᴀꜱ ᴏɴʟʏ 0 ᴄᴏɪɴꜱ</b>")
+
     if amount > vc:
         return await message.reply(
             f"⚠️ <b>{victim.mention_html()} ʜᴀꜱ ᴏɴʟʏ {vc:,} ᴄᴏɪɴꜱ</b>\n\n"
             f"ʏᴏᴜ ᴛʀɪᴇᴅ ᴛᴏ ʀᴏʙ <b>{amount:,}</b> ᴄᴏɪɴꜱ."
         )
-    pct = ROB_PREMIUM_PERCENT if await is_premium(robber.id) else ROB_NORMAL_PERCENT
+
+    pct = ROB_PREMIUM_PERCENT if is_prem else ROB_NORMAL_PERCENT
     ded = (amount * pct) // 100
     recv = amount - ded
+
     await add_coins(victim.id, -amount, is_earning=False)
     await add_coins(robber.id, recv, is_earning=False)
+
     xp = random.randint(0, 10)
     await add_xp(robber.id, xp)
+
     await message.reply(
         f"🪙 <b>ʀᴏʙ ꜱᴜᴄᴄᴇꜱꜱꜰᴜʟ!</b>\n━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"👤 {robber.mention_html()} ɢᴀɪɴᴇᴅ <b>{recv:,}</b> 🪙 ᴀꜰᴛᴇʀ {pct}% ᴅᴇᴅᴜᴄᴛɪᴏɴ.\n"
         f"📈 xᴘ: <b>+{xp}</b>"
     )
+
     try:
         await bot.send_message(
             victim.id,
@@ -153,7 +183,6 @@ async def cmd_shield(message: Message):
 async def cmd_shieldcheck(message: Message, bot: Bot):
     await get_or_create_user(message.from_user.id, message.from_user.username, message.from_user.first_name)
 
-    # ═══ Premium check ═══
     is_prem = await is_premium(message.from_user.id)
     if not is_prem:
         return await message.reply(
@@ -164,11 +193,9 @@ async def cmd_shieldcheck(message: Message, bot: Bot):
 
     has_target = message.reply_to_message and message.reply_to_message.from_user
 
-    # ═══ If reply to someone → DM the result ═══
     if has_target:
         target = message.reply_to_message.from_user
 
-        # Can't check other premium user's shield
         if await is_premium(target.id):
             return await message.reply(
                 "❌ ᴄᴀɴ'ᴛ ᴄʜᴇᴄᴋ ᴀɴᴏᴛʜᴇʀ ᴘʀᴇᴍɪᴜᴍ ᴜꜱᴇʀ'ꜱ ꜱʜɪᴇʟᴅ."
@@ -191,18 +218,11 @@ async def cmd_shieldcheck(message: Message, bot: Bot):
                 f"⏳ ʀᴇᴍᴀɪɴɪɴɢ: <b>{format_shield_time(rem)}</b>"
             )
 
-        # ═══ Send in DM (not GC) ═══
         if message.chat.type == "private":
-            # Already in DM
             await message.reply(result_text)
         else:
-            # In GC → send to premium user's DM
             try:
-                await bot.send_message(
-                    message.from_user.id,
-                    result_text
-                )
-                # Brief notice in GC without exposing shield time
+                await bot.send_message(message.from_user.id, result_text)
                 await message.reply("📩 <i>ꜱʜɪᴇʟᴅ ᴅᴇᴛᴀɪʟꜱ ꜱᴇɴᴛ ᴛᴏ ʏᴏᴜʀ ᴅᴍ.</i>")
             except Exception:
                 await message.reply(
@@ -210,7 +230,6 @@ async def cmd_shieldcheck(message: Message, bot: Bot):
                 )
         return
 
-    # ═══ No reply → show own shield (works in DM and GC) ═══
     rem = await shield_remaining_seconds(message.from_user.id)
 
     if rem <= 0:
