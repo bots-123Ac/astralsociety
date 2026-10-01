@@ -6,7 +6,10 @@ from datetime import datetime, timedelta
 
 import asyncpg
 
-from config import DATABASE_URL, COINS_PER_GEM
+from config import (
+    DATABASE_URL, COINS_PER_GEM,
+    LEVEL_REWARDS, LEVEL_TITLES, XP_PER_LEVEL_BASE,
+)
 
 
 # ═══════════════════════════════════════════════
@@ -101,6 +104,83 @@ def _parse(s):
 
 
 # ═══════════════════════════════════════════════
+# LEVEL MATH (XP → Level)
+# ═══════════════════════════════════════════════
+def xp_for_next_level(level: int) -> int:
+    """XP required to go from `level` → `level + 1`."""
+    return level * XP_PER_LEVEL_BASE
+
+
+def cumulative_xp_for_level(level: int) -> int:
+    """Total lifetime XP needed to REACH the given level."""
+    if level <= 1:
+        return 0
+    return XP_PER_LEVEL_BASE * (level - 1) * level // 2
+
+
+def compute_level_from_xp(total_xp: int) -> int:
+    """Given lifetime total XP, return current level."""
+    if total_xp < 0:
+        total_xp = 0
+    level = 1
+    while cumulative_xp_for_level(level + 1) <= total_xp:
+        level += 1
+        if level > 9999:
+            break
+    return level
+
+
+def compute_level_progress(total_xp: int, level: int):
+    """Return (xp_in_current_level, xp_needed_for_next)."""
+    current_threshold = cumulative_xp_for_level(level)
+    xp_in_level = total_xp - current_threshold
+    xp_needed = xp_for_next_level(level)
+    if xp_in_level < 0:
+        xp_in_level = 0
+    return xp_in_level, xp_needed
+
+
+def progress_bar(current: int, needed: int, length: int = 10) -> str:
+    """Return unicode progress bar like ▰▰▰▰▰▰░░░░"""
+    if needed <= 0:
+        return "▰" * length
+    filled = int((current / needed) * length)
+    filled = max(0, min(length, filled))
+    return "▰" * filled + "░" * (length - filled)
+
+
+def get_level_title(level: int) -> str:
+    """Return highest matching title."""
+    for lvl, title in LEVEL_TITLES:
+        if level >= lvl:
+            return title
+    return "Astral Rookie"
+
+
+def format_level_up_message(info: dict) -> str:
+    """Format the level-up notification."""
+    rewards_text = ""
+    if info.get("rewards"):
+        rewards_text = "\n" + "\n".join(
+            f"🎁 ʟᴇᴠᴇʟ {lvl}: {r['label']}" for lvl, r in info["rewards"]
+        )
+
+    bar = progress_bar(info["xp_in_level"], info["xp_needed"])
+    title = info.get("title", "")
+
+    return (
+        f"🎉 <b>ʟᴇᴠᴇʟ ᴜᴘ!</b> 🎉\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"⭐ ʏᴏᴜ ʀᴇᴀᴄʜᴇᴅ <b>ʟᴇᴠᴇʟ {info['new_level']}</b>!\n"
+        f"👑 ᴛɪᴛʟᴇ: <b>{title}</b>"
+        f"{rewards_text}\n\n"
+        f"⚡ xᴘ: <b>{info['xp_in_level']:,} / {info['xp_needed']:,}</b>\n"
+        f"<code>{bar}</code>\n\n"
+        f"ᴋᴇᴇᴘ ɢᴏɪɴɢ, ᴀꜱᴛʀᴀʟ ʟᴇɢᴇɴᴅ! 🚀"
+    )
+
+
+# ═══════════════════════════════════════════════
 # INIT DB
 # ═══════════════════════════════════════════════
 async def init_db():
@@ -116,6 +196,8 @@ async def init_db():
                 coins BIGINT DEFAULT 2000,
                 gems BIGINT DEFAULT 0,
                 xp BIGINT DEFAULT 0,
+                level INTEGER DEFAULT 1,
+                level_rewards_claimed TEXT DEFAULT '',
                 quiz_attempted INTEGER DEFAULT 0,
                 quiz_solved INTEGER DEFAULT 0,
                 word_attempted INTEGER DEFAULT 0,
@@ -130,6 +212,14 @@ async def init_db():
                 created_at TEXT
             )
         """)
+
+        # ═══ SAFE MIGRATION for existing users ═══
+        await conn.execute(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1"
+        )
+        await conn.execute(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS level_rewards_claimed TEXT DEFAULT ''"
+        )
 
         # ═══ STUDY ═══
         await conn.execute("""
@@ -224,6 +314,14 @@ async def init_db():
                 play_date TEXT,
                 count INTEGER DEFAULT 0,
                 PRIMARY KEY (user_id, play_date)
+            )
+        """)
+
+        # ═══ EXTRA PLAYS (inventory) ═══
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS extra_plays (
+                user_id BIGINT PRIMARY KEY,
+                count INTEGER DEFAULT 0
             )
         """)
 
@@ -352,11 +450,103 @@ async def add_gems(user_id, amount):
 
 
 async def add_xp(user_id, amount):
+    """
+    Add XP and auto-handle level up.
+    Returns dict with level-up info, or None if no level up.
+    """
+    if amount <= 0:
+        return None
+
     pool = await get_pool()
+
+    # Add XP first
     await pool.execute(
         "UPDATE users SET xp = xp + $1 WHERE user_id = $2",
         amount, user_id
     )
+
+    row = await pool.fetchrow(
+        "SELECT xp, level, level_rewards_claimed FROM users WHERE user_id = $1",
+        user_id
+    )
+    if not row:
+        return None
+
+    total_xp = row["xp"] or 0
+    current_level = row["level"] or 1
+    claimed_raw = row["level_rewards_claimed"] or ""
+
+    claimed = set()
+    for part in claimed_raw.split(","):
+        part = part.strip()
+        if part.isdigit():
+            claimed.add(int(part))
+
+    new_level = compute_level_from_xp(total_xp)
+    if new_level <= current_level:
+        return None
+
+    # Process every level crossed
+    new_claims = list(claimed)
+    rewards_granted = []
+
+    for lvl in range(current_level + 1, new_level + 1):
+        reward = LEVEL_REWARDS.get(lvl)
+        if not reward:
+            continue
+        if lvl in claimed:
+            continue
+
+        rtype = reward["type"]
+
+        if rtype == "coins":
+            await pool.execute(
+                "UPDATE users SET coins = coins + $1 WHERE user_id = $2",
+                reward["amount"], user_id
+            )
+            _cache_invalidate(_coins_cache, user_id)
+            # Log as earnings for leaderboard
+            try:
+                await pool.execute(
+                    "INSERT INTO coin_transactions (user_id, amount, created_at) VALUES ($1, $2, $3)",
+                    user_id, reward["amount"], _to_str(_now())
+                )
+            except Exception:
+                pass
+        elif rtype == "gems":
+            await pool.execute(
+                "UPDATE users SET gems = gems + $1 WHERE user_id = $2",
+                reward["amount"], user_id
+            )
+        elif rtype == "extra_play":
+            await add_extra_play(user_id, reward["amount"])
+        elif rtype == "xp_boost":
+            await pool.execute(
+                "INSERT INTO powers (user_id, power_type, expires_at) VALUES ($1, $2, $3)",
+                user_id, "xp_boost", _to_str(_now() + timedelta(days=reward["days"]))
+            )
+        # badge → title handled via get_level_title
+
+        new_claims.append(lvl)
+        rewards_granted.append((lvl, reward))
+
+    new_claimed_str = ",".join(str(x) for x in sorted(set(new_claims)))
+    await pool.execute(
+        "UPDATE users SET level = $1, level_rewards_claimed = $2 WHERE user_id = $3",
+        new_level, new_claimed_str, user_id
+    )
+
+    xp_in_level, xp_needed = compute_level_progress(total_xp, new_level)
+
+    return {
+        "new_level": new_level,
+        "old_level": current_level,
+        "total_xp": total_xp,
+        "xp_in_level": xp_in_level,
+        "xp_needed": xp_needed,
+        "rewards": rewards_granted,
+        "title": get_level_title(new_level),
+    }
 
 
 async def get_user_coins(user_id) -> int:
@@ -734,6 +924,66 @@ async def get_user_rank(user_id):
 
 
 # ═══════════════════════════════════════════════
+# LEVEL / USER HELPERS
+# ═══════════════════════════════════════════════
+async def get_user_level(user_id):
+    """Return (level, xp_in_level, xp_needed, title)."""
+    pool = await get_pool()
+    row = await pool.fetchrow(
+        "SELECT xp, level FROM users WHERE user_id = $1", user_id
+    )
+    if not row:
+        return 1, 0, XP_PER_LEVEL_BASE, "Astral Rookie"
+
+    total_xp = row["xp"] or 0
+    level = row["level"] or compute_level_from_xp(total_xp)
+    xp_in_level, xp_needed = compute_level_progress(total_xp, level)
+    return level, xp_in_level, xp_needed, get_level_title(level)
+
+
+# ═══════════════════════════════════════════════
+# EXTRA PLAYS (inventory)
+# ═══════════════════════════════════════════════
+async def get_extra_plays(user_id) -> int:
+    pool = await get_pool()
+    val = await pool.fetchval(
+        "SELECT count FROM extra_plays WHERE user_id = $1", user_id
+    )
+    return val or 0
+
+
+async def add_extra_play(user_id, amount=1):
+    pool = await get_pool()
+    row = await pool.fetchrow(
+        "SELECT count FROM extra_plays WHERE user_id = $1", user_id
+    )
+    if not row:
+        await pool.execute(
+            "INSERT INTO extra_plays (user_id, count) VALUES ($1, $2)",
+            user_id, amount
+        )
+    else:
+        await pool.execute(
+            "UPDATE extra_plays SET count = count + $1 WHERE user_id = $2",
+            amount, user_id
+        )
+
+
+async def use_extra_play(user_id) -> bool:
+    """Returns True if an extra play was consumed."""
+    pool = await get_pool()
+    row = await pool.fetchrow(
+        "SELECT count FROM extra_plays WHERE user_id = $1", user_id
+    )
+    if not row or (row["count"] or 0) <= 0:
+        return False
+    await pool.execute(
+        "UPDATE extra_plays SET count = count - 1 WHERE user_id = $1", user_id
+    )
+    return True
+
+
+# ═══════════════════════════════════════════════
 # POWERS
 # ═══════════════════════════════════════════════
 async def add_power(user_id, power_type, days):
@@ -759,6 +1009,18 @@ async def has_xp_boost(user_id) -> bool:
     val = await pool.fetchval(
         """SELECT 1 FROM powers
            WHERE user_id = $1 AND power_type = 'xp_boost' AND expires_at > $2
+           LIMIT 1""",
+        user_id, _to_str(_now())
+    )
+    return val is not None
+
+
+async def has_protection_checker(user_id) -> bool:
+    """Check if user has an active protection-checker power."""
+    pool = await get_pool()
+    val = await pool.fetchval(
+        """SELECT 1 FROM powers
+           WHERE user_id = $1 AND power_type = 'protection_checker' AND expires_at > $2
            LIMIT 1""",
         user_id, _to_str(_now())
     )
