@@ -2,7 +2,7 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from config import XP_PER_LEVEL_BASE, LEVEL_TITLES
+from config import XP_PER_LEVEL_BASE, LEVEL_TITLES, OWNER_IDS
 from utils.database import (
     get_or_create_user, get_user_by_astral_id, get_user_by_username,
     get_user_by_id, convert_coins_to_gems, is_premium,
@@ -78,7 +78,13 @@ async def format_balance(u, premium: bool = False) -> str:
     title = _get_level_title(level)
     extras = await get_extra_plays(u["user_id"])
 
-    header = "👑 <b>ᴘʀᴇᴍɪᴜᴍ ᴘʀᴏꜰɪʟᴇ</b> 👑" if premium else "👤 <b>ʙᴀʟᴀɴᴄᴇ</b>"
+    # ═══ Header based on role ═══
+    if u["user_id"] in OWNER_IDS:
+        header = "👑 <b>ᴏᴡɴᴇʀ ᴘʀᴏꜰɪʟᴇ</b> 👑"
+    elif premium:
+        header = "💎 <b>ᴘʀᴇᴍɪᴜᴍ ᴘʀᴏꜰɪʟᴇ</b> 💎"
+    else:
+        header = "👤 <b>ʙᴀʟᴀɴᴄᴇ</b>"
 
     return (
         f"{header}\n"
