@@ -1,10 +1,5 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from config import (
-    SUPPORT_GROUP_LINK,
-    SUPPORT_CHANNEL_LINK,
-    BOT_ADD_LINK,
-    WEBSITE_URL,
-)
+from config import SUPPORT_GROUP_LINK, SUPPORT_CHANNEL_LINK, BOT_ADD_LINK, WEBSITE_URL
 
 
 # ═══════════════════════════════════════════════
@@ -12,11 +7,11 @@ from config import (
 # ═══════════════════════════════════════════════
 def main_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🌐 ᴠɪsɪᴛ ᴡᴇʙsɪᴛᴇ", url=WEBSITE_URL)],
         [InlineKeyboardButton(text="🆘 ʜᴇʟᴘ", callback_data="menu:help"),
          InlineKeyboardButton(text="ℹ️ ᴀʙᴏᴜᴛ", callback_data="menu:about")],
         [InlineKeyboardButton(text="👥 ꜱᴜᴘᴘᴏʀᴛɪᴠᴇ ɢᴄ", url=SUPPORT_GROUP_LINK)],
         [InlineKeyboardButton(text="📢 ꜱᴜᴘᴘᴏʀᴛɪᴠᴇ ᴄʜᴀɴɴᴇʟ", url=SUPPORT_CHANNEL_LINK)],
+        [InlineKeyboardButton(text="🌐 ᴡᴇʙꜱɪᴛᴇ", url=WEBSITE_URL)],
         [InlineKeyboardButton(text="🥷 ᴋɪᴅɴᴀᴘ ᴍᴇ", url=BOT_ADD_LINK)],
     ])
 
@@ -32,7 +27,7 @@ def back_main_kb():
 
 
 # ═══════════════════════════════════════════════
-# GAMES MENU
+# 🎮 GAMES MENU
 # ═══════════════════════════════════════════════
 def tgames_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -43,7 +38,7 @@ def tgames_menu_kb():
 
 
 # ═══════════════════════════════════════════════
-# QUIZ
+# 🧠 QUIZ
 # ═══════════════════════════════════════════════
 def quiz_count_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -77,10 +72,7 @@ def quiz_menu_kb():
     for i in range(0, len(categories), 2):
         row = [InlineKeyboardButton(text=categories[i][0], callback_data=categories[i][1])]
         if i + 1 < len(categories):
-            row.append(InlineKeyboardButton(
-                text=categories[i + 1][0],
-                callback_data=categories[i + 1][1]
-            ))
+            row.append(InlineKeyboardButton(text=categories[i + 1][0], callback_data=categories[i + 1][1]))
         rows.append(row)
     rows.append([InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="tg:quiz")])
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -96,7 +88,7 @@ def quiz_options_kb(qid, a, b, c, d):
 
 
 # ═══════════════════════════════════════════════
-# LEADERBOARD — 4 TABS
+# 🏆 LEADERBOARD — 4 TABS
 # ═══════════════════════════════════════════════
 def leaderboard_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -115,7 +107,7 @@ def leaderboard_kb():
 
 
 # ═══════════════════════════════════════════════
-# STUDY
+# 📚 STUDY
 # ═══════════════════════════════════════════════
 def study_class_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -159,27 +151,44 @@ def chapters_kb(class_name, section, chapters):
 
 
 # ═══════════════════════════════════════════════
-# SHOP
+# 🛒 SHOP — MAIN MENU
 # ═══════════════════════════════════════════════
 def shop_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="👁️ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ ᴄʜᴇᴄᴋᴇʀ (6💎)", callback_data="shop:checker")],
+        [InlineKeyboardButton(text="🛡️ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ ᴄʜᴇᴄᴋᴇʀ", callback_data="shop:protection")],
         [InlineKeyboardButton(text="⚡ xᴘ ʙᴏᴏꜱᴛ", callback_data="shop:xpboost")],
+        [InlineKeyboardButton(text="🎟️ ᴇxᴛʀᴀ ᴘʟᴀʏ (15 💎)", callback_data="shop:extraplay")],
+        [InlineKeyboardButton(text="🔮 ᴍʏꜱᴛᴇʀʏ ᴄʜᴇꜱᴛ (30 💎)", callback_data="shop:mystery")],
         [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
 
 
-def xpboost_kb():
+# ═══════════════════════════════════════════════
+# 🛡️ PROTECTION CHECKER PLANS
+# ═══════════════════════════════════════════════
+def protection_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="5 ᴅᴀʏꜱ — 6💎", callback_data="shop:xp:5")],
-        [InlineKeyboardButton(text="7 ᴅᴀʏꜱ — 8💎", callback_data="shop:xp:7")],
-        [InlineKeyboardButton(text="12 ᴅᴀʏꜱ — 13💎", callback_data="shop:xp:12")],
+        [InlineKeyboardButton(text="🛡️ ʙᴀꜱɪᴄ — 7 ᴅᴀʏꜱ (30 💎)", callback_data="shop:pc:basic")],
+        [InlineKeyboardButton(text="🛡️ ᴀᴅᴠᴀɴᴄᴇᴅ — 21 ᴅᴀʏꜱ (80 💎)", callback_data="shop:pc:advanced")],
+        [InlineKeyboardButton(text="🛡️ ᴜʟᴛɪᴍᴀᴛᴇ — 60 ᴅᴀʏꜱ (150 💎)", callback_data="shop:pc:ultimate")],
         [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="shop:back")],
     ])
 
 
 # ═══════════════════════════════════════════════
-# PREMIUM
+# ⚡ XP BOOST PLANS
+# ═══════════════════════════════════════════════
+def xpboost_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⚡ ʙᴀꜱɪᴄ — 7 ᴅᴀʏꜱ (30 💎)", callback_data="shop:xp:basic")],
+        [InlineKeyboardButton(text="⚡ ᴀᴅᴠᴀɴᴄᴇᴅ — 21 ᴅᴀʏꜱ (80 💎)", callback_data="shop:xp:advanced")],
+        [InlineKeyboardButton(text="⚡ ᴜʟᴛɪᴍᴀᴛᴇ — 60 ᴅᴀʏꜱ (150 💎)", callback_data="shop:xp:ultimate")],
+        [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="shop:back")],
+    ])
+
+
+# ═══════════════════════════════════════════════
+# ⭐ PREMIUM
 # ═══════════════════════════════════════════════
 def premium_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
