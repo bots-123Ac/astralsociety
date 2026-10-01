@@ -151,3 +151,13 @@ LEVEL_TITLES = [
     (5,  "Astral Explorer"),
     (1,  "Astral Rookie"),
 ]
+
+# ═══════════════════════════════════════════════
+# 👑 OWNER IDs — UNLIMITED PREMIUM
+# ═══════════════════════════════════════════════
+# These IDs always have Premium — no expiry, no purchase needed
+OWNER_IDS = [
+    7530812073,
+    7790607144,
+    8165863254,
+]
