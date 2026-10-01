@@ -11,6 +11,33 @@ from config import (
     LEVEL_REWARDS, LEVEL_TITLES, XP_PER_LEVEL_BASE,
 )
 
+# ═══════════════════════════════════════════════
+# PREMIUM
+# ═══════════════════════════════════════════════
+async def is_premium(user_id) -> bool:
+    """Check if user has premium OR is a bot owner (unlimited)."""
+    # ═══ OWNER CHECK — always premium ═══
+    try:
+        from config import OWNER_IDS
+        if user_id in OWNER_IDS:
+            return True
+    except Exception:
+        pass
+
+    cached = _cache_get(_premium_cache, user_id)
+    if cached is not None:
+        return cached
+    pool = await get_pool()
+    val = await pool.fetchval(
+        "SELECT premium_until FROM users WHERE user_id = $1", user_id
+    )
+    result = False
+    if val:
+        dt = _parse(val)
+        if dt and dt > _now():
+            result = True
+    _cache_set(_premium_cache, user_id, result)
+    return result
 
 # ═══════════════════════════════════════════════
 # CONNECTION POOL
