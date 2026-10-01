@@ -11,10 +11,10 @@ from config import (
 )
 from utils.database import (
     get_or_create_user, add_gems, add_power, add_coins, add_xp,
-    add_extra_play, shield_remaining, get_pool,
+    add_extra_play, shield_remaining, get_pool, get_extra_plays,
+    format_level_up_message,
 )
 from utils.checks import dm_only
-from utils.xp import format_level_up_message
 
 router = Router()
 
@@ -93,7 +93,7 @@ async def shop_protection_buy(cb: CallbackQuery):
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"🛡️ ᴘʟᴀɴ: <b>{plan['label']}</b>\n"
         f"💎 ᴘᴀɪᴅ: <b>{plan['gems']} ɢᴇᴍꜱ</b>\n\n"
-        f"ɴᴏᴡ ʏᴏᴜ ᴄᴀɴ ᴜꜱᴇ <code>/shieldcheck @user</code>!",
+        f"ɴᴏᴡ ʏᴏᴜ ᴄᴀɴ ᴜꜱᴇ <code>/shieldcheck</code>!",
         reply_markup=back_main_kb()
     )
     await cb.answer("✅")
@@ -157,7 +157,6 @@ async def shop_extraplay(cb: CallbackQuery):
     await add_gems(cb.from_user.id, -EXTRA_PLAY_PRICE)
     await add_extra_play(cb.from_user.id, 1)
 
-    from utils.database import get_extra_plays
     total = await get_extra_plays(cb.from_user.id)
 
     await cb.message.edit_text(
@@ -223,7 +222,7 @@ async def shop_mystery(cb: CallbackQuery):
 
 
 # ═══════════════════════════════════════════════
-# /shieldtime (unchanged)
+# /shieldtime (legacy — kept for compatibility)
 # ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/shieldtime(\s|$)"))
 async def cmd_shieldtime(message: Message):
