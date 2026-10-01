@@ -1,8 +1,10 @@
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import (
+    Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton,
+)
 from datetime import datetime
 
-from config import PREMIUM_PLANS
+from config import PREMIUM_PLANS, OWNER_IDS
 from utils.database import (
     get_or_create_user, get_premium_status, deduct_gems, set_premium, get_pool,
 )
@@ -11,6 +13,9 @@ from utils.checks import dm_only
 router = Router()
 
 
+# ═══════════════════════════════════════════════
+# KEYBOARDS
+# ═══════════════════════════════════════════════
 def premium_menu_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="1 ᴡᴇᴇᴋ — 1,000 💎", callback_data="prem_buy:1w")],
@@ -30,21 +35,45 @@ def premium_main_text() -> str:
         f"• ᴅᴀɪʟʏ ʀᴇᴡᴀʀᴅ: 2000 → <b>5000 ᴄᴏɪɴꜱ</b>\n"
         f"• ᴅᴀɪʟʏ xᴘ: 150 → <b>350 xᴘ</b>\n"
         f"• ꜱʜɪᴇʟᴅ ᴅᴜʀᴀᴛɪᴏɴ: 2 → <b>5 ᴅᴀʏꜱ</b>\n"
+        f"• ʀᴏʙ ʟɪᴍɪᴛ: 15ᴋ → <b>100ᴋ</b>\n"
         f"• ᴘʀᴇᴍɪᴜᴍ ᴘʀᴏꜰɪʟᴇ ꜱᴛʏʟᴇ\n"
-        f"• 🔍 <b>/shieldcheck</b> ᴛᴏ ᴄʜᴇᴄᴋ ᴏᴛʜᴇʀꜱ' ꜱʜɪᴇʟᴅ\n\n"
+        f"• ᴠɪᴇᴡ ᴏᴛʜᴇʀꜱ' ꜱʜɪᴇʟᴅ ᴛɪᴍᴇ\n\n"
         f"💫 ᴄʜᴏᴏꜱᴇ ᴀ ᴘʟᴀɴ:"
     )
 
 
+# ═══════════════════════════════════════════════
+# /premium — Shop (DM only)
+# ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/premium(@\w+)?(\s|$)"))
 @dm_only
 async def cmd_premium(message: Message):
     await get_or_create_user(
-        message.from_user.id, message.from_user.username, message.from_user.first_name
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
     )
+
+    # ═══ Owner special case ═══
+    if message.from_user.id in OWNER_IDS:
+        return await message.answer(
+            f"👑 <b>ᴏᴡɴᴇʀ ᴀᴄᴄᴇꜱꜱ</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"ʏᴏᴜ ᴀʀᴇ ᴀ <b>ʙᴏᴛ ᴏᴡɴᴇʀ</b>!\n\n"
+            f"✅ ᴘʀᴇᴍɪᴜᴍ: <b>ᴜɴʟɪᴍɪᴛᴇᴅ</b>\n"
+            f"♾️ ᴇxᴘɪʀᴇꜱ: <b>ɴᴇᴠᴇʀ</b>\n\n"
+            f"ɴᴏ ᴘᴜʀᴄʜᴀꜱᴇ ɴᴇᴇᴅᴇᴅ. ᴇɴᴊᴏʏ ʏᴏᴜʀ ʙᴇɴᴇꜰɪᴛꜱ! 🎁",
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text="↩️ ᴍᴀɪɴ ᴍᴇɴᴜ", callback_data="menu:main")]
+            ])
+        )
+
     await message.answer(premium_main_text(), reply_markup=premium_menu_kb())
 
 
+# ═══════════════════════════════════════════════
+# BUY PREMIUM
+# ═══════════════════════════════════════════════
 @router.callback_query(F.data.startswith("prem_buy:"))
 async def cb_prem_buy(cb: CallbackQuery):
     plan_key = cb.data.split(":")[1]
@@ -54,6 +83,13 @@ async def cb_prem_buy(cb: CallbackQuery):
 
     user_id = cb.from_user.id
 
+    # ═══ Owner check ═══
+    if user_id in OWNER_IDS:
+        return await cb.answer(
+            "👑 ʏᴏᴜ ᴀʀᴇ ᴀ ʙᴏᴛ ᴏᴡɴᴇʀ!\nᴘʀᴇᴍɪᴜᴍ ɪꜱ ᴀʟʀᴇᴀᴅʏ ᴜɴʟɪᴍɪᴛᴇᴅ ꜰᴏʀ ʏᴏᴜ.",
+            show_alert=True
+        )
+
     is_active, expires_at, days_left = await get_premium_status(user_id)
     if is_active:
         return await cb.answer(
@@ -62,18 +98,22 @@ async def cb_prem_buy(cb: CallbackQuery):
         )
 
     pool = await get_pool()
-    current_gems = await pool.fetchval("SELECT gems FROM users WHERE user_id = $1", user_id)
+    current_gems = await pool.fetchval(
+        "SELECT gems FROM users WHERE user_id = $1", user_id
+    )
     current_gems = current_gems or 0
 
     if current_gems < plan["gems"]:
         return await cb.answer(
-            f"❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ɢᴇᴍꜱ!\n\nʏᴏᴜ ʜᴀᴠᴇ: {current_gems:,} 💎\nɴᴇᴇᴅ: {plan['gems']:,} 💎",
+            f"❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ɢᴇᴍꜱ!\n\n"
+            f"ʏᴏᴜ ʜᴀᴠᴇ: {current_gems:,} 💎\n"
+            f"ɴᴇᴇᴅ: {plan['gems']:,} 💎",
             show_alert=True
         )
 
     ok = await deduct_gems(user_id, plan["gems"])
     if not ok:
-        return await cb.answer("❌ ʟᴏꜱᴛ ɢᴇᴍꜱ ɪɴ ᴛʀᴀɴꜱᴀᴄᴛɪᴏɴ.", show_alert=True)
+        return await cb.answer("❌ ᴛʀᴀɴꜱᴀᴄᴛɪᴏɴ ꜰᴀɪʟᴇᴅ.", show_alert=True)
 
     until = await set_premium(user_id, plan["days"])
 
@@ -91,12 +131,29 @@ async def cb_prem_buy(cb: CallbackQuery):
     await cb.answer("✅ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴛɪᴠᴇ!")
 
 
+# ═══════════════════════════════════════════════
+# /premiumstatus — Check status (DM only)
+# ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/premiumstatus(@\w+)?(\s|$)"))
 @dm_only
 async def cmd_premium_status(message: Message):
     await get_or_create_user(
-        message.from_user.id, message.from_user.username, message.from_user.first_name
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
     )
+
+    # ═══ OWNER CHECK — unlimited premium ═══
+    if message.from_user.id in OWNER_IDS:
+        return await message.reply(
+            f"⭐ <b>ᴘʀᴇᴍɪᴜᴍ ꜱᴛᴀᴛᴜꜱ</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"👑 <b>ʙᴏᴛ ᴏᴡɴᴇʀ</b>\n\n"
+            f"✅ ᴘʀᴇᴍɪᴜᴍ: <b>ᴜɴʟɪᴍɪᴛᴇᴅ</b>\n"
+            f"♾️ ᴇxᴘɪʀᴇꜱ: <b>ɴᴇᴠᴇʀ</b>\n\n"
+            f"🎁 ᴇɴᴊᴏʏ ᴀʟʟ ᴏᴡɴᴇʀ ʙᴇɴᴇꜰɪᴛꜱ ꜰᴏʀᴇᴠᴇʀ!"
+        )
+
     is_active, expires_at, days_left = await get_premium_status(message.from_user.id)
 
     if not is_active:
