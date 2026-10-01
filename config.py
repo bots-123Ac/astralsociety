@@ -82,15 +82,72 @@ GIVE_DEDUCTION_PERCENT = 10
 SHIELD_NORMAL_MAX_DAYS = 2
 SHIELD_PREMIUM_MAX_DAYS = 5
 
+# ═══════════════════════════════════════════════
+# ⭐ PREMIUM (via Gems)
+# ═══════════════════════════════════════════════
 PREMIUM_PLANS = {
     "1w": {"days": 7,   "gems": 1000,   "label": "1 Week"},
     "1m": {"days": 30,  "gems": 10000,  "label": "1 Month"},
     "1y": {"days": 365, "gems": 100000, "label": "1 Year"},
 }
 
-XP_BOOST_PLANS = {
-    5:  {"gems": 6,  "label": "5 Days"},
-    7:  {"gems": 8,  "label": "7 Days"},
-    12: {"gems": 13, "label": "12 Days"},
+# ═══════════════════════════════════════════════
+# 🛒 SHOP — PROTECTION CHECKER PLANS
+# ═══════════════════════════════════════════════
+PROTECTION_CHECKER_PLANS = {
+    "basic":    {"days": 7,  "gems": 30,  "label": "Basic — 7 Days"},
+    "advanced": {"days": 21, "gems": 80,  "label": "Advanced — 21 Days"},
+    "ultimate": {"days": 60, "gems": 150, "label": "Ultimate — 60 Days"},
 }
-PROTECTION_CHECKER_COST = 6
+
+# ═══════════════════════════════════════════════
+# 🛒 SHOP — XP BOOST PLANS
+# ═══════════════════════════════════════════════
+XP_BOOST_PLANS = {
+    "basic":    {"days": 7,  "gems": 30,  "label": "Basic — 7 Days"},
+    "advanced": {"days": 21, "gems": 80,  "label": "Advanced — 21 Days"},
+    "ultimate": {"days": 60, "gems": 150, "label": "Ultimate — 60 Days"},
+}
+
+# ═══════════════════════════════════════════════
+# 🛒 SHOP — EXTRA PLAY
+# ═══════════════════════════════════════════════
+EXTRA_PLAY_PRICE = 15  # gems per extra play
+
+# ═══════════════════════════════════════════════
+# 🛒 SHOP — MYSTERY CHEST
+# ═══════════════════════════════════════════════
+MYSTERY_CHEST_PRICE = 30  # gems
+
+# Reward pool with weights (higher weight = more likely)
+# Every chest gives EXACTLY ONE reward (no empty outcome)
+MYSTERY_CHEST_REWARDS = [
+    {"type": "coins",      "amount": 12000, "label": "💰 12,000 Coins",   "weight": 15},
+    {"type": "xp",         "amount": 1000,  "label": "⭐ 1,000 XP",        "weight": 20},
+    {"type": "gems",       "amount": 10,    "label": "💎 10 Gems",        "weight": 20},
+    {"type": "xp_boost",   "days": 2,       "label": "⚡ 2-Day XP Boost",  "weight": 15},
+    {"type": "extra_play", "amount": 1,     "label": "🎟️ 1 Extra Play",   "weight": 15},
+    {"type": "coins",      "amount": 2000,  "label": "💰 2,000 Coins",    "weight": 15},
+]
+
+# ═══════════════════════════════════════════════
+# ⭐ XP & LEVEL SYSTEM
+# ═══════════════════════════════════════════════
+XP_PER_LEVEL_BASE = 1000  # Level N → N+1 requires N × 1000 XP
+
+# Level → one-time reward
+LEVEL_REWARDS = {
+    2:  {"type": "coins",      "amount": 2000, "label": "💰 2,000 Coins"},
+    3:  {"type": "gems",       "amount": 2,    "label": "💎 2 Gems"},
+    4:  {"type": "extra_play", "amount": 1,    "label": "🎟️ 1 Extra Play"},
+    5:  {"type": "xp_boost",   "days": 1,      "label": "⚡ 1-Day XP Boost"},
+    10: {"type": "badge",                      "label": "👑 Special Level Badge"},
+}
+
+# Level → Title (highest matching unlocked)
+LEVEL_TITLES = [
+    (20, "Empire Legend"),
+    (10, "Astral Master"),
+    (5,  "Astral Explorer"),
+    (1,  "Astral Rookie"),
+]
