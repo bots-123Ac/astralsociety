@@ -6,7 +6,8 @@ from datetime import datetime
 
 from config import PREMIUM_PLANS, OWNER_IDS
 from utils.database import (
-    get_or_create_user, get_premium_status, deduct_gems, set_premium, get_pool,
+    get_or_create_user, get_premium_status, deduct_gems, set_premium,
+    get_pool, set_custom_emoji, get_custom_emoji,
 )
 from utils.checks import dm_only
 
@@ -21,6 +22,7 @@ def premium_menu_kb():
         [InlineKeyboardButton(text="1 ᴡᴇᴇᴋ — 1,000 💎", callback_data="prem_buy:1w")],
         [InlineKeyboardButton(text="1 ᴍᴏɴᴛʜ — 10,000 💎", callback_data="prem_buy:1m")],
         [InlineKeyboardButton(text="1 ʏᴇᴀʀ — 100,000 💎", callback_data="prem_buy:1y")],
+        [InlineKeyboardButton(text="🎨 sᴇᴛ ᴇᴍᴏᴊɪ", callback_data="prem_setemoji")],
         [InlineKeyboardButton(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")],
     ])
 
@@ -37,13 +39,14 @@ def premium_main_text() -> str:
         f"• ꜱʜɪᴇʟᴅ ᴅᴜʀᴀᴛɪᴏɴ: 2 → <b>5 ᴅᴀʏꜱ</b>\n"
         f"• ʀᴏʙ ʟɪᴍɪᴛ: 15ᴋ → <b>100ᴋ</b>\n"
         f"• ᴘʀᴇᴍɪᴜᴍ ᴘʀᴏꜰɪʟᴇ ꜱᴛʏʟᴇ\n"
-        f"• ᴠɪᴇᴡ ᴏᴛʜᴇʀꜱ' ꜱʜɪᴇʟᴅ ᴛɪᴍᴇ\n\n"
+        f"• ᴠɪᴇᴡ ᴏᴛʜᴇʀꜱ' ꜱʜɪᴇʟᴅ ᴛɪᴍᴇ\n"
+        f"• 🎨 <b>ᴄᴜꜱᴛᴏᴍ ᴇᴍᴏᴊɪ</b> (ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ)\n\n"
         f"💫 ᴄʜᴏᴏꜱᴇ ᴀ ᴘʟᴀɴ:"
     )
 
 
 # ═══════════════════════════════════════════════
-# /premium — Shop (DM only)
+# /premium — Shop
 # ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/premium(@\w+)?(\s|$)"))
 @dm_only
@@ -54,7 +57,6 @@ async def cmd_premium(message: Message):
         message.from_user.first_name,
     )
 
-    # ═══ Owner special case ═══
     if message.from_user.id in OWNER_IDS:
         return await message.answer(
             f"👑 <b>ᴏᴡɴᴇʀ ᴀᴄᴄᴇꜱꜱ</b>\n"
@@ -62,7 +64,7 @@ async def cmd_premium(message: Message):
             f"ʏᴏᴜ ᴀʀᴇ ᴀ <b>ʙᴏᴛ ᴏᴡɴᴇʀ</b>!\n\n"
             f"✅ ᴘʀᴇᴍɪᴜᴍ: <b>ᴜɴʟɪᴍɪᴛᴇᴅ</b>\n"
             f"♾️ ᴇxᴘɪʀᴇꜱ: <b>ɴᴇᴠᴇʀ</b>\n\n"
-            f"ɴᴏ ᴘᴜʀᴄʜᴀꜱᴇ ɴᴇᴇᴅᴇᴅ. ᴇɴᴊᴏʏ ʏᴏᴜʀ ʙᴇɴᴇꜰɪᴛꜱ! 🎁",
+            f"🎨 ᴄᴜꜱᴛᴏᴍ ᴇᴍᴏᴊɪ ꜱᴇᴛ ᴋᴀʀɴᴇ ᴋᴇ ʟɪʏᴇ: /setemoji",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text="↩️ ᴍᴀɪɴ ᴍᴇɴᴜ", callback_data="menu:main")]
             ])
@@ -83,7 +85,6 @@ async def cb_prem_buy(cb: CallbackQuery):
 
     user_id = cb.from_user.id
 
-    # ═══ Owner check ═══
     if user_id in OWNER_IDS:
         return await cb.answer(
             "👑 ʏᴏᴜ ᴀʀᴇ ᴀ ʙᴏᴛ ᴏᴡɴᴇʀ!\nᴘʀᴇᴍɪᴜᴍ ɪꜱ ᴀʟʀᴇᴀᴅʏ ᴜɴʟɪᴍɪᴛᴇᴅ ꜰᴏʀ ʏᴏᴜ.",
@@ -105,9 +106,7 @@ async def cb_prem_buy(cb: CallbackQuery):
 
     if current_gems < plan["gems"]:
         return await cb.answer(
-            f"❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ɢᴇᴍꜱ!\n\n"
-            f"ʏᴏᴜ ʜᴀᴠᴇ: {current_gems:,} 💎\n"
-            f"ɴᴇᴇᴅ: {plan['gems']:,} 💎",
+            f"❌ ɪɴꜱᴜꜰꜰɪᴄɪᴇɴᴛ ɢᴇᴍꜱ!\n\nʏᴏᴜ ʜᴀᴠᴇ: {current_gems:,} 💎\nɴᴇᴇᴅ: {plan['gems']:,} 💎",
             show_alert=True
         )
 
@@ -132,7 +131,7 @@ async def cb_prem_buy(cb: CallbackQuery):
 
 
 # ═══════════════════════════════════════════════
-# /premiumstatus — Check status (DM only)
+# /premiumstatus
 # ═══════════════════════════════════════════════
 @router.message(F.text.regexp(r"^/premiumstatus(@\w+)?(\s|$)"))
 @dm_only
@@ -143,7 +142,6 @@ async def cmd_premium_status(message: Message):
         message.from_user.first_name,
     )
 
-    # ═══ OWNER CHECK — unlimited premium ═══
     if message.from_user.id in OWNER_IDS:
         return await message.reply(
             f"⭐ <b>ᴘʀᴇᴍɪᴜᴍ ꜱᴛᴀᴛᴜꜱ</b>\n"
@@ -177,4 +175,65 @@ async def cmd_premium_status(message: Message):
         f"📅 ᴇxᴘɪʀᴇꜱ: <b>{expiry_str}</b>\n"
         f"⏳ ᴅᴀʏꜱ ʟᴇꜰᴛ: <b>{days_left}</b>\n\n"
         f"🎁 ᴇɴᴊᴏʏ ʏᴏᴜʀ ʙᴇɴᴇꜰɪᴛꜱ!"
+    )
+
+
+# ═══════════════════════════════════════════════
+# 🎨 /setemoji — Premium custom emoji
+# ═══════════════════════════════════════════════
+@router.message(F.text.regexp(r"^/setemoji(@\w+)?(\s|$)"))
+@dm_only
+async def cmd_setemoji(message: Message):
+    await get_or_create_user(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
+    )
+
+    # ═══ Premium check ═══
+    is_active = False
+    if message.from_user.id in OWNER_IDS:
+        is_active = True
+    else:
+        status, _, _ = await get_premium_status(message.from_user.id)
+        is_active = status
+
+    if not is_active:
+        return await message.reply(
+            f"❌ <b>ᴘʀᴇᴍɪᴜᴍ ᴏɴʟʏ</b>\n\n"
+            f"ᴄᴜꜱᴛᴏᴍ ᴇᴍᴏᴊɪ ɪꜱ ᴀ ᴘʀᴇᴍɪᴜᴍ ꜰᴇᴀᴛᴜʀᴇ.\n\n"
+            f"💫 ᴜꜱᴇ /premium ᴛᴏ ɢᴇᴛ ᴘʀᴇᴍɪᴜᴍ."
+        )
+
+    # ═══ Parse argument ═══
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        current = await get_custom_emoji(message.from_user.id)
+        return await message.reply(
+            f"🎨 <b>ꜱᴇᴛ ᴄᴜꜱᴛᴏᴍ ᴇᴍᴏᴊɪ</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"ᴜꜱᴀɢᴇ: <code>/setemoji 🚀</code>\n\n"
+            f"ᴄᴜʀʀᴇɴᴛ: {current or 'ησηє'}\n\n"
+            f"ᴛʜɪꜱ ᴇᴍᴏᴊɪ ᴡɪʟʟ ꜱʜᴏᴡ ᴜᴘ ɪɴ ꜰʀᴏɴᴛ ᴏꜰ ʏᴏᴜʀ\n"
+            f"ᴜꜱᴇʀɴᴀᴍᴇ ᴏɴ ᴀʟʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅꜱ! 🏆"
+        )
+
+    emoji = parts[1].strip()
+
+    # ═══ Validate ═══
+    if len(emoji) > 5:
+        return await message.reply(
+            "❌ ᴇᴍᴏᴊɪ ᴛᴏᴏ ʟᴏɴɢ! ᴍᴀx 5 ᴄʜᴀʀᴀᴄᴛᴇʀꜱ ᴏɴʟʏ."
+        )
+
+    # ═══ Save ═══
+    await set_custom_emoji(message.from_user.id, emoji)
+
+    await message.reply(
+        f"✅ <b>ᴄᴜꜱᴛᴏᴍ ᴇᴍᴏᴊɪ ꜱᴀᴠᴇᴅ!</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ʏᴏᴜʀ ᴇᴍᴏᴊɪ: <b>{emoji}</b>\n\n"
+        f"ɪᴛ ᴡɪʟʟ ᴀᴘᴘᴇᴀʀ ʙᴇꜰᴏʀᴇ ʏᴏᴜʀ ɴᴀᴍᴇ ɪɴ ᴀʟʟ\n"
+        f"ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅꜱ! 🏆\n\n"
+        f"📌 ᴛᴏ ʀᴇᴍᴏᴠᴇ: <code>/setemoji ∅</code>"
     )
