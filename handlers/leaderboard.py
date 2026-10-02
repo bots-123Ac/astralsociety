@@ -31,8 +31,20 @@ def _format_lb(rows, period: str, rank) -> str:
             uname = row["username"]
             astral_id = row["astral_id"]
             coins = row["coins"] or 0
+
+            # ═══ Custom emoji (if set) ═══
+            try:
+                emoji = row["custom_emoji"] or ""
+            except Exception:
+                emoji = ""
+
+            if emoji == "∅" or emoji == "none":
+                emoji = ""
+
+            prefix = f"{emoji} " if emoji else ""
+
             display = f"@{uname}" if uname else (name or f"ID {astral_id}")
-            lines.append(f"{MEDALS[i]} {display} — <b>{coins:,}</b> 🪙")
+            lines.append(f"{MEDALS[i]} {prefix}{display} — <b>{coins:,}</b> 🪙")
 
     lines.append("━━━━━━━━━━━━━━━━━━━━━")
     if rank:
