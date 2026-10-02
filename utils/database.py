@@ -11,6 +11,126 @@ from config import (
     LEVEL_REWARDS, LEVEL_TITLES, XP_PER_LEVEL_BASE,
 )
 
+# ═══════════════════════════════════════════════
+# 📊 COUNT FUNCTIONS (for botstatus)
+# ═══════════════════════════════════════════════
+async def get_premium_count() -> int:
+    """Count users with active premium (excluding owners)."""
+    pool = await get_pool()
+    now_str = _to_str(_now())
+    val = await pool.fetchval(
+        """SELECT COUNT(*) FROM users
+           WHERE premium_until IS NOT NULL
+             AND premium_until > $1""",
+        now_str
+    )
+    return val or 0
+
+
+async def get_shielded_count() -> int:
+    """Count users with active shield."""
+    pool = await get_pool()
+    now_str = _to_str(_now())
+    val = await pool.fetchval(
+        """SELECT COUNT(*) FROM users
+           WHERE shield_until IS NOT NULL
+             AND shield_until > $1""",
+        now_str
+    )
+    return val or 0
+
+
+async def get_group_count() -> int:
+    """Count registered active groups."""
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COUNT(*) FROM active_groups")
+    return val or 0
+
+
+async def get_study_file_count() -> int:
+    """Count total study material files."""
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COUNT(*) FROM study_materials")
+    return val or 0
+
+
+async def get_study_section_breakdown():
+    """Returns list of (class_name, section, count)."""
+    pool = await get_pool()
+    rows = await pool.fetch(
+        """SELECT class_name, section, COUNT(*) as cnt
+           FROM study_materials
+           GROUP BY class_name, section
+           ORDER BY class_name, section"""
+    )
+    return [(r["class_name"], r["section"], r["cnt"]) for r in rows]
+
+
+async def get_study_class_breakdown():
+    """Returns list of (class_name, count)."""
+    pool = await get_pool()
+    rows = await pool.fetch(
+        """SELECT class_name, COUNT(*) as cnt
+           FROM study_materials
+           GROUP BY class_name
+           ORDER BY class_name"""
+    )
+    return [(r["class_name"], r["cnt"]) for r in rows]
+
+
+async def get_total_coins_sum() -> int:
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COALESCE(SUM(coins), 0) FROM users")
+    return val or 0
+
+
+async def get_total_gems_sum() -> int:
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COALESCE(SUM(gems), 0) FROM users")
+    return val or 0
+
+
+async def get_total_xp_sum() -> int:
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COALESCE(SUM(xp), 0) FROM users")
+    return val or 0
+
+
+async def get_total_quiz_attempts() -> int:
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COALESCE(SUM(quiz_attempted), 0) FROM users")
+    return val or 0
+
+
+async def get_total_quiz_solved() -> int:
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COALESCE(SUM(quiz_solved), 0) FROM users")
+    return val or 0
+
+
+async def get_total_number_attempts() -> int:
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COALESCE(SUM(number_attempted), 0) FROM users")
+    return val or 0
+
+
+async def get_total_number_guesses() -> int:
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COALESCE(SUM(number_guess), 0) FROM users")
+    return val or 0
+
+
+async def get_quiz_category_breakdown():
+    """Returns list of (category, count) sorted desc."""
+    pool = await get_pool()
+    rows = await pool.fetch(
+        """SELECT category, COUNT(*) as cnt
+           FROM quiz_questions
+           GROUP BY category
+           ORDER BY cnt DESC
+           LIMIT 10"""
+    )
+    return [(r["category"], r["cnt"]) for r in rows]
 
 # ═══════════════════════════════════════════════
 # CONNECTION POOL
