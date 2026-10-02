@@ -8,6 +8,7 @@ from aiogram.types import (
 from utils.database import (
     get_or_create_user, add_coins, add_xp,
     get_treasure_plays, inc_treasure_play,
+    try_play_game, format_level_up_message,
 )
 from utils.checks import dm_only
 
@@ -38,19 +39,20 @@ def boxes_kb(game_id: str, disabled: bool = False):
 @dm_only
 async def cmd_treasure(message: Message):
     await get_or_create_user(
-        message.from_user.id,
-        message.from_user.username,
-        message.from_user.first_name,
+        message.from_user.id, message.from_user.username, message.from_user.first_name
     )
 
-    plays = await get_treasure_plays(message.from_user.id)
+    allowed, used_extra, plays_left = await try_play_game(
+        message.from_user.id, get_treasure_plays, DAILY_LIMIT
+    )
 
-    if plays >= DAILY_LIMIT:
+    if not allowed:
         return await message.reply(
             f"⏳ <b>ᴅᴀɪʟʏ ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ</b>\n"
             f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"ʏᴏᴜ'ᴠᴇ ᴜꜱᴇᴅ <b>{plays}/{DAILY_LIMIT}</b> ᴛʀᴇᴀꜱᴜʀᴇ ʜᴜɴᴛꜱ ᴛᴏᴅᴀʏ.\n"
-            f"ᴄᴏᴍᴇ ʙᴀᴄᴋ ᴛᴏᴍᴏʀʀᴏᴡ!"
+            f"ʏᴏᴜ'ᴠᴇ ᴜꜱᴇᴅ ᴀʟʟ <b>{DAILY_LIMIT}</b> ɢᴀᴍᴇꜱ.\n"
+            f"ᴀɴᴅ ɴᴏ ᴇxᴛʀᴀ ᴘʟᴀʏꜱ ʀᴇᴍᴀɪɴɪɴɢ.\n\n"
+            f"🎟️ ʙᴜʏ ᴇxᴛʀᴀ ᴘʟᴀʏ ꜰʀᴏᴍ /shop!"
         )
 
     game_id = f"{message.from_user.id}_{random.randint(1000, 9999)}"
@@ -68,15 +70,18 @@ async def cmd_treasure(message: Message):
 
     ACTIVE_GAMES[message.from_user.id] = {"game_id": game_id, "boxes": boxes}
 
-    remaining = DAILY_LIMIT - plays - 1
+    plays = await get_treasure_plays(message.from_user.id)
+    remaining = max(0, DAILY_LIMIT - plays)
 
-    text = (
+    header = "🎟️ <b>ᴇxᴛʀᴀ ᴘʟᴀʏ ᴜꜱᴇᴅ!</b>\n\n" if used_extra else ""
+
+    text = header + (
         f"💎 <b>ᴛʀᴇᴀꜱᴜʀᴇ ʜᴜɴᴛ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
         f"🎁 ᴄʜᴏᴏꜱᴇ ᴀɴʏ ʙᴏx ꜰʀᴏᴍ ᴛʜᴇ 16 ʙᴇʟᴏᴡ!\n\n"
         f"🎯 ᴏɴᴇ ʙᴏx ʜᴀꜱ ᴀ <b>ᴊᴀᴄᴋᴘᴏᴛ</b>:\n"
         f"🪙 15,000 ᴄᴏɪɴꜱ + 📈 100 xᴘ\n\n"
-        f"📅 ᴀᴛᴛᴇᴍᴘᴛꜱ ʟᴇꜰᴛ ᴀꜰᴛᴇʀ ᴛʜɪꜱ: <b>{remaining}/{DAILY_LIMIT}</b>"
+        f"📅 ᴀᴛᴛᴇᴍᴘᴛꜱ ʟᴇꜰᴛ: <b>{remaining}/{DAILY_LIMIT}</b>"
     )
     await message.answer(text, reply_markup=boxes_kb(game_id))
 
@@ -97,7 +102,7 @@ async def cb_treasure(cb: CallbackQuery):
     game = ACTIVE_GAMES.get(user_id)
 
     if not game or game["game_id"] != game_id:
-        return await cb.answer("❌ ɢᴀᴍᴇ ᴇxᴘɪʀᴇᴅ. ᴜꜱᴇ /treasure ᴀɢᴀɪɴ.", show_alert=True)
+        return await cb.answer("❌ ɢᴀᴍᴇ ᴇxᴘɪʀᴇᴅ.", show_alert=True)
 
     boxes = game["boxes"]
     reward = boxes.get(idx)
@@ -105,8 +110,9 @@ async def cb_treasure(cb: CallbackQuery):
         return await cb.answer("❌ ɪɴᴠᴀʟɪᴅ ʙᴏx.", show_alert=True)
 
     await add_coins(user_id, reward["coins"])
+    xp_info = None
     if reward["xp"] > 0:
-        await add_xp(user_id, reward["xp"])
+        xp_info = await add_xp(user_id, reward["xp"])
 
     await inc_treasure_play(user_id)
     ACTIVE_GAMES.pop(user_id, None)
@@ -130,5 +136,11 @@ async def cb_treasure(cb: CallbackQuery):
         await cb.message.edit_text(result_text)
     except Exception:
         await cb.message.answer(result_text)
+
+    if xp_info:
+        try:
+            await cb.message.answer(format_level_up_message(xp_info))
+        except Exception:
+            pass
 
     await cb.answer("🎉" if reward["special"] else "🎁")
