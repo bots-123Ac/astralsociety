@@ -39,6 +39,16 @@ BOT_ADMIN_IDS = [
 ]
 
 # ═══════════════════════════════════════════════
+# 👑 OWNER IDs — UNLIMITED PREMIUM
+# ═══════════════════════════════════════════════
+# Ye IDs HAMESHA premium rahengi — no expiry
+OWNER_IDS = [
+    7530812073,
+    7790607144,
+    8165863254,
+]
+
+# ═══════════════════════════════════════════════
 # 👨‍💻 CREATOR CREDITS
 # ═══════════════════════════════════════════════
 CREATOR_1_NAME = "⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐"
@@ -57,7 +67,7 @@ CREDIT_HTML = (
 )
 
 # ═══════════════════════════════════════════════
-# 🗄️ DATABASE — Neon PostgreSQL
+# 🗄️ DATABASE
 # ═══════════════════════════════════════════════
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
@@ -83,7 +93,7 @@ SHIELD_NORMAL_MAX_DAYS = 2
 SHIELD_PREMIUM_MAX_DAYS = 5
 
 # ═══════════════════════════════════════════════
-# ⭐ PREMIUM (via Gems)
+# ⭐ PREMIUM PLANS
 # ═══════════════════════════════════════════════
 PREMIUM_PLANS = {
     "1w": {"days": 7,   "gems": 1000,   "label": "1 Week"},
@@ -92,7 +102,7 @@ PREMIUM_PLANS = {
 }
 
 # ═══════════════════════════════════════════════
-# 🛒 SHOP — PROTECTION CHECKER PLANS
+# 🛒 SHOP
 # ═══════════════════════════════════════════════
 PROTECTION_CHECKER_PLANS = {
     "basic":    {"days": 7,  "gems": 30,  "label": "Basic — 7 Days"},
@@ -100,27 +110,15 @@ PROTECTION_CHECKER_PLANS = {
     "ultimate": {"days": 60, "gems": 150, "label": "Ultimate — 60 Days"},
 }
 
-# ═══════════════════════════════════════════════
-# 🛒 SHOP — XP BOOST PLANS
-# ═══════════════════════════════════════════════
 XP_BOOST_PLANS = {
     "basic":    {"days": 7,  "gems": 30,  "label": "Basic — 7 Days"},
     "advanced": {"days": 21, "gems": 80,  "label": "Advanced — 21 Days"},
     "ultimate": {"days": 60, "gems": 150, "label": "Ultimate — 60 Days"},
 }
 
-# ═══════════════════════════════════════════════
-# 🛒 SHOP — EXTRA PLAY
-# ═══════════════════════════════════════════════
-EXTRA_PLAY_PRICE = 15  # gems per extra play
+EXTRA_PLAY_PRICE = 15
+MYSTERY_CHEST_PRICE = 30
 
-# ═══════════════════════════════════════════════
-# 🛒 SHOP — MYSTERY CHEST
-# ═══════════════════════════════════════════════
-MYSTERY_CHEST_PRICE = 30  # gems
-
-# Reward pool with weights (higher weight = more likely)
-# Every chest gives EXACTLY ONE reward (no empty outcome)
 MYSTERY_CHEST_REWARDS = [
     {"type": "coins",      "amount": 12000, "label": "💰 12,000 Coins",   "weight": 15},
     {"type": "xp",         "amount": 1000,  "label": "⭐ 1,000 XP",        "weight": 20},
@@ -133,9 +131,8 @@ MYSTERY_CHEST_REWARDS = [
 # ═══════════════════════════════════════════════
 # ⭐ XP & LEVEL SYSTEM
 # ═══════════════════════════════════════════════
-XP_PER_LEVEL_BASE = 1000  # Level N → N+1 requires N × 1000 XP
+XP_PER_LEVEL_BASE = 1000
 
-# Level → one-time reward
 LEVEL_REWARDS = {
     2:  {"type": "coins",      "amount": 2000, "label": "💰 2,000 Coins"},
     3:  {"type": "gems",       "amount": 2,    "label": "💎 2 Gems"},
@@ -144,20 +141,9 @@ LEVEL_REWARDS = {
     10: {"type": "badge",                      "label": "👑 Special Level Badge"},
 }
 
-# Level → Title (highest matching unlocked)
 LEVEL_TITLES = [
     (20, "Empire Legend"),
     (10, "Astral Master"),
     (5,  "Astral Explorer"),
     (1,  "Astral Rookie"),
-]
-
-# ═══════════════════════════════════════════════
-# 👑 OWNER IDs — UNLIMITED PREMIUM
-# ═══════════════════════════════════════════════
-# These IDs always have Premium — no expiry, no purchase needed
-OWNER_IDS = [
-    7530812073,
-    7790607144,
-    8165863254,
 ]
