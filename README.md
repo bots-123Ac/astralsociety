@@ -2,61 +2,58 @@
 <!--                                                                         -->
 <!--              🌌  ASTRAL EMPIRE BOT — OFFICIAL README  🌌                -->
 <!--                                                                         -->
-<!--                     Version 5.0 • Ultra Animated Edition                -->
+<!--                    ✨ Version 7.0 • Ultra Mega Edition ✨                -->
+<!--                                                                         -->
+<!--                ⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐  ×  𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟                 -->
 <!--                                                                         -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <div align="center">
 
-<!-- 🌠 ═══════════════════════════════════════════════════════════ 🌠 -->
-<!--                      ANIMATED HERO BANNER                        -->
-<!-- 🌠 ═══════════════════════════════════════════════════════════ 🌠 -->
+<!-- 🌠 EPIC ANIMATED HERO BANNER 🌠 -->
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20,24,30&height=300&section=header&text=Astral%20Empire&fontSize=100&fontAlignY=32&animation=twinkling&fontColor=ffffff&desc=The%20Ultimate%20All-in-One%20Telegram%20Bot&descAlignY=55&descSize=24&descColor=A78BFA" width="100%" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20,24,30&height=340&section=header&text=Astral%20Empire&fontSize=110&fontAlignY=32&animation=twinkling&fontColor=ffffff&desc=The%20Ultimate%20All-in-One%20Telegram%20Bot%20Experience&descAlignY=58&descSize=22&descColor=A78BFA" width="100%" />
 
 <br/>
 
-<!-- ⌨️ ═══════════════════════════════════════════════════════════ ⌨️ -->
-<!--                      ROTATING TYPING TEXTS                       -->
-<!-- ⌨️ ═══════════════════════════════════════════════════════════ ⌨️ -->
+<!-- 🎯 BOT PFP SHOWCASE -->
+<img src="https://files.catbox.moe/pdpf7z.jpg" width="130" style="border-radius: 50%; border: 4px solid #A78BFA; box-shadow: 0 0 40px #A78BFA;" />
 
+<br/><br/>
+
+<!-- ⌨️ ANIMATED TYPING 1 -->
 <a href="https://t.me/AstralEmpireRobot">
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=32&duration=2800&pause=700&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=%F0%9F%8C%8C+Welcome+to+Astral+Empire;%F0%9F%93%9A+Study+%7C+Quiz+%7C+Games+%7C+Economy;%E2%AD%90+XP+%26+Level+System;%F0%9F%9A%80+Built+with+%E2%9D%A4%EF%B8%8F+by+Astral+Society" alt="Typing 1" />
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=36&duration=2800&pause=700&color=A78BFA&center=true&vCenter=true&width=900&height=80&lines=%F0%9F%8C%8C+Welcome+to+Astral+Empire;%F0%9F%93%9A+Study+%7C+%F0%9F%8E%AE+Games+%7C+%E2%AD%90+Levels;%F0%9F%92%B0+Economy+%7C+%F0%9F%8F%86+Leaderboards;%F0%9F%9A%80+Built+with+%E2%9D%A4%EF%B8%8F+by+Astral+Society" alt="Typing Hero" />
 </a>
 
 <br/>
 
+<!-- ⌨️ ANIMATED TYPING 2 -->
 <a href="https://t.me/AstralEmpireRobot">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=22&duration=2500&pause=600&color=FFD700&center=true&vCenter=true&width=800&height=50&lines=%F0%9F%8E%B0+Lucky+Door+%7C+%F0%9F%92%8E+Treasure+Hunt+%7C+%F0%9F%92%A3+Bomb+Defuse;%F0%9F%8F%86+4-Tier+Global+Leaderboards;%F0%9F%91%91+Premium+%7C+Protection+Checker+%7C+XP+Boost;%F0%9F%8C%A0+Learn+%E2%80%A2+Play+%E2%80%A2+Compete+%E2%80%A2+Rise" alt="Typing 2" />
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=22&duration=2500&pause=600&color=FFD700&center=true&vCenter=true&width=800&height=55&lines=%F0%9F%8E%B0+Lucky+Door+%7C+%F0%9F%92%8E+Treasure+%7C+%F0%9F%92%A3+Bomb+Defuse;%F0%9F%8F%86+4-Tier+Global+Leaderboards;%F0%9F%91%91+Premium+%7C+%F0%9F%8E%A8+Custom+Emoji+%7C+%E2%9A%A1+XP+Boost;%F0%9F%8C%A0+Learn+%E2%80%A2+Play+%E2%80%A2+Compete+%E2%80%A2+Rise" alt="Typing Sub" />
 </a>
 
 <br/><br/>
 
-<!-- 🎯 ═══════════════════════════════════════════════════════════ 🎯 -->
-<!--                    MAIN LINK BADGES (ROW 1)                      -->
-<!-- 🎯 ═══════════════════════════════════════════════════════════ 🎯 -->
-
+<!-- 🎯 MAIN ACTION BUTTONS -->
 <p align="center">
   <a href="https://t.me/AstralEmpireRobot">
-    <img src="https://img.shields.io/badge/🤖_USE_BOT-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="45" />
+    <img src="https://img.shields.io/badge/🤖_USE_BOT-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="48" />
   </a>
   <a href="https://t.me/+-j8FiVjAUXExMmM1">
-    <img src="https://img.shields.io/badge/👥_JOIN_GC-5865F2?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="45" />
+    <img src="https://img.shields.io/badge/👥_JOIN_GC-5865F2?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="48" />
   </a>
   <a href="https://t.me/Astral_study_chest">
-    <img src="https://img.shields.io/badge/📚_STUDY_CHANNEL-9B59B6?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="45" />
+    <img src="https://img.shields.io/badge/📚_STUDY_CHANNEL-9B59B6?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="48" />
   </a>
   <a href="https://crazycore.vercel.app/">
-    <img src="https://img.shields.io/badge/🌐_WEBSITE-A78BFA?style=for-the-badge&labelColor=0D1117" height="45" />
+    <img src="https://img.shields.io/badge/🌐_WEBSITE-A78BFA?style=for-the-badge&labelColor=0D1117" height="48" />
   </a>
 </p>
 
 <br/>
 
-<!-- 🛠️ ═══════════════════════════════════════════════════════════ 🛠️ -->
-<!--                    TECH STACK BADGES (ROW 2)                    -->
-<!-- 🛠️ ═══════════════════════════════════════════════════════════ 🛠️ -->
-
+<!-- 🛠️ TECH STACK -->
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/aiogram-v3.13+-00A8E8?style=for-the-badge&logo=python&logoColor=white&labelColor=0D1117" />
@@ -73,59 +70,150 @@
 
 <br/>
 
-<!-- 📊 ═══════════════════════════════════════════════════════════ 📊 -->
-<!--                    STATUS BADGES (ROW 3)                        -->
-<!-- 📊 ═══════════════════════════════════════════════════════════ 📊 -->
-
+<!-- 📊 STATUS BADGES -->
 <p align="center">
   <img src="https://img.shields.io/badge/Status-🟢_Online-22C55E?style=for-the-badge&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/Version-5.0.0-A78BFA?style=for-the-badge&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/Version-7.0.0-A78BFA?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/Uptime-24/7-00D9FF?style=for-the-badge&labelColor=0D1117" />
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Made_With-❤️-FF6B6B?style=for-the-badge&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/By-Astral_Society-A78BFA?style=for-the-badge&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/For-Telegram-26A5E4?style=for-the-badge&labelColor=0D1117" />
-</p>
-
 <br/>
 
-<!-- 👑 ═══════════════════════════════════════════════════════════ 👑 -->
-<!--                    VIP / ROLE BADGES                            -->
-<!-- 👑 ═══════════════════════════════════════════════════════════ 👑 -->
-
+<!-- 👑 VIP ROLE BADGES -->
 <p align="center">
   <img src="https://img.shields.io/badge/👑_PREMIUM-FFD700?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/💎_VIP-00D9FF?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/🚀_PRO-FF6B6B?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/⭐_LEGEND-A78BFA?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/🎖️_ELITE-22C55E?style=for-the-badge&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/🏅_CHAMPION-FF9500?style=for-the-badge&labelColor=0D1117" />
 </p>
 
 <br/>
 
-<!-- 🐍 ═══════════════════════════════════════════════════════════ 🐍 -->
-<!--                    SNAKE CONTRIBUTION ANIMATION                 -->
-<!-- 🐍 ═══════════════════════════════════════════════════════════ 🐍 -->
-
+<!-- 🐍 SNAKE CONTRIBUTION -->
 <img src="https://raw.githubusercontent.com/platane/snk/output/github-contribution-grid-snake-dark.svg" width="100%" />
 
-<br/>
-
-</div>
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          ANIMATED DIVIDER                                -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<br/><br/>
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                            ABOUT SECTION                                 -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+</div>
+
+---
+
+<div align="center">
+
+# 👨‍💻 ᴍᴇᴇᴛ ᴛʜᴇ ᴛᴇᴀᴍ
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=3000&pause=600&color=A78BFA&center=true&vCenter=true&width=700&lines=The+Brilliant+Minds+Behind+Astral+Empire+%F0%9F%8C%9F;Made+with+Passion+%26+Late+Night+Coffee+%E2%98%95" />
+
+</div>
+
+<br/>
+
+<table align="center" width="100%">
+<tr>
+<td align="center" width="50%">
+
+<img src="https://files.catbox.moe/424au6.jpg" width="140" style="border-radius: 50%; border: 4px solid #FFD700; box-shadow: 0 0 30px #FFD700;" />
+
+<br/><br/>
+
+<img src="https://img.shields.io/badge/👑_OWNER-FFD700?style=for-the-badge&labelColor=0D1117" />
+
+### ⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=14&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=300&lines=Visionary+%7C+Developer;Dream+Builder+%F0%9F%9A%80" />
+
+<br/><br/>
+
+<a href="https://t.me/OfficialCrazyBoy07">
+  <img src="https://img.shields.io/badge/📱_@OfficialCrazyBoy07-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
+</a>
+
+</td>
+<td align="center" width="50%">
+
+<img src="https://files.catbox.moe/4ris71.jpg" width="140" style="border-radius: 50%; border: 4px solid #A78BFA; box-shadow: 0 0 30px #A78BFA;" />
+
+<br/><br/>
+
+<img src="https://img.shields.io/badge/⭐_CO--OWNER-A78BFA?style=for-the-badge&labelColor=0D1117" />
+
+### 𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=14&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=300&lines=Creative+%7C+Innovator;Idea+Generator+%F0%9F%92%A1" />
+
+<br/><br/>
+
+<a href="https://t.me/Lunar_kanha_4572">
+  <img src="https://img.shields.io/badge/📱_@Lunar__kanha__4572-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
+</a>
+
+</td>
+</tr>
+</table>
+
+<br/>
+
+<table align="center" width="100%">
+<tr>
+<td align="center" width="33%">
+
+<img src="https://files.catbox.moe/ho69iu.jpg" width="100" style="border-radius: 50%; border: 3px solid #22C55E; box-shadow: 0 0 25px #22C55E;" />
+
+<br/><br/>
+
+<img src="https://img.shields.io/badge/👥_SUPPORT_GROUP-5865F2?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
+
+<br/><br/>
+
+<a href="https://t.me/+-j8FiVjAUXExMmM1">
+  <img src="https://img.shields.io/badge/JOIN_NOW-22C55E?style=for-the-badge&labelColor=0D1117" />
+</a>
+
+</td>
+<td align="center" width="33%">
+
+<img src="https://files.catbox.moe/eju0lf.jpg" width="100" style="border-radius: 50%; border: 3px solid #00D9FF; box-shadow: 0 0 25px #00D9FF;" />
+
+<br/><br/>
+
+<img src="https://img.shields.io/badge/📚_STUDY_CHANNEL-9B59B6?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
+
+<br/><br/>
+
+<a href="https://t.me/Astral_study_chest">
+  <img src="https://img.shields.io/badge/JOIN_NOW-00D9FF?style=for-the-badge&labelColor=0D1117" />
+</a>
+
+</td>
+<td align="center" width="33%">
+
+<img src="https://files.catbox.moe/2qtw7n.jpg" width="100" style="border-radius: 50%; border: 3px solid #A78BFA; box-shadow: 0 0 25px #A78BFA;" />
+
+<br/><br/>
+
+<img src="https://img.shields.io/badge/🤖_OFFICIAL_BOT-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
+
+<br/><br/>
+
+<a href="https://t.me/AstralEmpireRobot">
+  <img src="https://img.shields.io/badge/START_BOT-A78BFA?style=for-the-badge&labelColor=0D1117" />
+</a>
+
+</td>
+</tr>
+</table>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+---
 
 <div align="center">
 
@@ -143,33 +231,27 @@
 
 </div>
 
-**˹𝐀𝐬𝐭𝐫𝐚𝐥 ꭙ 𝐄𝐦𝐩𝐢𝐫𝐞˼** is a premium, feature-rich **All-in-One Telegram Bot** that blends **Study Material**, **Quiz Systems**, **Economy**, **Interactive Gaming**, **Premium Memberships**, **Level Progression** and **Group Management** into a single, elegant ecosystem.
+**˹𝐀𝐬𝐭𝐫𝐚𝐥 ꭙ 𝐄𝐦𝐩𝐢𝐫𝐞˼** is a **premium, feature-rich, All-in-One Telegram Bot** that seamlessly blends **Study Material**, **Quiz Systems**, **Economy**, **Interactive Gaming**, **Premium Memberships**, **Level Progression**, and **Group Management** into one elegant cosmic ecosystem.
 
-Whether you're a **student** looking for curated study resources, an **admin** managing a growing community, or a **gamer** hunting for jackpots — this bot was made for you.
-
-<br/>
-
-<div align="center">
-
-### 🚀 ᴠɪꜱɪᴏɴ
-
-```
-┌─────────────────────────────────────────────────────┐
-│                                                     │
-│   📚 Learn   →   🎮 Play   →   🏆 Compete   →   🌠 Rise   │
-│                                                     │
-└─────────────────────────────────────────────────────┘
-```
-
-</div>
+Whether you're a **student** seeking curated study resources, an **admin** managing a thriving community, or a **gamer** hunting jackpots — this bot was crafted for you.
 
 <br/>
 
 <div align="center">
 
-### 🎯 ᴡʜᴀᴛ ᴍᴀᴋᴇꜱ ɪᴛ ꜱᴘᴇᴄɪᴀʟ?
+### 🚀 ᴛʜᴇ ᴠɪꜱɪᴏɴ
+
+```plaintext
+┌───────────────────────────────────────────────────────────────┐
+│                                                               │
+│   📚 Learn   →   🎮 Play   →   🏆 Compete   →   🌠 Rise     │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
+```
 
 </div>
+
+<br/>
 
 <table align="center" width="100%">
 <tr>
@@ -206,13 +288,9 @@ Whether you're a **student** looking for curated study resources, an **admin** m
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          KEY FEATURES                                    -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
@@ -224,24 +302,15 @@ Whether you're a **student** looking for curated study resources, an **admin** m
 
 <br/>
 
-<!-- ══════════════════════════════════════════════════════════════════════ -->
-<!--                     FEATURE GRID START                                 -->
-<!-- ══════════════════════════════════════════════════════════════════════ -->
-
 <table align="center" width="100%">
 <tr>
 <td width="50%" valign="top">
-
-<!-- 📚 STUDY SYSTEM -->
-<div align="center">
 
 ### 📚 ꜱᴛᴜᴅʏ ꜱʏꜱᴛᴇᴍ
 
 <img src="https://img.shields.io/badge/📘_Class_10-3776AB?style=flat-square&labelColor=0D1117" />
 <img src="https://img.shields.io/badge/📗_Class_11-3776AB?style=flat-square&labelColor=0D1117" />
 <img src="https://img.shields.io/badge/📕_Class_12-3776AB?style=flat-square&labelColor=0D1117" />
-
-</div>
 
 - 📘 **Class 10** — Science, Maths, SST, English
 - 📗 **Class 11** — JEE, NEET, Both streams
@@ -251,30 +320,18 @@ Whether you're a **student** looking for curated study resources, an **admin** m
 - 👑 **Admin-only** upload panel with FSM
 - 🔍 **Smart navigation** with step-back
 - ✅ **PYQ auto-tracking** for mission
-- 📁 **Education types:** CBSE, ICSE, JEE, NEET
 
-<br/>
-
-<div align="center">
-
-```
+```plaintext
 Class → Section → Chapter → Material
 ```
 
-</div>
-
 </td>
 <td width="50%" valign="top">
-
-<!-- 📝 QUIZ SYSTEM -->
-<div align="center">
 
 ### 📝 ǫᴜɪᴢ ꜱʏꜱᴛᴇᴍ
 
 <img src="https://img.shields.io/badge/15_Categories-FF6B6B?style=flat-square&labelColor=0D1117" />
 <img src="https://img.shields.io/badge/5000+_Questions-FFD700?style=flat-square&labelColor=0D1117" />
-
-</div>
 
 - 🎯 **15 Categories** — Space, Science, History, Tech, Sports, Movies, Music, Animals, Food & more
 - 📊 **5000+ Real Questions** — auto-fetched from OpenTDB
@@ -283,18 +340,10 @@ Class → Section → Chapter → Material
 - 🪙 **+40 Coins** per correct answer
 - 📈 **+0-5 XP** per question
 - 🏆 **Leaderboard Integration**
-- 🎮 **Difficulty Modes** — flexible sessions
-- 📊 **Count Selection** — 5/10/15/20 questions
 
-<br/>
-
-<div align="center">
-
-```
+```plaintext
 Quiz → Category → Question → Reward
 ```
-
-</div>
 
 </td>
 </tr>
@@ -306,60 +355,39 @@ Quiz → Category → Question → Reward
 <tr>
 <td width="50%" valign="top">
 
-<!-- 🎮 GAMES -->
-<div align="center">
-
 ### 🎮 ɢᴀᴍᴇꜱ
 
 <img src="https://img.shields.io/badge/5_Unique_Games-A78BFA?style=flat-square&labelColor=0D1117" />
 
-</div>
-
-#### 🚪 **Lucky Door**
-> Open 4 of 25 named doors
+#### 🚪 Lucky Door
+> Open 4 of 25 named doors | 2 plays/day
 > 
-> **Daily:** 2 plays
-> **Rewards:** 💰 200 – 5,000 coins
 > **Jackpot:** 🪙 40,000 + 📈 400 XP
 
-#### 💎 **Treasure Hunt**
-> Pick 1 of 16 mystery boxes
+#### 💎 Treasure Hunt
+> Pick 1 of 16 mystery boxes | 3 plays/day
 > 
-> **Daily:** 3 plays
-> **Rewards:** 💰 500 – 1,000 coins
 > **Jackpot:** 🪙 15,000 + 📈 100 XP
 
-#### 💣 **Bomb Defuse**
-> 12 hidden boxes, up to 2 picks
+#### 💣 Bomb Defuse
+> 12 hidden boxes, 2 picks | 3 plays/day
 > 
-> **Daily:** 3 plays
-> **Bomb:** 💣 -10,000 coins
-> **Lucky:** 🍀 +15,000 coins
-> **Treasure:** 💰 +5,000 – 7,000
+> 💣 Bomb: -10,000 | 🍀 Lucky: +15,000 | 💰 Treasure: +5k-7k
 
-#### 🧠 **Quiz Game**
-> 5/10/15/20 question challenges
-> 
-> **Rewards:** 🪙 40/question + XP
+#### 🧠 Quiz Game
+> 5/10/15/20 questions | 🪙 40/question + XP
 
-#### 🔢 **Guess the Number**
-> 100–500 range, 12 attempts
-> 
-> **Rewards:** 🪙 80 + XP
+#### 🔢 Guess the Number
+> 100–500 range, 12 attempts | 🪙 80 + XP
 
 </td>
 <td width="50%" valign="top">
-
-<!-- 💰 ECONOMY -->
-<div align="center">
 
 ### 💰 ᴇᴄᴏɴᴏᴍʏ
 
 <img src="https://img.shields.io/badge/Coins-FFD700?style=flat-square&labelColor=0D1117" />
 <img src="https://img.shields.io/badge/Gems-00D9FF?style=flat-square&labelColor=0D1117" />
 <img src="https://img.shields.io/badge/XP-22C55E?style=flat-square&labelColor=0D1117" />
-
-</div>
 
 - 🪙 **Astral Coins** — Main currency
 - 💎 **Gems** — 100 Coins = 1 Gem
@@ -373,15 +401,9 @@ Quiz → Category → Question → Reward
 - 🎟️ **Extra Plays** — Purchase anytime
 - 🔮 **Mystery Chest** — Random rewards
 
-<br/>
-
-<div align="center">
-
-```
+```plaintext
 Earn → Spend → Upgrade → Dominate
 ```
-
-</div>
 
 </td>
 </tr>
@@ -393,15 +415,7 @@ Earn → Spend → Upgrade → Dominate
 <tr>
 <td width="50%" valign="top">
 
-<!-- 👑 PREMIUM -->
-<div align="center">
-
 ### 👑 ᴘʀᴇᴍɪᴜᴍ ꜱʏꜱᴛᴇᴍ
-
-<img src="https://img.shields.io/badge/⭐_Premium-FFD700?style=flat-square&labelColor=0D1117" />
-<img src="https://img.shields.io/badge/💎_Via_Gems-00D9FF?style=flat-square&labelColor=0D1117" />
-
-</div>
 
 | Plan | Gems | Duration |
 |:---:|:---:|:---:|
@@ -415,24 +429,15 @@ Earn → Spend → Upgrade → Dominate
 - 🪙 **Rob Limit** — 15k → 100,000
 - 📈 **Daily Coins** — 2,000 → 5,000
 - 🎁 **Daily XP** — 150 → 350
-- 🛡️ **Shield Duration** — 2 → 5 Days
+- 🛡️ **Shield** — 2 → 5 Days
 - 👑 **Premium Profile Style**
 - 🔍 **/shieldcheck** — Check others' shields
-- ⚡ **Priority Support**
+- 🎨 **/setemoji** — Custom leaderboard emoji
 
 </td>
 <td width="50%" valign="top">
 
-<!-- 🛡️ MANAGEMENT -->
-<div align="center">
-
 ### 🛡️ ɢʀᴏᴜᴘ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ
-
-<img src="https://img.shields.io/badge/Robs-FF6B6B?style=flat-square&labelColor=0D1117" />
-<img src="https://img.shields.io/badge/Gives-22C55E?style=flat-square&labelColor=0D1117" />
-<img src="https://img.shields.io/badge/Shield-00D9FF?style=flat-square&labelColor=0D1117" />
-
-</div>
 
 - 🪙 **/robs** — Rob users (reply + amount)
 - 💸 **/gives** — Send coins (reply only)
@@ -440,8 +445,7 @@ Earn → Spend → Upgrade → Dominate
 - 🔍 **/shieldcheck** — Premium-only checker
 - 👤 **/balance** — Profile in DM + GC
 - 📩 **DM Delivery** — Shield results sent privately
-
-<br/>
+- 🔔 **Auto Alerts** — Shield expiry warnings
 
 **Anti-Exploit Protections:**
 
@@ -458,13 +462,9 @@ Earn → Spend → Upgrade → Dominate
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                       XP & LEVEL SYSTEM                                  -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
@@ -475,8 +475,6 @@ Earn → Spend → Upgrade → Dominate
 </div>
 
 <br/>
-
-### 📈 ʟᴇᴠᴇʟ ᴘʀᴏɢʀᴇꜱꜱɪᴏɴ ꜰᴏʀᴍᴜʟᴀ
 
 > **XP Required for Next Level = Current Level × 1,000**
 
@@ -513,46 +511,17 @@ Earn → Spend → Upgrade → Dominate
 
 <br/>
 
-### 🎁 ʟᴇᴠᴇʟ ʀᴇᴡᴀʀᴅꜱ (ᴏɴᴇ-ᴛɪᴍᴇ)
+### 🎁 ʟᴇᴠᴇʟ ʀᴇᴡᴀʀᴅꜱ
 
-<table align="center">
-<tr>
-<td align="center">
-
-### ⭐ Level 2
-💰 **2,000 Coins**
-
-</td>
-<td align="center">
-
-### ⭐ Level 3
-💎 **2 Gems**
-
-</td>
-<td align="center">
-
-### ⭐ Level 4
-🎟️ **1 Extra Play**
-
-</td>
-<td align="center">
-
-### ⭐ Level 5
-⚡ **1-Day XP Boost**
-
-</td>
-<td align="center">
-
-### 👑 Level 10
-🏅 **Special Badge**
-
-</td>
-</tr>
-</table>
+| Level | Reward |
+|:---:|:---:|
+| ⭐ 2 | 💰 2,000 Coins |
+| ⭐ 3 | 💎 2 Gems |
+| ⭐ 4 | 🎟️ 1 Extra Play |
+| ⭐ 5 | ⚡ 1-Day XP Boost |
+| 👑 10 | 🏅 Special Badge |
 
 <br/>
-
-### 📊 ᴘʀᴏɢʀᴇꜱꜱ ᴠɪꜱᴜᴀʟɪᴢᴀᴛɪᴏɴ
 
 ```plaintext
 ┌──────────────────────────────────────────┐
@@ -564,33 +533,9 @@ Earn → Spend → Upgrade → Dominate
 
 <br/>
 
-### 🎉 ʟᴇᴠᴇʟ ᴜᴘ ᴍᴇꜱꜱᴀɢᴇ ᴇxᴀᴍᴘʟᴇ
-
-```plaintext
-╔═══════════════════════════════════╗
-║   🎉 LEVEL UP! 🎉                 ║
-╠═══════════════════════════════════╣
-║   ⭐ You reached Level 5!         ║
-║   👑 TITLE: Astral Explorer       ║
-║                                   ║
-║   🎁 LEVEL 5: ⚡ 1-Day XP Boost    ║
-║                                   ║
-║   ⚡ XP: 300 / 5,000              ║
-║   ▰▰▰▰▰▰░░░░                      ║
-║                                   ║
-║   Keep going, Astral Legend! 🚀   ║
-╚═══════════════════════════════════╝
-```
-
-<br/>
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          SHOP SECTION                                    -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
@@ -608,30 +553,22 @@ Earn → Spend → Upgrade → Dominate
 
 ### 🛡️ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ ᴄʜᴇᴄᴋᴇʀ
 
-> Check other users' shield time
-
 | Plan | Duration | Price |
 |:---:|:---:|:---:|
 | 🌱 Basic | 7 days | 💎 30 |
 | 🚀 Advanced | 21 days | 💎 80 |
 | 👑 Ultimate | 60 days | 💎 150 |
-
-**Effect:** Use `/shieldcheck @user` to peek at anyone's shield
 
 </td>
 <td width="50%" valign="top">
 
 ### ⚡ xᴘ ʙᴏᴏꜱᴛ
 
-> Get 2× XP from all games
-
 | Plan | Duration | Price |
 |:---:|:---:|:---:|
 | 🌱 Basic | 7 days | 💎 30 |
 | 🚀 Advanced | 21 days | 💎 80 |
 | 👑 Ultimate | 60 days | 💎 150 |
-
-**Effect:** All XP rewards doubled automatically
 
 </td>
 </tr>
@@ -640,33 +577,25 @@ Earn → Spend → Upgrade → Dominate
 
 ### 🎟️ ᴇxᴛʀᴀ ᴘʟᴀʏ
 
-> Play more games daily
-
 **Price:** 💎 15 (per play)
 
 **Effect:** +1 game attempt stored in inventory
 
-**Usage:** Auto-consumed when daily limit reached
+**Works With:** Lucky Door, Treasure, Bomb Defuse
 
 </td>
 <td width="50%" valign="top">
 
 ### 🔮 ᴍʏꜱᴛᴇʀʏ ᴄʜᴇꜱᴛ
 
-> Random reward every time
-
 **Price:** 💎 30 (per chest)
 
-**Reward Pool:**
-
+**Rewards:**
 - 💰 12,000 Coins
 - ⭐ 1,000 XP
 - 💎 10 Gems
 - ⚡ 2-Day XP Boost
 - 🎟️ 1 Extra Play
-- 📦 2,000 Coins
-
-**Rules:** Every chest gives exactly ONE reward
 
 </td>
 </tr>
@@ -674,13 +603,9 @@ Earn → Spend → Upgrade → Dominate
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                       LEADERBOARD SYSTEM                                 -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
@@ -692,8 +617,6 @@ Earn → Spend → Upgrade → Dominate
 
 <br/>
 
-<div align="center">
-
 <table>
 <tr>
 <td align="center" width="25%">
@@ -701,7 +624,6 @@ Earn → Spend → Upgrade → Dominate
 ### 📅 ᴛᴏᴅᴀʏ
 - Top 10 daily earners
 - Resets 12:00 AM UTC
-- Only today's earnings
 
 </td>
 <td align="center" width="25%">
@@ -709,7 +631,6 @@ Earn → Spend → Upgrade → Dominate
 ### 📆 ᴡᴇᴇᴋʟʏ
 - Top 10 weekly earners
 - Resets every Monday
-- Monday 00:00 UTC
 
 </td>
 <td align="center" width="25%">
@@ -717,7 +638,6 @@ Earn → Spend → Upgrade → Dominate
 ### 🗓️ ᴍᴏɴᴛʜʟʏ
 - Top 10 monthly earners
 - Resets 1st of month
-- Full month's earnings
 
 </td>
 <td align="center" width="25%">
@@ -725,32 +645,22 @@ Earn → Spend → Upgrade → Dominate
 ### 🌐 ᴀʟʟ-ᴛɪᴍᴇ
 - Top 10 lifetime richest
 - Never resets
-- Live current balance
 
 </td>
 </tr>
 </table>
 
-</div>
-
 <br/>
-
-### 🏅 ᴛᴏᴘ 10 ᴇxᴀᴍᴘʟᴇ
 
 ```plaintext
 ┌──────────────────────────────────────────────┐
 │  📅 TODAY'S TOP 10                           │
 ├──────────────────────────────────────────────┤
-│  🥇 @user1     →  26,700 🪙                  │
-│  🥈 @user2     →  22,686 🪙                  │
-│  🥉 @user3     →  11,882 🪙                  │
-│  4️⃣ @user4     →   7,642 🪙                  │
-│  5️⃣ @user5     →   2,651 🪙                  │
-│  6️⃣ @user6     →   2,360 🪙                  │
-│  7️⃣ @user7     →   2,186 🪙                  │
-│  8️⃣ @user8     →   1,968 🪙                  │
-│  9️⃣ @user9     →   1,700 🪙                  │
-│  🔟 @user10    →   1,500 🪙                  │
+│  🥇 🚀 @user1     →  26,700 🪙               │
+│  🥈 👑 @user2     →  22,686 🪙               │
+│  🥉 ⭐ @user3     →  11,882 🪙               │
+│  4️⃣ @user4        →   7,642 🪙               │
+│  5️⃣ @user5        →   2,651 🪙               │
 ├──────────────────────────────────────────────┤
 │  👤 YOUR RANK: #15 (1,250 🪙)                │
 └──────────────────────────────────────────────┘
@@ -758,19 +668,13 @@ Earn → Spend → Upgrade → Dominate
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          TECH STACK                                      -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # 🛠️ ᴛᴇᴄʜ ꜱᴛᴀᴄᴋ
-
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=00D9FF&center=true&vCenter=true&width=700&lines=Powered+by+Modern+Technologies+%E2%9A%A1;Built+for+Performance+%F0%9F%9A%80;Scalable+%26+Reliable+%F0%9F%94%A5" />
 
 </div>
 
@@ -789,44 +693,33 @@ Earn → Spend → Upgrade → Dominate
 
 <div align="center">
 
-### 🎨 ᴅᴇᴠᴇʟᴏᴘᴍᴇɴᴛ ᴛᴏᴏʟꜱ
-
-<img src="https://skillicons.dev/icons?i=python,git,github,vscode,postgres,docker,linux&theme=dark" />
+<img src="https://skillicons.dev/icons?i=python,git,github,vscode,postgres,docker,linux,redis&theme=dark" />
 
 </div>
 
 <br/>
-
-### 📦 ᴋᴇʏ ᴅᴇᴘᴇɴᴅᴇɴᴄɪᴇꜱ
 
 ```bash
 aiogram==3.13.1         # Telegram Bot Framework
 asyncpg==0.29.0         # PostgreSQL Async Driver
 python-dotenv==1.0.1    # Environment Variables
 aiohttp==3.9.5          # HTTP Client for OpenTDB
+redis==5.0.1            # Cache Layer (Optional)
 ```
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          COMMAND CENTER                                  -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # 🎯 ᴄᴏᴍᴍᴀɴᴅ ᴄᴇɴᴛᴇʀ
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=30%2B+Commands+at+Your+Fingertips;Organized+%26+Easy+to+Use+%E2%9C%A8;Everything+Just+a+Click+Away+%F0%9F%8E%AF" />
-
 </div>
 
 <br/>
-
-<div align="center">
 
 ### 🏠 **ᴄᴏʀᴇ**
 
@@ -878,6 +771,7 @@ aiohttp==3.9.5          # HTTP Client for OpenTDB
 |:---:|:---|:---:|
 | `/premium` | ⭐ Premium shop | 💬 DM |
 | `/premiumstatus` | 📅 Check premium status | 💬 DM |
+| `/setemoji` | 🎨 Custom leaderboard emoji | 💬 DM |
 
 ### 🛒 **ꜱʜᴏᴘ**
 
@@ -900,23 +794,15 @@ aiohttp==3.9.5          # HTTP Client for OpenTDB
 | `/botstatus` | 📊 Bot status | 👑 Admin |
 | `/users` | 👥 User stats | 👑 Admin |
 
-</div>
-
 <br/>
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          QUICK START                                     -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # 🚀 ǫᴜɪᴄᴋ ꜱᴛᴀʀᴛ
-
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FF6B6B&center=true&vCenter=true&width=700&lines=Get+Started+in+Under+5+Minutes+%E2%9A%A1;Deploy+Anywhere+%F0%9F%9A%80;Simple+Setup+%E2%9C%A8" />
 
 </div>
 
@@ -969,8 +855,6 @@ python main.py
 
 <br/>
 
-**Steps:**
-
 ```yaml
 1. 🍴 Fork this repository
 2. 🚂 Go to railway.app → New Project
@@ -983,19 +867,13 @@ python main.py
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          PROJECT STRUCTURE                               -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # 📁 ᴘʀᴏᴊᴇᴄᴛ ꜱᴛʀᴜᴄᴛᴜʀᴇ
-
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=700&lines=Clean+%26+Organized+Architecture+%F0%9F%8F%97%EF%B8%8F;Modular+Design+Pattern+%E2%9C%A8;Easy+to+Extend+%F0%9F%94%A7" />
 
 </div>
 
@@ -1023,7 +901,7 @@ astral-empire-bot/
 │   ├── 🛒 shop.py                # /shop
 │   ├── ⚡ powers.py              # /powers
 │   ├── 📝 quiz.py                # /quiz
-│   ├── ⭐ premium.py             # /premium, /premiumstatus
+│   ├── ⭐ premium.py             # /premium, /premiumstatus, /setemoji
 │   ├── 💎 treasure.py            # /treasure game
 │   ├── 🚪 luckydoor.py           # /luckydoor game
 │   ├── 💣 bombdefuse.py          # /defuse game
@@ -1041,6 +919,8 @@ astral-empire-bot/
 │   ├── 💫 ui.py                  # Smart edit + safe UI
 │   ├── 📝 logger.py              # Logging setup
 │   ├── ✅ checks.py              # DM-only decorator
+│   ├── 📚 words.py               # Word game pool
+│   ├── ⭐ xp.py                  # Level math helpers
 │   ├── 🎓 quiz_seed.py           # 225 seed questions
 │   └── 🌐 quiz_loader.py         # OpenTDB auto-fetch
 │
@@ -1050,25 +930,19 @@ astral-empire-bot/
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          ROADMAP                                         -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # 🗺️ ʀᴏᴀᴅᴍᴀᴘ
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=22C55E&center=true&vCenter=true&width=700&lines=Constant+Updates+%26+New+Features+%F0%9F%94%A5;Join+Us+on+the+Journey+%F0%9F%9A%80" />
-
 </div>
 
 <br/>
 
-<div align="center">
+### ✅ ᴄᴏᴍᴩʟᴇᴛᴇᴅ
 
 | Status | Feature |
 |:---:|:---|
@@ -1077,14 +951,14 @@ astral-empire-bot/
 | ✅ | Quiz system (15 categories, 5000+ questions) |
 | ✅ | Lucky Door Game (25 doors, jackpot 40k) |
 | ✅ | Treasure Hunt (16 boxes, jackpot 15k) |
-| ✅ | Bomb Defuse (12 boxes, bomb + lucky + treasure) |
+| ✅ | Bomb Defuse (12 boxes) |
 | ✅ | Guess the Number game |
 | ✅ | Economy (Coins + Gems + XP) |
 | ✅ | Robs + Shield + Premium |
-| ✅ | Rob limits (15k Normal / 100k Premium) |
 | ✅ | Premium via Gems (1w/1m/1y) |
 | ✅ | Premium Profile style |
-| ✅ | Premium-only /shieldcheck (DM delivery) |
+| ✅ | Premium /shieldcheck (DM delivery) |
+| ✅ | Premium /setemoji (custom emoji) |
 | ✅ | Daily rewards + Mission |
 | ✅ | 4-Tier Global Leaderboard |
 | ✅ | XP & Level System |
@@ -1093,121 +967,31 @@ astral-empire-bot/
 | ✅ | XP Boost (3 tiers) |
 | ✅ | Extra Play inventory |
 | ✅ | Mystery Chest (random rewards) |
-| ✅ | Creator credits (clickable) |
+| ✅ | Owner unlimited premium |
 | ✅ | Auto-fetch quiz from OpenTDB |
 | ✅ | PostgreSQL (Neon) persistent storage |
-| ✅ | DM-only decorator for games |
-| ✅ | Rob amount validation |
-| ✅ | Shield re-activation block |
+| ✅ | Shield expiry alerts (6h/2h/30m) |
+
+### 🔄 ɪɴ ᴩʀᴏɢʀᴇꜱꜱ
+
+| Status | Feature |
+|:---:|:---|
 | 🔄 | Multi-language support |
 | 🔄 | Web dashboard |
 | 🔄 | Tournament mode |
 | 🔄 | Team battles |
 | 🔄 | Trading system |
 | 🔄 | Achievement badges |
-| 🔄 | Voice commands |
-| 🔄 | AI-powered chatbots |
-
-</div>
 
 <br/>
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                        WHY CHOOSE US                                     -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-# 💡 ᴡʜʏ ᴄʜᴏᴏꜱᴇ ᴀꜱᴛʀᴀʟ ᴇᴍᴘɪʀᴇ?
-
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=Not+Just+a+Bot+%E2%80%94+An+Ecosystem+%F0%9F%8C%8C;Built+Different+%C2%B7+Built+Better;Experience+the+Future+%F0%9F%9A%80" />
-
-</div>
-
-<br/>
-
-<table align="center" width="100%">
-<tr>
-<td align="center" width="25%">
-
-### ⚡
-**Lightning Fast**
-> Async everywhere + Redis cache + Pool warm-up
-
-</td>
-<td align="center" width="25%">
-
-### 🎨
-**Beautiful UI**
-> Custom fancy fonts + Inline keyboards + Smooth navigation
-
-</td>
-<td align="center" width="25%">
-
-### 🛡️
-**Secure**
-> Anti-exploit checks + Rate limiting + Permission system
-
-</td>
-<td align="center" width="25%">
-
-### 📈
-**Scalable**
-> PostgreSQL + Async + Railway ready
-
-</td>
-</tr>
-<tr>
-<td align="center">
-
-### 🎮
-**Fun Games**
-> 5 unique games with progression
-
-</td>
-<td align="center">
-
-### ⭐
-**Level System**
-> XP + Titles + Rewards
-
-</td>
-<td align="center">
-
-### 💎
-**Premium System**
-> Full featured + Rewarding
-
-</td>
-<td align="center">
-
-### 🌐
-**Multi-Purpose**
-> Study + Games + Management
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          GITHUB STATS                                    -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # 📊 ɢɪᴛʜᴜʙ ꜱᴛᴀᴛꜱ
-
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=Live+Stats+%26+Analytics+%F0%9F%93%88;Building+Something+Amazing+%E2%9C%A8;Growing+Every+Day+%F0%9F%8C%B1" />
 
 </div>
 
@@ -1227,27 +1011,17 @@ astral-empire-bot/
 
 <img src="https://github-profile-trophy.vercel.app/?username=bots-123Ac&theme=algolia&no-frame=true&no-bg=true&column=7&margin-w=10&margin-h=10" width="100%" />
 
-<br/><br/>
-
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=bots-123Ac&theme=midnight-purple&hide_border=true&bg_color=0D1117&title_color=A78BFA&text_color=ffffff&layout=compact&border_radius=15" width="60%" />
-
 </div>
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          FAQ SECTION                                     -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # ❓ ꜰʀᴇQᴜᴇɴᴛʟʏ ᴀꜱᴋᴇᴅ Qᴜᴇꜱᴛɪᴏɴꜱ
-
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=00D9FF&center=true&vCenter=true&width=700&lines=Got+Questions%3F+We+Have+Answers!+%F0%9F%92%A1;Everything+You+Need+to+Know+%F0%9F%93%96" />
 
 </div>
 
@@ -1257,7 +1031,7 @@ astral-empire-bot/
 <summary><b>🤖 How do I start using the bot?</b></summary>
 <br/>
 
-Simply search for **@AstralEmpireRobot** on Telegram and hit **Start**. You'll be greeted with the main menu — pick any option to begin!
+Search for **@AstralEmpireRobot** on Telegram and hit **Start**.
 
 </details>
 
@@ -1267,10 +1041,9 @@ Simply search for **@AstralEmpireRobot** on Telegram and hit **Start**. You'll b
 <summary><b>💎 How do I earn Gems?</b></summary>
 <br/>
 
-You can earn Gems by:
 - Converting **100 Coins = 1 Gem** via `/convert 100c`
 - Winning them from **Mystery Chest**
-- Level rewards (Level 3 gives 2 Gems)
+- Level rewards
 - Premium benefits
 
 </details>
@@ -1281,13 +1054,12 @@ You can earn Gems by:
 <summary><b>⭐ What does Premium give me?</b></summary>
 <br/>
 
-Premium unlocks:
-- **5% rob loss** (vs 10% for normal)
+- **5% rob loss** (vs 10%)
 - **5000 daily coins** (vs 2000)
 - **350 daily XP** (vs 150)
 - **5-day shields** (vs 2)
-- Premium profile style
-- `/shieldcheck` — check others' shields
+- `/shieldcheck` — check shields
+- `/setemoji` — custom leaderboard emoji
 - Higher rob limits (100k vs 15k)
 
 </details>
@@ -1298,17 +1070,7 @@ Premium unlocks:
 <summary><b>🛡️ How do I activate my shield?</b></summary>
 <br/>
 
-Use `/shield 2` for a 2-day shield (normal users) or up to 5 days for premium. Shield protects your coins from being robbed.
-
-</details>
-
-<br/>
-
-<details>
-<summary><b>🎮 Why won't games work in GC?</b></summary>
-<br/>
-
-Most games are **DM only** for balance. Only `/luckydoor`, `/defuse`, and `/mission` work in both DM and GC. Try `/luckydoor` in GC if you want a group game!
+Use `/shield 2` for 2-day shield (normal) or up to 5 days for premium.
 
 </details>
 
@@ -1318,12 +1080,7 @@ Most games are **DM only** for balance. Only `/luckydoor`, `/defuse`, and `/miss
 <summary><b>📈 How does the level system work?</b></summary>
 <br/>
 
-You earn **XP** from games, quizzes, and missions. Every level requires **Level × 1000 XP**. So:
-- Level 1 → 2: 1,000 XP
-- Level 2 → 3: 2,000 XP
-- Level 5 → 6: 5,000 XP
-
-Extra XP always carries forward!
+XP from games, quizzes, missions. Level N → N+1 needs **N × 1000 XP**.
 
 </details>
 
@@ -1333,117 +1090,88 @@ Extra XP always carries forward!
 <summary><b>💾 Is my data saved permanently?</b></summary>
 <br/>
 
-Yes! All data is stored in **PostgreSQL** (via Neon.tech). Even if the bot restarts 1000 times, your coins, gems, XP, level, and inventory will remain intact.
+Yes! Stored in **PostgreSQL** (Neon.tech). Survives restarts.
 
 </details>
 
 <br/>
 
 <details>
-<summary><b>🔮 What can I get from Mystery Chest?</b></summary>
+<summary><b>🎨 How do I set a custom emoji?</b></summary>
 <br/>
 
-Each Mystery Chest gives **exactly one** random reward from:
-- 💰 12,000 Coins
-- ⭐ 1,000 XP
-- 💎 10 Gems
-- ⚡ 2-Day XP Boost
-- 🎟️ 1 Extra Play
-- 💰 2,000 Coins
-
-No empty outcomes!
+Premium users only: `/setemoji 🚀` (DM only). Remove: `/setemoji ∅`
 
 </details>
 
 <br/>
 
 <details>
-<summary><b>👑 What's the rarest achievement?</b></summary>
+<summary><b>🎟️ How do Extra Plays work?</b></summary>
 <br/>
 
-The **Massive Jackpot** in Lucky Door — **40,000 Coins + 400 XP**! Only 1 in 25 doors contains it, and you can only open 4 doors per game.
+Buy from `/shop` for 15 gems. Adds +1 game attempt beyond daily limit. Auto-consumed when limit reached. Works with Lucky Door, Treasure, Bomb Defuse.
 
 </details>
 
 <br/>
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          CHANGELOG                                       -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # 📅 ᴄʜᴀɴɢᴇʟᴏɢ
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=700&lines=What's+New+in+Version+5.0;Stay+Updated+%F0%9F%94%94;Fresh+Features+%F0%9F%8E%81" />
-
 </div>
 
 <br/>
 
-### 🎉 v5.0.0 — Current Version
+### 🎉 v7.0.0 — Current
 
-- ✨ Added **XP & Level System**
-- 🎁 Added **Level Rewards** (coins, gems, extra plays, XP boosts)
-- 👑 Added **Level Titles** (Rookie → Explorer → Master → Legend)
-- 🛒 Added **Protection Checker** (7/21/60 days)
-- ⚡ Added **XP Boost** (7/21/60 days)
-- 🎟️ Added **Extra Play** purchase system
-- 🔮 Added **Mystery Chest** with random rewards
-- 📊 Improved **Level Up messages**
-- 🏆 Fixed **4-tab Leaderboard** accuracy
-- 🛡️ Enhanced **Anti-Exploit** checks
-- 💎 Added **Extra Plays inventory**
+- 🎨 Added **/setemoji** (Premium custom emoji)
+- 🎟️ Fixed **Extra Play** integration
+- 👑 Owner IDs get **unlimited premium**
+- 📊 Enhanced **profile** with level + XP bar
+- 🔔 Added **Shield expiry alerts**
+- 📩 Shield check via **DM**
+- 🌐 Added **Website link**
+- 🛡️ Enhanced **anti-exploit** protections
 
-### 🚀 v4.0.0
+### 🚀 v6.0.0
+- First `/setemoji` version
 
-- 🎮 Added **Lucky Door** game
-- 💣 Added **Bomb Defuse** game
-- 💰 Redesigned economy
+### ✨ v5.0.0
+- XP & Level System
+- Level Rewards & Titles
+- Protection Checker
+- XP Boost
+- Mystery Chest
+
+### 🎮 v4.0.0
+- Lucky Door, Bomb Defuse games
 
 ### 🌟 v3.0.0
-
-- 💎 Added **Treasure Hunt**
-- 🏆 Added **4-tab Leaderboards**
-- ⭐ Introduced **Premium** via Gems
+- Treasure Hunt, 4-tab Leaderboards
 
 ### 🎯 v2.0.0
-
-- 📝 Added **Quiz System** (15 categories)
-- 🔢 Added **Number Game**
-- 🎁 Added **Daily & Mission**
+- Quiz System, Number Game
 
 ### 🌌 v1.0.0
-
-- 🌱 Initial release
-- 📚 Basic study system
-- 👑 Admin panel
+- Initial release
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          SUPPORT SECTION                                 -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # 💬 ꜱᴜᴘᴘᴏʀᴛ & ᴄᴏᴍᴍᴜɴɪᴛʏ
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=00D9FF&center=true&vCenter=true&width=700&lines=Join+Our+Growing+Community+%F0%9F%8C%8C;We're+Here+to+Help+%F0%9F%A4%9D;Let's+Build+Together+%F0%9F%9A%80" />
-
-</div>
-
 <br/>
-
-<div align="center">
 
 <a href="https://t.me/AstralEmpireRobot">
   <img src="https://img.shields.io/badge/🤖_Use_Bot-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="50" />
@@ -1461,138 +1189,58 @@ The **Massive Jackpot** in Lucky Door — **40,000 Coins + 400 XP**! Only 1 in 2
   <img src="https://img.shields.io/badge/🌐_Visit_Website-A78BFA?style=for-the-badge&labelColor=0D1117" height="50" />
 </a>
 
-</div>
+<br/><br/>
 
-<br/>
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=600&lines=⭐+Star+the+repo+if+you+like+it!+⭐;Every+star+motivates+us+%F0%9F%92%9C" />
 
-<div align="center">
+<br/><br/>
 
-### 🌟 ꜱᴛᴀʀ ᴛʜɪꜱ ʀᴇᴘᴏ!
-
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=600&lines=⭐+If+you+like+this+project%2C+star+it!+⭐;Every+star+motivates+us+%F0%9F%92%9C;Thank+you+for+your+support!+%F0%9F%99%8F" />
+[![Star](https://img.shields.io/badge/⭐_STAR_THIS_REPO-FFD700?style=for-the-badge&labelColor=0D1117)](https://github.com/bots-123Ac/astralsociety/stargazers)
 
 </div>
 
 <br/>
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          CREATORS                                        -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-# 👨‍💻 ᴄʀᴇᴀᴛᴏʀꜱ
-
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=700&lines=The+Brilliant+Minds+Behind+Astral+Empire+%F0%9F%8C%9F;Made+with+Passion+%26+Late+Night+Coffee+%E2%98%95" />
-
-</div>
-
-<br/>
-
-<div align="center">
-
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <img src="https://img.shields.io/badge/👑_Creator-FFD700?style=for-the-badge&labelColor=0D1117" />
-      <br/><br/>
-      <h3>⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐</h3>
-      <p>
-        <a href="https://t.me/OfficialCrazyBoy07">
-          <img src="https://img.shields.io/badge/📱_@OfficialCrazyBoy07-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
-        </a>
-      </p>
-      <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=14&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=300&lines=Visionary+%7C+Developer;Dream+Builder+%F0%9F%9A%80" />
-    </td>
-    <td align="center" width="50%">
-      <img src="https://img.shields.io/badge/⭐_Co--Creator-A78BFA?style=for-the-badge&labelColor=0D1117" />
-      <br/><br/>
-      <h3>𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟</h3>
-      <p>
-        <a href="https://t.me/Lunar_kanha_4572">
-          <img src="https://img.shields.io/badge/📱_@Lunar__kanha__4572-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
-        </a>
-      </p>
-      <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=14&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=300&lines=Creative+%7C+Innovator;Idea+Generator+%F0%9F%92%A1" />
-    </td>
-  </tr>
-</table>
-
-</div>
-
-<br/>
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          CONTRIBUTING                                    -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # 🤝 ᴄᴏɴᴛʀɪʙᴜᴛɪɴɢ
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=22C55E&center=true&vCenter=true&width=700&lines=Contributions+are+Always+Welcome!+%F0%9F%8E%89;Let's+Build+Together+%F0%9F%9A%80;Every+PR+Makes+a+Difference+%E2%9C%A8" />
+Contributions welcome! 🎉
+
+```bash
+1. 🍴 Fork the repository
+2. 🌿 Create your branch
+3. 💾 Commit your changes
+4. 🚀 Push to the branch
+5. 🎯 Open a Pull Request
+```
+
+### 🎁 ᴡᴀʏꜱ ᴛᴏ ᴄᴏɴᴛʀɪʙᴜᴛᴇ
+
+- 🐛 Report Bugs
+- 💡 Suggest Features
+- 📝 Improve Docs
+- 🎨 Design
+- 🌍 Translate
+- ⭐ Star the Repo
 
 </div>
 
 <br/>
 
-Contributions are always welcome! 🎉 Here's how you can help:
-
-```bash
-# 1. 🍴 Fork the repository
-
-# 2. 🌿 Create your feature branch
-git checkout -b feature/AmazingFeature
-
-# 3. 💾 Commit your changes
-git commit -m 'Add some AmazingFeature'
-
-# 4. 📤 Push to the branch
-git push origin feature/AmazingFeature
-
-# 5. 🎯 Open a Pull Request
-```
-
-<br/>
-
-### 🎁 ᴡᴀʏꜱ ᴛᴏ ᴄᴏɴᴛʀɪʙᴜᴛᴇ
-
-- 🐛 **Report Bugs** — Found an issue? Let us know!
-- 💡 **Suggest Features** — Have an idea? Share it!
-- 📝 **Improve Docs** — Better documentation helps everyone
-- 🎨 **Design** — UI/UX improvements always welcome
-- 🌍 **Translate** — Help us go multi-language
-- ⭐ **Star the Repo** — Show your support!
-
-<br/>
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          LICENSE                                         -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 # 📜 ʟɪᴄᴇɴꜱᴇ
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=MIT+License+%F0%9F%93%9C;Free+to+Use+%26+Modify+%E2%9C%A8;Open+Source+Forever+%F0%9F%92%9C" />
-
-<br/><br/>
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
-<br/>
+This project is licensed under the **MIT License** — see [LICENSE](LICENSE).
 
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&labelColor=0D1117)](LICENSE)
 
@@ -1600,67 +1248,56 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 <br/>
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          FINAL FOOTER                                    -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
+---
 
 <div align="center">
 
 <br/>
 
-<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=26&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=60&lines=Thank+You+for+Visiting+%F0%9F%92%9C;Built+with+%E2%9D%A4%EF%B8%8F+by+Astral+Society;%F0%9F%8C%9F+Learn+%E2%80%A2+Play+%E2%80%A2+Compete+%E2%80%A2+Rise+%F0%9F%8C%9F" />
+<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=28&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=Thank+You+for+Visiting+%F0%9F%92%9C;Built+with+%E2%9D%A4%EF%B8%8F+by+Astral+Society;%F0%9F%8C%9F+Learn+%E2%80%A2+Play+%E2%80%A2+Compete+%E2%80%A2+Rise+%F0%9F%8C%9F" />
 
 <br/><br/>
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=16&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=⭐+Star+the+repo+if+you+enjoyed+it!;%F0%9F%9A%80+Join+our+growing+community;%F0%9F%92%9C+Your+support+means+everything" />
-
-<br/><br/>
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20,24,30&height=220&section=footer&animation=twinkling&text=See%20You%20in%20the%20Stars!&fontSize=42&fontColor=ffffff&fontAlignY=72" width="100%" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20,24,30&height=250&section=footer&animation=twinkling&text=See%20You%20in%20the%20Stars!&fontSize=48&fontColor=ffffff&fontAlignY=75" width="100%" />
 
 <br/>
 
-<!-- 👁️ VISITOR COUNTER -->
-<img src="https://komarev.com/ghpvc/?username=bots-123Ac&label=Visitors&color=A78BFA&style=for-the-badge" />
+<img src="https://komarev.com/ghpvc/?username=bots-123Ac&label=👁️%20Visitors&color=A78BFA&style=for-the-badge" />
 
 &nbsp;&nbsp;
 
-<!-- ⏱️ UPTIME BADGE -->
 <img src="https://img.shields.io/badge/Uptime-24%2F7-brightgreen?style=for-the-badge&labelColor=0D1117" />
 
 &nbsp;&nbsp;
 
-<!-- ⭐ STARS BADGE -->
 <a href="https://github.com/bots-123Ac/astralsociety/stargazers">
   <img src="https://img.shields.io/github/stars/bots-123Ac/astralsociety?style=for-the-badge&color=FFD700&labelColor=0D1117" />
 </a>
 
 <br/><br/>
 
-<p>
-  <a href="https://t.me/AstralEmpireRobot">
-    <img src="https://img.shields.io/badge/Made_with_Love_for_Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="45" />
-  </a>
-</p>
+<a href="https://t.me/AstralEmpireRobot">
+  <img src="https://img.shields.io/badge/Made_with_Love_for_Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="45" />
+</a>
 
 <br/>
 
-<p>
-  <b>🌌 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ʀɪꜱᴇ 🌌</b>
-</p>
+**🌌 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ʀɪꜱᴇ 🌌**
+
+<br/>
+
+### ⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐ × 𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟
+
+<br/>
+
+<sub>© 2026 Astral Society. All rights reserved.</sub>
 
 <br/>
 
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                                                                         -->
 <!--                  🌌 END OF README • MADE WITH ❤️ 🌌                    -->
-<!--                                                                         -->
-<!--              ⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐  ×  𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟                     -->
-<!--                                                                         -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
