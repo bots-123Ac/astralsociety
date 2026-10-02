@@ -6,7 +6,7 @@ from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from config import BOT_NAME
+from config import BOT_NAME, OWNER_IDS
 from utils.permissions import is_bot_admin
 from utils.database import get_pool
 
@@ -46,10 +46,33 @@ async def get_db_analytics() -> dict:
 
     # ─── Users ───
     stats["total_users"] = await pool.fetchval("SELECT COUNT(*) FROM users") or 0
-    stats["premium_users"] = await pool.fetchval(
+
+    # Premium count (DB users)
+    db_premium = await pool.fetchval(
         "SELECT COUNT(*) FROM users WHERE premium_until IS NOT NULL AND premium_until > $1",
         now_str
     ) or 0
+
+    # Add owner count (owners are always premium - runtime check)
+    owner_count = 0
+    try:
+        owner_count = len(OWNER_IDS)
+        # Optionally: only count owners that exist in users table
+        if OWNER_IDS:
+            placeholders = ",".join(f"${i+1}" for i in range(len(OWNER_IDS)))
+            existing_owners = await pool.fetchval(
+                f"SELECT COUNT(*) FROM users WHERE user_id IN ({placeholders})",
+                *OWNER_IDS
+            )
+            # Add owners not already in db_premium
+            owner_count = existing_owners or 0
+    except Exception:
+        pass
+
+    stats["premium_users"] = db_premium + owner_count
+    stats["db_premium_users"] = db_premium
+    stats["owner_count"] = owner_count
+
     stats["shielded_users"] = await pool.fetchval(
         "SELECT COUNT(*) FROM users WHERE shield_until IS NOT NULL AND shield_until > $1",
         now_str
@@ -102,7 +125,7 @@ async def get_db_analytics() -> dict:
     stats["total_number_attempts"] = await pool.fetchval("SELECT COALESCE(SUM(number_attempted), 0) FROM users") or 0
     stats["total_number_guesses"] = await pool.fetchval("SELECT COALESCE(SUM(number_guess), 0) FROM users") or 0
 
-    # ─── Groups ───
+    # ─── Groups (FIX) ───
     stats["total_groups"] = await pool.fetchval("SELECT COUNT(*) FROM active_groups") or 0
 
     # ─── Top users ───
