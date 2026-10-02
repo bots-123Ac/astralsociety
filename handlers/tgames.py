@@ -13,6 +13,7 @@ from utils.database import (
     add_coins, add_xp, inc_quiz_attempt, inc_quiz_solved,
     inc_number_attempt, inc_number_guess, has_xp_boost, mission_quiz_done,
     get_random_quiz_question, get_quiz_count,
+    format_level_up_message,
 )
 from utils.checks import dm_only
 
@@ -33,7 +34,6 @@ CATEGORY_NAMES = {
 }
 
 
-# ═══ /tgames — DM only ═══
 @router.message(F.text.regexp(r"^/tgames(@\w+)?(\s|$)"))
 @dm_only
 async def cmd_tgames(message: Message):
@@ -56,7 +56,9 @@ async def cb_games_menu(cb: CallbackQuery):
     await cb.answer()
 
 
-# ═══ QUIZ ═══
+# ═══════════════════════════════════════════════
+# QUIZ
+# ═══════════════════════════════════════════════
 @router.callback_query(F.data == "tg:quiz")
 async def quiz_select(cb: CallbackQuery):
     if cb.message.chat.type != "private":
@@ -187,8 +189,10 @@ async def _finish_quiz(cb: CallbackQuery, key: tuple):
 
     if coins > 0:
         await add_coins(cb.from_user.id, coins)
+
+    xp_info = None
     if xp > 0:
-        await add_xp(cb.from_user.id, xp)
+        xp_info = await add_xp(cb.from_user.id, xp)
 
     await cb.message.edit_text(
         f"🏁 <b>ǫᴜɪᴢ ᴄᴏᴍᴘʟᴇᴛᴇᴅ!</b>\n"
@@ -200,10 +204,19 @@ async def _finish_quiz(cb: CallbackQuery, key: tuple):
         f"🪙 +{coins} ᴄᴏɪɴꜱ\n📈 +{xp} xᴘ",
         reply_markup=back_main_kb()
     )
+
+    if xp_info:
+        try:
+            await cb.message.answer(format_level_up_message(xp_info))
+        except Exception:
+            pass
+
     await cb.answer("🏁")
 
 
-# ═══ NUMBER GAME ═══
+# ═══════════════════════════════════════════════
+# NUMBER GAME
+# ═══════════════════════════════════════════════
 @router.callback_query(F.data == "tg:number")
 async def number_start(cb: CallbackQuery):
     if cb.message.chat.type != "private":
@@ -263,13 +276,19 @@ async def number_guess(message: Message):
         if await has_xp_boost(user_id):
             xp_gain *= 2
         await add_coins(user_id, coins)
-        await add_xp(user_id, xp_gain)
+        xp_info = await add_xp(user_id, xp_gain)
         NUMBER_CACHE.pop(key, None)
-        return await message.reply(
+        await message.reply(
             f"🎉 <b>ᴄᴏʀʀᴇᴄᴛ!</b>\n\n"
             f"ꜱᴇᴄʀᴇᴛ: <b>{secret}</b>\nᴀᴛᴛᴇᴍᴘᴛꜱ: <b>{game['attempts']}</b>\n\n"
             f"🪙 +{coins} | 📈 +{xp_gain} xᴘ"
         )
+        if xp_info:
+            try:
+                await message.answer(format_level_up_message(xp_info))
+            except Exception:
+                pass
+        return
 
     remaining = NUMBER_MAX_ATTEMPTS - game["attempts"]
     if game["attempts"] >= NUMBER_MAX_ATTEMPTS:
