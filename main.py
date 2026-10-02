@@ -66,7 +66,7 @@ async def main():
     # ROUTER ORDER — VERY IMPORTANT
     # admin.router MUST be LAST (has wildcard handler)
     # ═══════════════════════════════════════════════
-    dp.include_router(start.router)          # 1.  /start
+    dp.include_router(start.router)          # 1.  /start + my_chat_member
     dp.include_router(menu.router)           # 2.  /help, /about
     dp.include_router(profile.router)        # 3.  /balance, /profile, /convert
     dp.include_router(robs.router)           # 4.  /gives, /robs, /shield, /shieldcheck
@@ -77,7 +77,7 @@ async def main():
     dp.include_router(shop.router)           # 9.  /shop
     dp.include_router(powers.router)         # 10. /powers
     dp.include_router(quiz.router)           # 11. /quiz
-    dp.include_router(premium.router)        # 12. /premium, /premiumstatus
+    dp.include_router(premium.router)        # 12. /premium, /premiumstatus, /setemoji
     dp.include_router(botstats.router)       # 13. /botstatus, /users
     dp.include_router(treasure.router)       # 14. /treasure
     dp.include_router(luckydoor.router)      # 15. /luckydoor
