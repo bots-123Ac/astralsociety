@@ -11,6 +11,7 @@ from config import (
     LEVEL_REWARDS, LEVEL_TITLES, XP_PER_LEVEL_BASE,
 )
 
+
 # ═══════════════════════════════════════════════
 # 📊 COUNT FUNCTIONS (for botstatus)
 # ═══════════════════════════════════════════════
@@ -131,6 +132,7 @@ async def get_quiz_category_breakdown():
            LIMIT 10"""
     )
     return [(r["category"], r["cnt"]) for r in rows]
+
 
 # ═══════════════════════════════════════════════
 # CONNECTION POOL
@@ -567,6 +569,57 @@ async def add_xp(user_id, amount):
         "xp_needed": xp_needed, "rewards": rewards_granted,
         "title": get_level_title(new_level),
     }
+
+
+async def get_user_xp(user_id) -> int:
+    """Get user's total lifetime XP."""
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT xp FROM users WHERE user_id = $1", user_id)
+    return val or 0
+
+
+async def remove_xp(user_id, amount):
+    """
+    Remove XP from user and recalculate level.
+    Returns dict if level changed, else None.
+    """
+    if amount <= 0:
+        return None
+
+    pool = await get_pool()
+
+    # Get current level
+    row = await pool.fetchrow(
+        "SELECT xp, level FROM users WHERE user_id = $1", user_id
+    )
+    if not row:
+        return None
+
+    old_level = row["level"] or 1
+
+    # Remove XP (never go below 0)
+    await pool.execute(
+        "UPDATE users SET xp = GREATEST(xp - $1, 0) WHERE user_id = $2",
+        amount, user_id
+    )
+
+    # Get new XP
+    new_xp_row = await pool.fetchrow(
+        "SELECT xp FROM users WHERE user_id = $1", user_id
+    )
+    new_xp = new_xp_row["xp"] or 0
+
+    # Recalculate level
+    new_level = compute_level_from_xp(new_xp)
+
+    if new_level != old_level:
+        await pool.execute(
+            "UPDATE users SET level = $1 WHERE user_id = $2",
+            new_level, user_id
+        )
+        return {"old_level": old_level, "new_level": new_level, "total_xp": new_xp}
+
+    return None
 
 
 async def get_user_coins(user_id) -> int:
