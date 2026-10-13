@@ -41,11 +41,11 @@ BOT_ADMIN_IDS = [
 # ═══════════════════════════════════════════════
 # 👑 OWNER IDs — UNLIMITED PREMIUM
 # ═══════════════════════════════════════════════
-# Ye IDs HAMESHA premium rahengi — no expiry
+# These IDs always have Premium — no expiry, no purchase needed
 OWNER_IDS = [
     7530812073,
     7790607144,
-    8165863254,
+    8987845745,   # ✅ NAYA ID ADDED
 ]
 
 # ═══════════════════════════════════════════════
