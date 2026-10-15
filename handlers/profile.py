@@ -2,65 +2,20 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from config import XP_PER_LEVEL_BASE, LEVEL_TITLES, OWNER_IDS
+from config import XP_PER_LEVEL_BASE, MAX_LEVEL
 from utils.database import (
     get_or_create_user, get_user_by_astral_id, get_user_by_username,
     get_user_by_id, convert_coins_to_gems, is_premium,
     get_user_coins, get_user_gems, get_extra_plays,
+    compute_level_from_xp, compute_level_progress, get_level_title,
+    progress_bar,
 )
 
 router = Router()
 
 
 # ═══════════════════════════════════════════════
-# LEVEL MATH HELPERS
-# ═══════════════════════════════════════════════
-def _cumulative_xp_for_level(level: int) -> int:
-    """Total lifetime XP needed to REACH the given level."""
-    if level <= 1:
-        return 0
-    return XP_PER_LEVEL_BASE * (level - 1) * level // 2
-
-
-def _compute_level_from_xp(total_xp: int) -> int:
-    """Given lifetime total XP, return current level."""
-    if total_xp < 0:
-        total_xp = 0
-    level = 1
-    while _cumulative_xp_for_level(level + 1) <= total_xp:
-        level += 1
-        if level > 9999:
-            break
-    return level
-
-
-def _compute_level_progress(total_xp: int, level: int):
-    """Return (xp_in_current_level, xp_needed_for_next)."""
-    current_threshold = _cumulative_xp_for_level(level)
-    xp_in_level = total_xp - current_threshold
-    xp_needed = level * XP_PER_LEVEL_BASE
-    if xp_in_level < 0:
-        xp_in_level = 0
-    return xp_in_level, xp_needed
-
-
-def _progress_bar(current: int, needed: int, length: int = 10) -> str:
-    if needed <= 0:
-        return "▰" * length
-    filled = int((current / needed) * length)
-    filled = max(0, min(length, filled))
-    return "▰" * filled + "░" * (length - filled)
-
-
-def _get_level_title(level: int) -> str:
-    for lvl, title in LEVEL_TITLES:
-        if level >= lvl:
-            return title
-    return "Astral Rookie"
-
-
-# ═══════════════════════════════════════════════
-# FORMAT PROFILE / BALANCE
+# FORMAT PROFILE
 # ═══════════════════════════════════════════════
 async def format_balance(u, premium: bool = False) -> str:
     name = u["first_name"] or "ᴜɴᴋɴᴏᴡɴ"
@@ -71,20 +26,44 @@ async def format_balance(u, premium: bool = False) -> str:
     total_xp = u["xp"] or 0
     quiz_solved = u["quiz_solved"] or 0
 
-    # ═══ Level math ═══
-    level = _compute_level_from_xp(total_xp)
-    xp_in_level, xp_needed = _compute_level_progress(total_xp, level)
-    bar = _progress_bar(xp_in_level, xp_needed)
-    title = _get_level_title(level)
+    # Level math
+    level = compute_level_from_xp(total_xp)
+    xp_in_level, xp_needed = compute_level_progress(total_xp, level)
+    bar = progress_bar(xp_in_level, xp_needed)
+    title = get_level_title(level)
     extras = await get_extra_plays(u["user_id"])
 
-    # ═══ Header based on role ═══
-    if u["user_id"] in OWNER_IDS:
+    # ═══ Owner check ═══
+    try:
+        from config import OWNER_IDS
+        is_owner = u["user_id"] in OWNER_IDS
+    except Exception:
+        is_owner = False
+
+    if is_owner:
         header = "👑 <b>ᴏᴡɴᴇʀ ᴘʀᴏꜰɪʟᴇ</b> 👑"
     elif premium:
         header = "💎 <b>ᴘʀᴇᴍɪᴜᴍ ᴘʀᴏꜰɪʟᴇ</b> 💎"
     else:
         header = "👤 <b>ʙᴀʟᴀɴᴄᴇ</b>"
+
+    # ═══ Level line ═══
+    if level >= MAX_LEVEL:
+        level_line = (
+            f"━━━━━━━━━━━━━━━━━━━━━\n"
+            f"⭐ ʟᴇᴠᴇʟ: <b>{level}</b> / {MAX_LEVEL}  •  👑 {title}\n"
+            f"♾️ <b>ᴍᴀx ʟᴇᴠᴇʟ ʀᴇᴀᴄʜᴇᴅ</b>\n"
+            f"<code>{'▰' * 10}</code>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━"
+        )
+    else:
+        level_line = (
+            f"━━━━━━━━━━━━━━━━━━━━━\n"
+            f"⭐ ʟᴇᴠᴇʟ: <b>{level}</b>  •  👑 {title}\n"
+            f"⚡ xᴘ: <b>{xp_in_level:,} / {xp_needed:,}</b>\n"
+            f"<code>{bar}</code>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━"
+        )
 
     return (
         f"{header}\n"
@@ -97,11 +76,7 @@ async def format_balance(u, premium: bool = False) -> str:
         f"🧠 ǫᴜɪᴢ ꜱᴏʟᴠᴇᴅ — <b>{quiz_solved}</b>\n"
         f"💎 ɢᴇᴍꜱ         — <b>{gems:,}</b>\n"
         f"🎟️ ᴇxᴛʀᴀ ᴘʟᴀʏꜱ — <b>{extras}</b>\n\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"⭐ ʟᴇᴠᴇʟ: <b>{level}</b>  •  👑 {title}\n"
-        f"⚡ xᴘ: <b>{xp_in_level:,} / {xp_needed:,}</b>\n"
-        f"<code>{bar}</code>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━"
+        f"{level_line}"
     )
 
 
@@ -110,7 +85,7 @@ async def format_balance(u, premium: bool = False) -> str:
 # ═══════════════════════════════════════════════
 @router.message(Command("balance"))
 async def cmd_balance(message: Message):
-    # ═══ Priority 1: Reply to a user ═══
+    # Priority 1: Reply
     if message.reply_to_message and message.reply_to_message.from_user:
         target = message.reply_to_message.from_user
         await get_or_create_user(target.id, target.username, target.first_name)
@@ -120,11 +95,10 @@ async def cmd_balance(message: Message):
         prem = await is_premium(target.id)
         return await message.reply(await format_balance(u, prem))
 
-    # ═══ Priority 2: Args ═══
+    # Priority 2: Args
     parts = (message.text or "").split()
     args = parts[1:] if len(parts) > 1 else []
 
-    # No args — own balance
     if not args:
         await get_or_create_user(
             message.from_user.id,
@@ -137,7 +111,6 @@ async def cmd_balance(message: Message):
         prem = await is_premium(message.from_user.id)
         return await message.reply(await format_balance(u, prem))
 
-    # Has arg
     arg = args[0].strip()
     u = None
 
@@ -157,7 +130,7 @@ async def cmd_balance(message: Message):
     await message.reply(await format_balance(u, prem))
 
 
-# ═══ Alias: /profile → /balance ═══
+# Alias
 @router.message(Command("profile"))
 async def cmd_profile_alias(message: Message):
     await cmd_balance(message)
