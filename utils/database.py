@@ -335,7 +335,6 @@ async def init_db():
         await conn.execute(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS level_rewards_claimed TEXT DEFAULT ''"
         )
-        # 🔧 NEW — custom premium emoji column
         await conn.execute(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS custom_emoji TEXT DEFAULT '🌟'"
         )
@@ -1169,6 +1168,38 @@ async def use_extra_play(user_id) -> bool:
         "UPDATE extra_plays SET count = count - 1 WHERE user_id = $1", user_id
     )
     return True
+
+
+# 🔧 NEW — Shared daily-limit gate for all games
+async def try_play_game(user_id, get_plays_func, daily_limit: int):
+    """
+    Check whether a user may play a limited-daily game.
+
+    Callers pass the *getter* function itself, e.g.:
+        allowed, used_extra, plays_left = await try_play_game(
+            user_id, get_treasure_plays, DAILY_LIMIT
+        )
+
+    Returns:
+        (allowed: bool, used_extra: bool, plays_left: int)
+
+    Notes:
+        • Does NOT increment the play counter — the game handler
+          calls inc_<game>_play() only after the game finishes.
+        • If the daily limit is already reached but the user has an
+          Extra Play in inventory, one is consumed and allowed=True.
+    """
+    plays = await get_plays_func(user_id) or 0
+
+    if plays < daily_limit:
+        return True, False, daily_limit - plays
+
+    # At / over limit → try to burn an Extra Play
+    consumed = await use_extra_play(user_id)
+    if consumed:
+        return True, True, 0
+
+    return False, False, 0
 
 
 # ═══════════════════════════════════════════════
