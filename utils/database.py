@@ -335,6 +335,10 @@ async def init_db():
         await conn.execute(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS level_rewards_claimed TEXT DEFAULT ''"
         )
+        # 🔧 NEW — custom premium emoji column
+        await conn.execute(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS custom_emoji TEXT DEFAULT '🌟'"
+        )
 
         # ═══ STUDY ═══
         await conn.execute("""
@@ -532,6 +536,25 @@ async def get_user_by_username(username):
 async def get_user_by_id(user_id):
     pool = await get_pool()
     return await pool.fetchrow("SELECT * FROM users WHERE user_id = $1", user_id)
+
+
+# 🔧 NEW — Premium custom emoji storage
+async def set_custom_emoji(user_id, emoji: str):
+    """Save the user's chosen premium custom emoji."""
+    pool = await get_pool()
+    await pool.execute(
+        "UPDATE users SET custom_emoji = $1 WHERE user_id = $2",
+        emoji, user_id
+    )
+
+
+async def get_custom_emoji(user_id) -> str:
+    """Fetch the user's chosen premium custom emoji (defaults to 🌟)."""
+    pool = await get_pool()
+    val = await pool.fetchval(
+        "SELECT custom_emoji FROM users WHERE user_id = $1", user_id
+    )
+    return val or "🌟"
 
 
 async def add_coins(user_id, amount, is_earning=True):
