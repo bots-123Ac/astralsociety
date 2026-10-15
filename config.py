@@ -45,7 +45,7 @@ BOT_ADMIN_IDS = [
 OWNER_IDS = [
     7530812073,
     7790607144,
-    8987845745,   # ✅ NAYA ID ADDED
+    8987845745,
 ]
 
 # ═══════════════════════════════════════════════
@@ -67,7 +67,7 @@ CREDIT_HTML = (
 )
 
 # ═══════════════════════════════════════════════
-# 🗄️ DATABASE
+# 🗄️ DATABASE — Neon PostgreSQL
 # ═══════════════════════════════════════════════
 DATABASE_URL = os.getenv("DATABASE_URL", "")
 
@@ -93,7 +93,7 @@ SHIELD_NORMAL_MAX_DAYS = 2
 SHIELD_PREMIUM_MAX_DAYS = 5
 
 # ═══════════════════════════════════════════════
-# ⭐ PREMIUM PLANS
+# ⭐ PREMIUM (via Gems)
 # ═══════════════════════════════════════════════
 PREMIUM_PLANS = {
     "1w": {"days": 7,   "gems": 1000,   "label": "1 Week"},
@@ -102,7 +102,7 @@ PREMIUM_PLANS = {
 }
 
 # ═══════════════════════════════════════════════
-# 🛒 SHOP
+# 🛒 SHOP — PROTECTION CHECKER PLANS
 # ═══════════════════════════════════════════════
 PROTECTION_CHECKER_PLANS = {
     "basic":    {"days": 7,  "gems": 30,  "label": "Basic — 7 Days"},
@@ -110,13 +110,23 @@ PROTECTION_CHECKER_PLANS = {
     "ultimate": {"days": 60, "gems": 150, "label": "Ultimate — 60 Days"},
 }
 
+# ═══════════════════════════════════════════════
+# 🛒 SHOP — XP BOOST PLANS
+# ═══════════════════════════════════════════════
 XP_BOOST_PLANS = {
     "basic":    {"days": 7,  "gems": 30,  "label": "Basic — 7 Days"},
     "advanced": {"days": 21, "gems": 80,  "label": "Advanced — 21 Days"},
     "ultimate": {"days": 60, "gems": 150, "label": "Ultimate — 60 Days"},
 }
 
+# ═══════════════════════════════════════════════
+# 🛒 SHOP — EXTRA PLAY
+# ═══════════════════════════════════════════════
 EXTRA_PLAY_PRICE = 15
+
+# ═══════════════════════════════════════════════
+# 🛒 SHOP — MYSTERY CHEST
+# ═══════════════════════════════════════════════
 MYSTERY_CHEST_PRICE = 30
 
 MYSTERY_CHEST_REWARDS = [
@@ -129,21 +139,85 @@ MYSTERY_CHEST_REWARDS = [
 ]
 
 # ═══════════════════════════════════════════════
-# ⭐ XP & LEVEL SYSTEM
+# ⭐ XP & LEVEL SYSTEM (Level 1 → 50)
 # ═══════════════════════════════════════════════
 XP_PER_LEVEL_BASE = 1000
+MAX_LEVEL = 50
 
-LEVEL_REWARDS = {
-    2:  {"type": "coins",      "amount": 2000, "label": "💰 2,000 Coins"},
-    3:  {"type": "gems",       "amount": 2,    "label": "💎 2 Gems"},
-    4:  {"type": "extra_play", "amount": 1,    "label": "🎟️ 1 Extra Play"},
-    5:  {"type": "xp_boost",   "days": 1,      "label": "⚡ 1-Day XP Boost"},
-    10: {"type": "badge",                      "label": "👑 Special Level Badge"},
+# Level → Title (Level 1 = Rookie, Level 50 = Astral Deity)
+LEVEL_TITLES = {
+    # Beginner Tier
+    1:  "Rookie",
+    2:  "Novice",
+    3:  "Apprentice",
+    4:  "Explorer",
+    5:  "Adventurer",
+    # Warrior Tier
+    6:  "Fighter",
+    7:  "Warrior",
+    8:  "Elite Warrior",
+    9:  "Veteran",
+    10: "Champion",
+    # Champion Tier
+    11: "Knight",
+    12: "Royal Knight",
+    13: "Guardian",
+    14: "Elite Guardian",
+    15: "Commander",
+    # Legendary Tier
+    16: "Warlord",
+    17: "Master",
+    18: "Grandmaster",
+    19: "Legend",
+    20: "Legendary Hero",
+    # Astral Tier
+    21: "Conqueror",
+    22: "Overlord",
+    23: "Supreme Overlord",
+    24: "Mythic",
+    25: "Immortal",
+    26: "Celestial",
+    27: "Astral Lord",
+    28: "Eternal",
+    29: "Divine Emperor",
+    30: "Astral Sovereign",
+    # Cosmic Tier
+    31: "Cosmic Warrior",
+    32: "Cosmic Knight",
+    33: "Starborn",
+    34: "Star Guardian",
+    35: "Nebula Lord",
+    # Galactic Tier
+    36: "Galactic Champion",
+    37: "Void Walker",
+    38: "Galaxy Conqueror",
+    39: "Universal Guardian",
+    40: "Universal Emperor",
+    # Divine Tier
+    41: "Divine Warrior",
+    42: "Divine Overlord",
+    43: "Celestial Emperor",
+    44: "Eternal Sovereign",
+    45: "Cosmic Deity",
+    # Supreme Tier
+    46: "Infinity Lord",
+    47: "Supreme Deity",
+    48: "Eternal God",
+    49: "Omniversal Ruler",
+    50: "Astral Deity",
 }
 
-LEVEL_TITLES = [
-    (20, "Empire Legend"),
-    (10, "Astral Master"),
-    (5,  "Astral Explorer"),
-    (1,  "Astral Rookie"),
+# ═══════════════════════════════════════════════
+# LEVEL REWARD TIERS (used on level-up)
+# ═══════════════════════════════════════════════
+LEVEL_REWARD_TIERS = [
+    {"min": 1,  "max": 5,  "gems": 4,        "extra_plays": 1},
+    {"min": 6,  "max": 10, "gems": 7,        "extra_plays": 2},
+    {"min": 11, "max": 15, "mystery_chests": 1, "extra_plays": 1},
+    {"min": 16, "max": 20, "mystery_chests": 2, "extra_plays": 2},
+    {"min": 21, "max": 30, "coins": 10000,   "extra_plays": 1},
+    {"min": 31, "max": 35, "coins": 15000,   "extra_plays": 2},
+    {"min": 36, "max": 40, "coins": 20000,   "extra_plays": 2},
+    {"min": 41, "max": 45, "coins": 25000,   "extra_plays": 3},
+    {"min": 46, "max": 50, "coins": 50000,   "extra_plays": 3, "mystery_chests": 1},
 ]
