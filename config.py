@@ -221,3 +221,26 @@ LEVEL_REWARD_TIERS = [
     {"min": 41, "max": 45, "coins": 25000,   "extra_plays": 3},
     {"min": 46, "max": 50, "coins": 50000,   "extra_plays": 3, "mystery_chests": 1},
 ]
+
+
+# ═══════════════════════════════════════════════
+# CLONE BOT SYSTEM
+# ═══════════════════════════════════════════════
+MAX_CLONES_PER_USER = 1        # ek user = ek clone
+MAX_TOTAL_CLONES = 20          # Railway worker memory safety cap
+
+# Main bot identity (for clone credit line)
+MAIN_BOT_USERNAME = "AstralEmpireRobot"
+MAIN_BOT_NAME = "˹𝐀𝐬𝐭𝐫𝐚𝐥 ꭙ 𝐄𝐦𝐩𝐢𝐫𝐞˼"
+MAIN_BOT_LINK = "https://t.me/AstralEmpireRobot"
+
+# Fernet key for encrypting clone bot tokens.
+# Generate ONCE and paste in Railway env vars:
+#   python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+CLONE_ENCRYPT_KEY = os.getenv("CLONE_ENCRYPT_KEY", "")
+
+# How often (seconds) to re-verify clone owners' required-chat membership
+CLONE_MEMBERSHIP_CHECK_INTERVAL = 600   # 10 minutes
+
+# Cache TTL for clone "allowed to run" flag
+CLONE_ALLOWED_CACHE_TTL = 300           # 5 minutes
