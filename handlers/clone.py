@@ -1,8 +1,13 @@
 """
-handlers/clone.py — Clone bot creation flow.
+handlers/clone.py — Clone bot creation flow with LIVE verification.
 
-Every /clone call does a LIVE membership verification. Nothing is
-cached as "verified" between clicks.
+Behavior:
+  • If NO required chats are configured → skip verification, ask for token.
+  • If required chats exist → check membership on every /clone click.
+    - Missing → show Join buttons (only for missing chats) + Verify.
+    - All joined → ask for token.
+  • Group join requests are respected: a user with a PENDING request is
+    still treated as NOT joined until an admin approves.
 """
 
 import logging
@@ -19,7 +24,7 @@ from aiogram.enums import ParseMode
 
 from config import MAX_TOTAL_CLONES
 from utils import clone_db
-from utils.bot_context import get_bot_context, is_clone
+from utils.bot_context import is_clone
 from utils.clone_manager import start_clone, stop_clone
 
 router = Router()
@@ -35,18 +40,14 @@ class CloneFSM(StatesGroup):
 # ═══════════════════════════════════════════════
 async def _check_all_joined(bot: Bot, user_id: int):
     """
-    Live check — always calls Telegram API. No shortcuts.
+    Live membership check via Telegram API. No caching.
 
-    Returns (all_joined: bool, missing_records: list, no_required: bool)
+    Returns (all_joined: bool, missing_records: list, has_required: bool)
     """
     required = await clone_db.get_all_required_chats()
 
     if not required:
-        log.warning(
-            f"⚠️ No required chats configured. Clone verification "
-            f"impossible for user {user_id}."
-        )
-        return False, [], True
+        return True, [], False
 
     missing = []
     for chat in required:
@@ -54,7 +55,7 @@ async def _check_all_joined(bot: Bot, user_id: int):
             member = await bot.get_chat_member(chat["chat_id"], user_id)
             status = member.status
             log.info(
-                f"🔎 Membership check: user={user_id} chat={chat['chat_id']} "
+                f"🔎 Membership: user={user_id} chat={chat['chat_id']} "
                 f"status={status}"
             )
             if status in ("left", "kicked"):
@@ -64,7 +65,6 @@ async def _check_all_joined(bot: Bot, user_id: int):
                 f"⚠️ get_chat_member failed for chat {chat['chat_id']} "
                 f"user {user_id}: {e}"
             )
-            # Treat as missing (safe default)
             missing.append(chat)
 
     all_joined = len(missing) == 0
@@ -75,13 +75,15 @@ async def _check_all_joined(bot: Bot, user_id: int):
     except Exception:
         pass
 
-    return all_joined, missing, False
+    return all_joined, missing, True
 
 
+# ═══════════════════════════════════════════════
+# JOIN KEYBOARD — only missing chats + Verify
+# ═══════════════════════════════════════════════
 def _required_join_kb(missing: list) -> InlineKeyboardMarkup:
     rows = []
     for chat in missing:
-        label = chat["chat_title"] or str(chat["chat_id"])
         if chat["chat_username"]:
             url = f"https://t.me/{chat['chat_username'].lstrip('@')}"
         elif chat["invite_link"]:
@@ -90,8 +92,11 @@ def _required_join_kb(missing: list) -> InlineKeyboardMarkup:
             bare = str(chat["chat_id"]).replace("-100", "")
             url = f"https://t.me/c/{bare}"
 
-        prefix = "📢" if chat["chat_type"] == "channel" else "👥"
-        rows.append([InlineKeyboardButton(text=f"{prefix} {label}", url=url)])
+        if chat["chat_type"] == "channel":
+            btn_text = "📢 ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ"
+        else:
+            btn_text = "👥 ᴊᴏɪɴ ɢʀᴏᴜᴘ"
+        rows.append([InlineKeyboardButton(text=btn_text, url=url)])
 
     rows.append([
         InlineKeyboardButton(text="✅ ᴠᴇʀɪꜰʏ", callback_data="clone:verify"),
@@ -102,6 +107,21 @@ def _required_join_kb(missing: list) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
+def _missing_header(missing: list) -> str:
+    """Message text depends on which chats are missing."""
+    has_channel = any(c["chat_type"] == "channel" for c in missing)
+    has_group = any(c["chat_type"] != "channel" for c in missing)
+
+    if has_channel and has_group:
+        return "📢 <b>ᴀᴛ ꜰɪʀꜱᴛ, ᴊᴏɪɴ ᴛʜɪꜱ ᴄʜᴀɴɴᴇʟ ᴀɴᴅ ɢʀᴏᴜᴘ ᴛᴏ ᴄᴏɴᴛɪɴᴜᴇ.</b>"
+    if has_channel:
+        return "📢 <b>ᴀᴛ ꜰɪʀꜱᴛ, ᴊᴏɪɴ ᴛʜɪꜱ ᴄʜᴀɴɴᴇʟ.</b>"
+    return "👥 <b>ᴀᴛ ꜰɪʀꜱᴛ, ᴊᴏɪɴ ᴛʜɪꜱ ɢʀᴏᴜᴘ.</b>"
+
+
+# ═══════════════════════════════════════════════
+# TOKEN INSTRUCTIONS
+# ═══════════════════════════════════════════════
 def _token_instructions() -> str:
     return (
         "🎯 <b>ᴄʟᴏɴᴇ ʙᴏᴛ ꜱᴇᴛᴜᴘ</b>\n"
@@ -116,6 +136,12 @@ def _token_instructions() -> str:
     )
 
 
+def _token_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="❌ ᴄᴀɴᴄᴇʟ", callback_data="clone:cancel")],
+    ])
+
+
 # ═══════════════════════════════════════════════
 # SHARED FLOW
 # ═══════════════════════════════════════════════
@@ -123,19 +149,21 @@ async def _start_clone_flow(
     *, target_msg: Message, bot: Bot, state: FSMContext,
     user_id: int, is_cb: bool = False, cb: CallbackQuery = None,
 ):
-    # Block if called from within a clone bot
+    # Block clone creation from inside a clone bot
     if is_clone():
-        text = (
-            "🚫 <b>ᴛʜɪꜱ ɪꜱ ᴀ ᴄʟᴏɴᴇ ʙᴏᴛ.</b>\n\n"
-            "ᴛᴏ ᴄʀᴇᴀᴛᴇ ʏᴏᴜʀ ᴏᴡɴ ᴄʟᴏɴᴇ, ᴠɪꜱɪᴛ ᴛʜᴇ ᴏʀɪɢɪɴᴀʟ ʙᴏᴛ."
-        )
         if is_cb:
-            await cb.answer("🚫 ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ ɪɴ ᴄʟᴏɴᴇ", show_alert=True)
+            await cb.answer(
+                "🚫 ᴄʀᴇᴀᴛᴇ ᴄʟᴏɴᴇꜱ ꜰʀᴏᴍ ᴛʜᴇ ᴏʀɪɢɪɴᴀʟ ʙᴏᴛ",
+                show_alert=True,
+            )
         else:
-            await target_msg.answer(text)
+            await target_msg.answer(
+                "🚫 <b>ɴᴏᴛ ᴀᴠᴀɪʟᴀʙʟᴇ ʜᴇʀᴇ.</b>\n\n"
+                "ᴠɪꜱɪᴛ ᴛʜᴇ ᴏʀɪɢɪɴᴀʟ ʙᴏᴛ ᴛᴏ ᴄʀᴇᴀᴛᴇ ʏᴏᴜʀ ᴄʟᴏɴᴇ."
+            )
         return
 
-    # ── Existing clone? ──
+    # Already has a clone?
     existing = await clone_db.get_clone_by_owner(user_id)
     if existing:
         status = "✅ ᴀᴄᴛɪᴠᴇ" if existing["is_active"] else "🚫 ɪɴᴀᴄᴛɪᴠᴇ"
@@ -161,7 +189,7 @@ async def _start_clone_flow(
             await target_msg.answer(text, reply_markup=kb)
         return
 
-    # ── Global cap ──
+    # Global cap
     total = await clone_db.get_total_clones_count()
     if total >= MAX_TOTAL_CLONES:
         err = (
@@ -174,30 +202,37 @@ async def _start_clone_flow(
             await target_msg.answer(err)
         return
 
-    # ── LIVE membership check ──
-    all_joined, missing, no_required = await _check_all_joined(bot, user_id)
+    # LIVE membership check
+    all_joined, missing, has_required = await _check_all_joined(bot, user_id)
 
-    if no_required:
-        err = (
-            "⚙️ <b>ᴄʟᴏɴᴇ ꜱʏꜱᴛᴇᴍ ɴᴏᴛ ʀᴇᴀᴅʏ</b>\n\n"
-            "ᴛʜᴇ ʙᴏᴛ ᴏᴡɴᴇʀ ʜᴀꜱ ɴᴏᴛ ᴄᴏɴꜰɪɢᴜʀᴇᴅ ᴀɴʏ ʀᴇQᴜɪʀᴇᴅ\n"
-            "ᴄʜᴀɴɴᴇʟꜱ ᴏʀ ɢʀᴏᴜᴘꜱ ʏᴇᴛ.\n\n"
-            "ᴘʟᴇᴀꜱᴇ ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ʙᴏᴛ ᴏᴡɴᴇʀ."
-        )
+    # Case A: no required chats configured → skip verification
+    if not has_required:
+        await state.set_state(CloneFSM.waiting_token)
         if is_cb:
-            await cb.answer("⚙️ ɴᴏ ʀᴇQᴜɪʀᴇᴅ ᴄʜᴀᴛꜱ ꜱᴇᴛ", show_alert=True)
+            try:
+                await target_msg.edit_text(
+                    _token_instructions(),
+                    reply_markup=_token_kb(),
+                    disable_web_page_preview=True,
+                )
+            except Exception:
+                await bot.send_message(
+                    user_id, _token_instructions(),
+                    reply_markup=_token_kb(),
+                    disable_web_page_preview=True,
+                )
+            await cb.answer()
         else:
-            await target_msg.answer(err)
+            await target_msg.answer(
+                _token_instructions(),
+                reply_markup=_token_kb(),
+                disable_web_page_preview=True,
+            )
         return
 
+    # Case B: required chats exist and some missing → show join screen
     if not all_joined:
-        text = (
-            "📢 <b>ᴊᴏɪɴ ʀᴇQᴜɪʀᴇᴅ</b>\n"
-            "━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "ᴛᴏ ᴄʀᴇᴀᴛᴇ ʏᴏᴜʀ ᴄʟᴏɴᴇ ʙᴏᴛ, ʏᴏᴜ ᴍᴜꜱᴛ ᴊᴏɪɴ\n"
-            "ᴛʜᴇ ꜰᴏʟʟᴏᴡɪɴɢ ᴄʜᴀɴɴᴇʟꜱ/ɢʀᴏᴜᴘꜱ:\n\n"
-            "👉 ᴊᴏɪɴ ᴛʜᴇᴍ ᴀʟʟ, ᴛʜᴇɴ ᴛᴀᴘ ᴠᴇʀɪꜰʏ."
-        )
+        text = _missing_header(missing)
         kb = _required_join_kb(missing)
         if is_cb:
             try:
@@ -209,25 +244,27 @@ async def _start_clone_flow(
             await target_msg.answer(text, reply_markup=kb)
         return
 
-    # ── Ask for token ──
+    # Case C: all joined → ask for token
     await state.set_state(CloneFSM.waiting_token)
-    text = _token_instructions()
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="❌ ᴄᴀɴᴄᴇʟ", callback_data="clone:cancel")],
-    ])
     if is_cb:
         try:
             await target_msg.edit_text(
-                text, reply_markup=kb, disable_web_page_preview=True
+                _token_instructions(),
+                reply_markup=_token_kb(),
+                disable_web_page_preview=True,
             )
         except Exception:
             await bot.send_message(
-                user_id, text, reply_markup=kb, disable_web_page_preview=True
+                user_id, _token_instructions(),
+                reply_markup=_token_kb(),
+                disable_web_page_preview=True,
             )
         await cb.answer()
     else:
         await target_msg.answer(
-            text, reply_markup=kb, disable_web_page_preview=True
+            _token_instructions(),
+            reply_markup=_token_kb(),
+            disable_web_page_preview=True,
         )
 
 
@@ -277,8 +314,7 @@ async def process_token(message: Message, state: FSMContext):
 
     if ":" not in token or len(token) < 30 or len(token) > 100:
         return await message.reply(
-            "❌ <b>ɪɴᴠᴀʟɪᴅ ᴛᴏᴋᴇɴ ꜰᴏʀᴍᴀᴛ.</b>\n\n"
-            "ᴜꜱᴇ /clone ᴛᴏ ʀᴇꜱᴛᴀʀᴛ."
+            "❌ <b>ɪɴᴠᴀʟɪᴅ ᴛᴏᴋᴇɴ ꜰᴏʀᴍᴀᴛ.</b>\n\nᴜꜱᴇ /clone ᴛᴏ ʀᴇꜱᴛᴀʀᴛ."
         )
 
     test_bot = None
@@ -311,15 +347,14 @@ async def process_token(message: Message, state: FSMContext):
             "❌ <b>ᴛʜɪꜱ ʙᴏᴛ ɪꜱ ᴀʟʀᴇᴀᴅʏ ᴀ ᴄʟᴏɴᴇ.</b>"
         )
 
-    # Re-check membership (still live)
-    all_joined, missing, _ = await _check_all_joined(
+    # Re-verify membership (in case user left during typing)
+    all_joined, missing, has_required = await _check_all_joined(
         message.bot, message.from_user.id
     )
-    if not all_joined:
+    if has_required and not all_joined:
         await state.clear()
         return await message.reply(
-            "📢 <b>ʏᴏᴜ ʟᴇꜰᴛ ᴀ ʀᴇQᴜɪʀᴇᴅ ᴄʜᴀᴛ.</b>\n\n"
-            "ᴘʟᴇᴀꜱᴇ ʀᴇᴊᴏɪɴ ᴀɴᴅ ᴛʀʏ /clone ᴀɢᴀɪɴ.",
+            _missing_header(missing),
             reply_markup=_required_join_kb(missing),
         )
 
