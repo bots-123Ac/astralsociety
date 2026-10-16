@@ -12,6 +12,7 @@ def main_menu_kb():
         [InlineKeyboardButton(text="👥 ꜱᴜᴘᴘᴏʀᴛɪᴠᴇ ɢᴄ", url=SUPPORT_GROUP_LINK)],
         [InlineKeyboardButton(text="📢 ꜱᴜᴘᴘᴏʀᴛɪᴠᴇ ᴄʜᴀɴɴᴇʟ", url=SUPPORT_CHANNEL_LINK)],
         [InlineKeyboardButton(text="🌐 ᴡᴇʙꜱɪᴛᴇ", url=WEBSITE_URL)],
+        [InlineKeyboardButton(text="🎯 ᴄʟᴏɴᴇ ʙᴏᴛ", callback_data="clone:start")],
         [InlineKeyboardButton(text="🥷 ᴋɪᴅɴᴀᴘ ᴍᴇ", url=BOT_ADD_LINK)],
     ])
 
