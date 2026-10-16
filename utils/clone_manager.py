@@ -30,20 +30,21 @@ _active_clones: dict[int, dict] = {}
 #     "bot": Bot,
 #     "task": asyncio.Task,
 #     "record": asyncpg.Record,
-#     "allowed_until": float,       # cache timestamp for membership check
+#     "allowed_until": float,
 #     "allowed": bool,
 # }
 
-_dispatcher_factory: Optional[Callable[[int], Dispatcher]] = None
+_dispatcher_factory: Optional[Callable[[object], Dispatcher]] = None
 _membership_task: Optional[asyncio.Task] = None
 
 
-def set_dispatcher_factory(factory: Callable[[int], Dispatcher]):
+def set_dispatcher_factory(factory: Callable[[object], Dispatcher]):
     """
     Called from main.py at boot.
 
-    The factory receives the clone's owner_user_id and returns a fully
-    configured Dispatcher with all routers registered.
+    The factory receives the FULL clone record (asyncpg.Record)
+    and returns a fully configured Dispatcher with all routers
+    and clone-specific middlewares registered.
     """
     global _dispatcher_factory
     _dispatcher_factory = factory
@@ -86,9 +87,9 @@ async def start_clone(clone_record) -> bool:
         await clone_db.set_clone_active(clone_id, False, f"get_me: {e}")
         return False
 
-    # Build dispatcher with owner id injected
+    # Build dispatcher with FULL clone record injected
     try:
-        dp = _dispatcher_factory(clone_record["owner_user_id"])
+        dp = _dispatcher_factory(clone_record)
     except Exception as e:
         print(f"❌ Clone {clone_id}: dispatcher build failed — {e}")
         await bot.session.close()
@@ -183,7 +184,7 @@ def is_clone_allowed(clone_id: int) -> bool:
     if not info:
         return False
     if time.time() > info["allowed_until"]:
-        # cache expired — default to True and let the background task refresh
+        # cache expired — default to last known value
         return info["allowed"]
     return info["allowed"]
 
@@ -197,7 +198,7 @@ def get_clone_record_by_bot_id(bot_id: int):
     return None
 
 
-async def _verify_membership_for_clone(clone_record, main_bot: Bot) -> tuple[bool, list]:
+async def _verify_membership_for_clone(clone_record, main_bot: Bot):
     """
     Check if the clone owner is still in all required chats.
     Uses the MAIN bot to query chat membership (clones may not be in those chats).
@@ -229,7 +230,7 @@ async def _verify_membership_for_clone(clone_record, main_bot: Bot) -> tuple[boo
 async def membership_check_loop(main_bot: Bot):
     """
     Background loop: every N seconds, re-verify each active clone's owner.
-    Updates the in-memory 'allowed' flag and DB is_active accordingly.
+    Updates the in-memory 'allowed' flag.
     """
     while True:
         try:
