@@ -1,29 +1,61 @@
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!--                                                                         -->
-<!--          🌌  ASTRAL EMPIRE BOT — OFFICIAL README  🌌                    -->
+<!--     🌌  ASTRAL EMPIRE BOT — HYPER-ANIMATED README  🌌                   -->
 <!--                                                                         -->
-<!--              Version 6.0 • Clone Empire Edition                         -->
+<!--           Version 6.0 • Clone Empire • Cyberpunk Edition                -->
 <!--                                                                         -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20,24,30&height=320&section=header&text=Astral%20Empire&fontSize=110&fontAlignY=32&animation=twinkling&fontColor=ffffff&desc=The%20Ultimate%20All-in-One%20Telegram%20Bot%20Empire&descAlignY=58&descSize=22&descColor=A78BFA" width="100%" />
+<!-- ═══ MATRIX RAIN HEADER ═══ -->
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20,24,30&height=340&section=header&text=Astral%20Empire&fontSize=130&fontAlignY=30&animation=twinkling&fontColor=ffffff&desc=⚡%20The%20Ultimate%20All-in-One%20Telegram%20Bot%20Empire%20⚡&descAlignY=58&descSize=24&descColor=A78BFA&stroke=A78BFA&strokeWidth=2" width="100%" />
 
+<!-- ═══ NEON GLOW NAME ═══ -->
+<h1 align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=60&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=90&lines=⛧+ASTRAL+EMPIRE+⛧;⚡+CLONE+EMPIRE+EDITION+⚡;🌟+v6.0.0+RELEASE+🌟" alt="Main Title" />
+</h1>
+
+<!-- ═══ PARTY PARROT DIVIDER ═══ -->
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="50" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="50" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="50" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="50" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="50" />
+
+<!-- ═══ MULTI-LINE ROTATING TYPING ═══ -->
 <br/>
 
 <a href="https://t.me/AstralEmpireRobot">
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=32&duration=2800&pause=700&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=%F0%9F%8C%8C+Welcome+to+Astral+Empire;%F0%9F%93%9A+Study+%7C+Quiz+%7C+Games+%7C+Economy;%E2%AD%90+XP+%26+Level+System;%F0%9F%A4%96+Clone+Bot+System+v6.0;%F0%9F%9A%80+Built+with+%E2%9D%A4%EF%B8%8F+by+Astral+Society" alt="Typing 1" />
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=32&duration=2200&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=%F0%9F%8C%8C+WELCOME+TO+ASTRAL+EMPIRE;%F0%9F%93%9A+STUDY+%7C+QUIZ+%7C+GAMES+%7C+ECONOMY;%E2%AD%90+XP+%26+LEVEL+SYSTEM;%F0%9F%A4%96+CLONE+BOT+SYSTEM+v6.0;%F0%9F%9A%80+BUILT+WITH+%E2%9D%A4%EF%B8%8F+BY+ASTRAL+SOCIETY" alt="Typing 1" />
 </a>
 
 <br/>
 
 <a href="https://t.me/AstralEmpireRobot">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=22&duration=2500&pause=600&color=FFD700&center=true&vCenter=true&width=800&height=50&lines=%F0%9F%8E%B0+Lucky+Door+%7C+%F0%9F%92%8E+Treasure+Hunt+%7C+%F0%9F%92%A3+Bomb+Defuse;%F0%9F%8F%86+4-Tier+Global+Leaderboards;%F0%9F%91%91+Premium+%7C+Protection+Checker+%7C+XP+Boost;%F0%9F%A4%96+Make+Your+Own+Clone+Bot+Today;%F0%9F%8C%A0+Learn+%E2%80%A2+Play+%E2%80%A2+Compete+%E2%80%A2+Rise" alt="Typing 2" />
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=22&duration=2000&pause=400&color=FFD700&center=true&vCenter=true&width=800&height=50&lines=%F0%9F%8E%B0+Lucky+Door+%7C+%F0%9F%92%8E+Treasure+Hunt+%7C+%F0%9F%92%A3+Bomb+Defuse;%F0%9F%8F%86+4-Tier+Global+Leaderboards;%F0%9F%91%91+Premium+%7C+Protection+Checker+%7C+XP+Boost;%F0%9F%A4%96+Make+Your+Own+Clone+Bot+Today;%F0%9F%8C%A0+LEARN+%E2%80%A2+PLAY+%E2%80%A2+COMPETE+%E2%80%A2+RISE" alt="Typing 2" />
 </a>
 
-<br/><br/>
+<br/>
 
+<a href="https://t.me/AstralEmpireRobot">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=18&duration=2500&pause=300&color=00D9FF&center=true&vCenter=true&width=700&height=40&lines=%E2%9A%A1+50%2B+Commands+%7C+8+Major+Systems+%E2%9A%A1;%F0%9F%94%A5+PostgreSQL+%2B+Async+%2B+Railway+%F0%9F%94%A5;%E2%9C%A8+Fernet+AES+Encrypted+Tokens+%E2%9C%A8" alt="Typing 3" />
+
+<br/>
+
+<!-- ═══ STARGATE / WARP GIF ═══ -->
+<img src="https://media.giphy.com/media/xUOwGdPZ8l3N2t4F0c/giphy.gif" width="400" />
+
+<!-- ═══ SCROLLING MARQUEE ═══ -->
+<br/>
+
+<marquee behavior="scroll" direction="left" scrollamount="10">
+  <h3>⚡ 𝗔𝗦𝗧𝗥𝗔𝗟 𝗘𝗠𝗣𝗜𝗥𝗘 — 𝗧𝗛𝗘 𝗨𝗟𝗧𝗜𝗠𝗔𝗧𝗘 𝗧𝗘𝗟𝗘𝗚𝗥𝗔𝗠 𝗕𝗢𝗧 𝗘𝗫𝗣𝗘𝗥𝗜𝗘𝗡𝗖𝗘 ⚡ &nbsp;&nbsp; 🤖 𝗠𝗔𝗞𝗘 𝗬𝗢𝗨𝗥 𝗢𝗪𝗡 𝗖𝗟𝗢𝗡𝗘 𝗕𝗢𝗧 𝗧𝗢𝗗𝗔𝗬 🤖 &nbsp;&nbsp; 🚀 𝗩𝟲.𝟬 𝗥𝗘𝗟𝗘𝗔𝗦𝗘𝗗 🚀 &nbsp;&nbsp;</h3>
+</marquee>
+
+<br/>
+
+<!-- ═══ MAIN CTA BUTTONS ═══ -->
 <p align="center">
   <a href="https://t.me/AstralEmpireRobot">
     <img src="https://img.shields.io/badge/🤖_USE_BOT-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="45" />
@@ -41,6 +73,7 @@
 
 <br/>
 
+<!-- ═══ TECH STACK BADGES ═══ -->
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/aiogram-v3.13+-00A8E8?style=for-the-badge&logo=python&logoColor=white&labelColor=0D1117" />
@@ -58,6 +91,7 @@
 
 <br/>
 
+<!-- ═══ STATUS BADGES ═══ -->
 <p align="center">
   <img src="https://img.shields.io/badge/Status-🟢_Online-22C55E?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/Version-6.0.0-A78BFA?style=for-the-badge&labelColor=0D1117" />
@@ -74,6 +108,7 @@
 
 <br/>
 
+<!-- ═══ TIER BADGES ═══ -->
 <p align="center">
   <img src="https://img.shields.io/badge/👑_PREMIUM-FFD700?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/💎_VIP-00D9FF?style=for-the-badge&labelColor=0D1117" />
@@ -85,12 +120,14 @@
 
 <br/>
 
+<!-- ═══ ANIMATED SNAKE ═══ -->
 <img src="https://raw.githubusercontent.com/platane/snk/output/github-contribution-grid-snake-dark.svg" width="100%" />
 
 <br/>
 
 </div>
 
+<!-- ═══ NEON DIVIDER ═══ -->
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -99,25 +136,32 @@
 
 <div align="center">
 
-# 🤖 ɴᴇᴡ ɪɴ ᴠ6.0 — ᴄʟᴏɴᴇ ʙᴏᴛ ꜱʏꜱᴛᴇᴍ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=45&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=900&height=70&lines=🤖+NEW+IN+V6.0+—+CLONE+BOT+SYSTEM+🤖;⚡+MAKE+YOUR+OWN+EMPIRE+⚡;🔐+100%25+ENCRYPTED+🔐" alt="Clone Bot Title" />
+</h1>
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=800&lines=Make+Your+Own+Astral+Empire+Clone+%F0%9F%A4%96;Same+Features+%7C+Your+Own+Owner;100%25+Encrypted+%26+Safe+%F0%9F%94%92;Launch+in+Under+60+Seconds+%E2%9A%A1" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2200&pause=500&color=FFD700&center=true&vCenter=true&width=900&lines=Make+Your+Own+Astral+Empire+Clone+%F0%9F%A4%96;Same+Features+%7C+Your+Own+Owner;100%25+Encrypted+%26+Safe+%F0%9F%94%92;Launch+in+Under+60+Seconds+%E2%9A%A1" />
 
 <br/>
 
 > ### 🌟 *"Why use only one bot, when you can rule your own empire?"*
 
-</div>
+<br/>
+
+<img src="https://media.giphy.com/media/l0HlPystfePnAI3G8/giphy.gif" width="350" />
 
 <br/>
 
+<!-- ═══ CLONE BOT FEATURES GRID ═══ -->
 <table align="center" width="100%">
 <tr>
 <td width="50%" valign="top">
 
 <div align="center">
 
-### 🎯 **ᴏɴᴇ-ᴄʟɪᴄᴋ ᴄʟᴏɴᴇ**
+<h3>🎯 <b>ᴏɴᴇ-ᴄʟɪᴄᴋ ᴄʟᴏɴᴇ</b></h3>
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=12&duration=2000&pause=400&color=22C55E&center=true&vCenter=true&width=350&lines=⚡+Launch+in+60+seconds+⚡" />
 
 </div>
 
@@ -135,7 +179,9 @@
 
 <div align="center">
 
-### 📢 **ᴍᴀɴᴅᴀᴛᴏʀʏ ᴊᴏɪɴ ꜱʏꜱᴛᴇᴍ**
+<h3>📢 <b>ᴍᴀɴᴅᴀᴛᴏʀʏ ᴊᴏɪɴ ꜱʏꜱᴛᴇᴍ</b></h3>
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=12&duration=2000&pause=400&color=FF6B6B&center=true&vCenter=true&width=350&lines=🛡️+Auto+Access+Control+🛡️" />
 
 </div>
 
@@ -154,7 +200,9 @@
 
 <div align="center">
 
-### 👑 **ᴘᴇʀ-ᴄʟᴏɴᴇ ᴀᴅᴍɪɴꜱ**
+<h3>👑 <b>ᴘᴇʀ-ᴄʟᴏɴᴇ ᴀᴅᴍɪɴꜱ</b></h3>
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=12&duration=2000&pause=400&color=FFD700&center=true&vCenter=true&width=350&lines=👤+Full+Owner+Control+👤" />
 
 </div>
 
@@ -171,7 +219,9 @@
 
 <div align="center">
 
-### 📡 **ᴏᴡɴᴇʀ ʙʀᴏᴀᴅᴄᴀꜱᴛ**
+<h3>📡 <b>ᴏᴡɴᴇʀ ʙʀᴏᴀᴅᴄᴀꜱᴛ</b></h3>
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=12&duration=2000&pause=400&color=00D9FF&center=true&vCenter=true&width=350&lines=📢+Reach+Everyone+📢" />
 
 </div>
 
@@ -187,7 +237,7 @@
 </tr>
 </table>
 
-<br/>
+</div>
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
@@ -197,7 +247,9 @@
 
 <div align="center">
 
-# 👨‍💻 ᴍᴇᴇᴛ ᴛʜᴇ ᴛᴇᴀᴍ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=👨‍💻+MEET+THE+TEAM+👨‍💻;⚡+LEGENDS+BEHIND+THE+EMPIRE+⚡" alt="Team Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=3000&pause=600&color=A78BFA&center=true&vCenter=true&width=700&lines=The+Brilliant+Minds+Behind+Astral+Empire+%F0%9F%8C%9F;Made+with+Passion+%26+Late+Night+Coffee+%E2%98%95" />
 
@@ -209,17 +261,18 @@
 <tr>
 <td align="center" width="50%">
 
-<img src="https://files.catbox.moe/424au6.jpg" width="130" height="130" style="border-radius: 50%; border: 4px solid #FFD700; box-shadow: 0 0 30px #FFD700;" />
+<!-- ═══ OWNER CARD ═══ -->
+<img src="https://files.catbox.moe/424au6.jpg" width="150" height="150" style="border-radius: 50%; border: 5px solid #FFD700; box-shadow: 0 0 40px #FFD700, 0 0 80px #FFD700;" />
 
 <br/><br/>
 
-<img src="https://img.shields.io/badge/👑_OWNER-FFD700?style=for-the-badge&labelColor=0D1117" />
+<img src="https://readme-typing-svg.demolab.com?font=Orbitron&size=20&duration=2000&pause=300&color=FFD700&center=true&vCenter=true&width=350&lines=%F0%9F%91%91+OWNER+%F0%9F%91%91" />
 
 <br/>
 
-<h3>⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐</h3>
+<h2>⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐</h2>
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=14&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=300&lines=Visionary+%7C+Developer;Dream+Builder+%F0%9F%9A%80" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=14&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=300&lines=Visionary+%7C+Developer;Dream+Builder+%F0%9F%9A%80" />
 
 <br/>
 
@@ -227,20 +280,27 @@
   <img src="https://img.shields.io/badge/📱_@OfficialCrazyBoy07-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
 </a>
 
+<br/><br/>
+
+<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="50" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="50" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="50" />
+
 </td>
 <td align="center" width="50%">
 
-<img src="https://files.catbox.moe/4ris71.jpg" width="130" height="130" style="border-radius: 50%; border: 4px solid #A78BFA; box-shadow: 0 0 30px #A78BFA;" />
+<!-- ═══ CO-OWNER CARD ═══ -->
+<img src="https://files.catbox.moe/4ris71.jpg" width="150" height="150" style="border-radius: 50%; border: 5px solid #A78BFA; box-shadow: 0 0 40px #A78BFA, 0 0 80px #A78BFA;" />
 
 <br/><br/>
 
-<img src="https://img.shields.io/badge/⭐_CO--OWNER-A78BFA?style=for-the-badge&labelColor=0D1117" />
+<img src="https://readme-typing-svg.demolab.com?font=Orbitron&size=20&duration=2000&pause=300&color=A78BFA&center=true&vCenter=true&width=350&lines=%E2%AD%90+CO-OWNER+%E2%AD%90" />
 
 <br/>
 
-<h3>𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟</h3>
+<h2>𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟</h2>
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=14&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=300&lines=Creative+%7C+Innovator;Idea+Generator+%F0%9F%92%A1" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=14&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=300&lines=Creative+%7C+Innovator;Idea+Generator+%F0%9F%92%A1" />
 
 <br/>
 
@@ -248,56 +308,63 @@
   <img src="https://img.shields.io/badge/📱_@Lunar__kanha__4572-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
 </a>
 
+<br/><br/>
+
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="50" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="50" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="50" />
+
 </td>
 </tr>
 </table>
 
 <br/>
 
+<!-- ═══ BOT / GC / CHANNEL CARDS ═══ -->
 <table align="center" width="100%">
 <tr>
 <td align="center" width="33%">
 
-<img src="https://files.catbox.moe/pdpf7z.jpg" width="90" height="90" style="border-radius: 50%; border: 3px solid #A78BFA; box-shadow: 0 0 20px #A78BFA;" />
+<img src="https://files.catbox.moe/pdpf7z.jpg" width="100" height="100" style="border-radius: 50%; border: 4px solid #A78BFA; box-shadow: 0 0 30px #A78BFA;" />
 
-<br/>
+<br/><br/>
 
 <img src="https://img.shields.io/badge/🤖_OFFICIAL_BOT-26A5E4?style=for-the-badge&labelColor=0D1117" />
 
-<br/>
+<br/><br/>
 
 <a href="https://t.me/AstralEmpireRobot">
-  <img src="https://img.shields.io/badge/START_BOT-A78BFA?style=for-the-badge&labelColor=0D1117" />
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&size=14&duration=2000&pause=300&color=A78BFA&center=true&vCenter=true&width=200&lines=%E2%96%B6+START+BOT+%E2%96%B6" />
 </a>
 
 </td>
 <td align="center" width="33%">
 
-<img src="https://files.catbox.moe/ho69iu.jpg" width="90" height="90" style="border-radius: 50%; border: 3px solid #22C55E; box-shadow: 0 0 20px #22C55E;" />
+<img src="https://files.catbox.moe/ho69iu.jpg" width="100" height="100" style="border-radius: 50%; border: 4px solid #22C55E; box-shadow: 0 0 30px #22C55E;" />
 
-<br/>
+<br/><br/>
 
 <img src="https://img.shields.io/badge/👥_SUPPORT_GROUP-5865F2?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
 
-<br/>
+<br/><br/>
 
 <a href="https://t.me/+-j8FiVjAUXExMmM1">
-  <img src="https://img.shields.io/badge/JOIN_NOW-22C55E?style=for-the-badge&labelColor=0D1117" />
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&size=14&duration=2000&pause=300&color=22C55E&center=true&vCenter=true&width=200&lines=%E2%96%B6+JOIN+NOW+%E2%96%B6" />
 </a>
 
 </td>
 <td align="center" width="33%">
 
-<img src="https://files.catbox.moe/eju0lf.jpg" width="90" height="90" style="border-radius: 50%; border: 3px solid #00D9FF; box-shadow: 0 0 20px #00D9FF;" />
+<img src="https://files.catbox.moe/eju0lf.jpg" width="100" height="100" style="border-radius: 50%; border: 4px solid #00D9FF; box-shadow: 0 0 30px #00D9FF;" />
 
-<br/>
+<br/><br/>
 
 <img src="https://img.shields.io/badge/📚_STUDY_CHANNEL-9B59B6?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
 
-<br/>
+<br/><br/>
 
 <a href="https://t.me/Astral_study_chest">
-  <img src="https://img.shields.io/badge/JOIN_NOW-00D9FF?style=for-the-badge&labelColor=0D1117" />
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&size=14&duration=2000&pause=300&color=00D9FF&center=true&vCenter=true&width=200&lines=%E2%96%B6+JOIN+NOW+%E2%96%B6" />
 </a>
 
 </td>
@@ -314,7 +381,9 @@
 
 <div align="center">
 
-# 🌌 ᴀʙᴏᴜᴛ ᴛʜᴇ ᴘʀᴏᴊᴇᴄᴛ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=🌌+ABOUT+THE+PROJECT+🌌;⚡+OUR+MISSION+⚡" alt="About Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=3000&pause=600&color=A78BFA&center=true&vCenter=true&width=700&lines=Building+the+Future+of+Telegram+Bots+%F0%9F%9A%80;A+Single+Bot+with+Infinite+Possibilities+%E2%9C%A8" />
 
@@ -327,6 +396,8 @@
 > ### 🌟 *"One Bot. Infinite Possibilities. Endless Empires."*
 
 </div>
+
+<br/>
 
 **˹𝐀𝐬𝐭𝐫𝐚𝐥 ꭙ 𝐄𝐦𝐩𝐢𝐫𝐞˼** is a premium, feature-rich **All-in-One Telegram Bot** that blends **Study Material**, **Quiz Systems**, **Economy**, **Interactive Gaming**, **Premium Memberships**, **Level Progression**, **Group Management**, and a **full Clone Bot System** into a single, elegant ecosystem.
 
@@ -406,7 +477,9 @@ Whether you're a **student** looking for curated study resources, an **admin** m
 
 <div align="center">
 
-# ✨ ᴋᴇʏ ꜰᴇᴀᴛᴜʀᴇꜱ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=22C55E&center=true&vCenter=true&width=900&height=70&lines=✨+KEY+FEATURES+✨;⚡+8+MAJOR+SYSTEMS+⚡;🔥+50%2B+COMMANDS+🔥" alt="Features Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=22C55E&center=true&vCenter=true&width=700&lines=Explore+Everything+Astral+Empire+Has+To+Offer;8+Major+Systems+%C2%B7+40%2B+Commands;Built+with+Passion+%E2%9D%A4%EF%B8%8F" />
 
@@ -635,7 +708,9 @@ Earn → Spend → Upgrade → Dominate
 
 <div align="center">
 
-# 🤖 ᴄʟᴏɴᴇ ʙᴏᴛ ꜱʏꜱᴛᴇᴍ ᴅᴇᴇᴘ ᴅɪᴠᴇ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=FF6B6B&center=true&vCenter=true&width=900&height=70&lines=🤖+CLONE+BOT+SYSTEM+🤖;⚡+DEEP+DIVE+⚡" alt="Clone Deep Dive" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FF6B6B&center=true&vCenter=true&width=800&lines=Your+Own+Branded+Bot+%F0%9F%A4%96;Full+Feature+Parity+with+Main+Bot;Independent+Owner+%26+Admins" />
 
@@ -738,7 +813,9 @@ Earn → Spend → Upgrade → Dominate
 
 <div align="center">
 
-# ⭐ xᴘ & ʟᴇᴠᴇʟ ꜱʏꜱᴛᴇᴍ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=900&height=70&lines=⭐+XP+%26+LEVEL+SYSTEM+⭐;⚡+PROGRESS+YOUR+JOURNEY+⚡" alt="XP Level Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=Level+Up+Your+Journey+%F0%9F%8C%9F;Earn+XP+%7C+Level+Up+%7C+Unlock+Rewards;Progression+Like+Never+Before+%F0%9F%9A%80" />
 
@@ -842,7 +919,9 @@ Earn → Spend → Upgrade → Dominate
 
 <div align="center">
 
-# 🛒 ᴀꜱᴛʀᴀʟ ꜱʜᴏᴘ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=00D9FF&center=true&vCenter=true&width=900&height=70&lines=🛒+ASTRAL+SHOP+🛒;💎+PREMIUM+ITEMS+💎" alt="Shop Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=00D9FF&center=true&vCenter=true&width=700&lines=Premium+Items+at+Your+Fingertips;Boost+Your+Journey+%E2%9A%A1;Purchase+with+Gems+%F0%9F%92%8E" />
 
@@ -930,7 +1009,9 @@ Earn → Spend → Upgrade → Dominate
 
 <div align="center">
 
-# 🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ ꜱʏꜱᴛᴇᴍ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=900&height=70&lines=🏆+LEADERBOARD+SYSTEM+🏆;⚡+4-TIER+GLOBAL+⚡" alt="Leaderboard Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=4-Tier+Global+Leaderboard+%F0%9F%8F%86;Today+%7C+Weekly+%7C+Monthly+%7C+All-Time;Compete+with+the+Best+%F0%9F%94%A5" />
 
@@ -1012,7 +1093,9 @@ Earn → Spend → Upgrade → Dominate
 
 <div align="center">
 
-# 🛠️ ᴛᴇᴄʜ ꜱᴛᴀᴄᴋ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=00D9FF&center=true&vCenter=true&width=900&height=70&lines=🛠️+TECH+STACK+🛠️;⚡+POWERED+BY+MODERN+TOOLS+⚡" alt="Tech Stack Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=00D9FF&center=true&vCenter=true&width=700&lines=Powered+by+Modern+Technologies+%E2%9A%A1;Built+for+Performance+%F0%9F%9A%80;Scalable+%26+Reliable+%F0%9F%94%A5" />
 
@@ -1061,7 +1144,9 @@ cryptography>=42.0.0    # Fernet Token Encryption (v6.0+)
 
 <div align="center">
 
-# 🎯 ᴄᴏᴍᴍᴀɴᴅ ᴄᴇɴᴛᴇʀ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=900&height=70&lines=🎯+COMMAND+CENTER+🎯;⚡+50%2B+COMMANDS+⚡" alt="Commands Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=40%2B+Commands+at+Your+Fingertips;Organized+%26+Easy+to+Use+%E2%9C%A8;Everything+Just+a+Click+Away+%F0%9F%8E%AF" />
 
@@ -1176,7 +1261,9 @@ cryptography>=42.0.0    # Fernet Token Encryption (v6.0+)
 
 <div align="center">
 
-# 🚀 ǫᴜɪᴄᴋ ꜱᴛᴀʀᴛ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=FF6B6B&center=true&vCenter=true&width=900&height=70&lines=🚀+QUICK+START+🚀;⚡+LAUNCH+IN+5+MINUTES+⚡" alt="Quick Start Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FF6B6B&center=true&vCenter=true&width=700&lines=Get+Started+in+Under+5+Minutes+%E2%9A%A1;Deploy+Anywhere+%F0%9F%9A%80;Simple+Setup+%E2%9C%A8" />
 
@@ -1262,7 +1349,9 @@ python main.py
 
 <div align="center">
 
-# 📁 ᴘʀᴏᴊᴇᴄᴛ ꜱᴛʀᴜᴄᴛᴜʀᴇ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=📁+PROJECT+STRUCTURE+📁;⚡+CLEAN+ARCHITECTURE+⚡" alt="Structure Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=700&lines=Clean+%26+Organized+Architecture+%F0%9F%8F%97%EF%B8%8F;Modular+Design+Pattern+%E2%9C%A8;Easy+to+Extend+%F0%9F%94%A7" />
 
@@ -1333,7 +1422,9 @@ astral-empire-bot/
 
 <div align="center">
 
-# 🗺️ ʀᴏᴀᴅᴍᴀᴘ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=22C55E&center=true&vCenter=true&width=900&height=70&lines=🗺️+ROADMAP+🗺️;⚡+FUTURE+PLANS+⚡" alt="Roadmap Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=22C55E&center=true&vCenter=true&width=700&lines=Constant+Updates+%26+New+Features+%F0%9F%94%A5;Join+Us+on+the+Journey+%F0%9F%9A%80" />
 
@@ -1400,7 +1491,9 @@ astral-empire-bot/
 
 <div align="center">
 
-# 💡 ᴡʜʏ ᴄʜᴏᴏꜱᴇ ᴀꜱᴛʀᴀʟ ᴇᴍᴘɪʀᴇ?
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=900&height=70&lines=💡+WHY+CHOOSE+US+💡;⚡+BUILT+DIFFERENT+⚡" alt="Why Us Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=Not+Just+a+Bot+%E2%80%94+An+Ecosystem+%F0%9F%8C%8C;Built+Different+%C2%B7+Built+Better;Experience+the+Future+%F0%9F%9A%80" />
 
@@ -1481,7 +1574,9 @@ astral-empire-bot/
 
 <div align="center">
 
-# 📊 ɢɪᴛʜᴜʙ ꜱᴛᴀᴛꜱ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=900&height=70&lines=📊+GITHUB+STATS+📊;⚡+LIVE+ANALYTICS+⚡" alt="GitHub Stats Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=Live+Stats+%26+Analytics+%F0%9F%93%88;Building+Something+Amazing+%E2%9C%A8;Growing+Every+Day+%F0%9F%8C%B1" />
 
@@ -1519,7 +1614,9 @@ astral-empire-bot/
 
 <div align="center">
 
-# ❓ ꜰʀᴇQᴜᴇɴᴛʟʏ ᴀꜱᴋᴇᴅ Qᴜᴇꜱᴛɪᴏɴꜱ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=00D9FF&center=true&vCenter=true&width=900&height=70&lines=❓+FAQ+❓;⚡+QUESTIONS+%26+ANSWERS+⚡" alt="FAQ Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=00D9FF&center=true&vCenter=true&width=700&lines=Got+Questions%3F+We+Have+Answers!+%F0%9F%92%A1;Everything+You+Need+to+Know+%F0%9F%93%96" />
 
@@ -1695,7 +1792,9 @@ Your clone bot stays active **as long as you remain a member of all required cha
 
 <div align="center">
 
-# 📅 ᴄʜᴀɴɢᴇʟᴏɢ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=📅+CHANGELOG+📅;⚡+WHAT'S+NEW+⚡" alt="Changelog Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=700&lines=What's+New+in+Version+6.0;Stay+Updated+%F0%9F%94%94;Fresh+Features+%F0%9F%8E%81" />
 
@@ -1772,7 +1871,9 @@ Your clone bot stays active **as long as you remain a member of all required cha
 
 <div align="center">
 
-# 💬 ꜱᴜᴘᴘᴏʀᴛ & ᴄᴏᴍᴍᴜɴɪᴛʏ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=00D9FF&center=true&vCenter=true&width=900&height=70&lines=💬+SUPPORT+%26+COMMUNITY+💬;⚡+JOIN+US+⚡" alt="Support Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=00D9FF&center=true&vCenter=true&width=700&lines=Join+Our+Growing+Community+%F0%9F%8C%8C;We're+Here+to+Help+%F0%9F%A4%9D;Let's+Build+Together+%F0%9F%9A%80" />
 
@@ -1808,6 +1909,12 @@ Your clone bot stays active **as long as you remain a member of all required cha
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=600&lines=⭐+If+you+like+this+project%2C+star+it!+⭐;Every+star+motivates+us+%F0%9F%92%9C;Thank+you+for+your+support!+%F0%9F%99%8F" />
 
+<br/><br/>
+
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="60" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="60" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="60" />
+
 </div>
 
 <br/>
@@ -1820,7 +1927,9 @@ Your clone bot stays active **as long as you remain a member of all required cha
 
 <div align="center">
 
-# 👨‍💻 ᴄʀᴇᴀᴛᴏʀꜱ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=👨‍💻+CREATORS+👨‍💻;⚡+THE+LEGENDS+⚡" alt="Creators Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=700&lines=The+Brilliant+Minds+Behind+Astral+Empire+%F0%9F%8C%9F;Made+with+Passion+%26+Late+Night+Coffee+%E2%98%95" />
 
@@ -1833,7 +1942,7 @@ Your clone bot stays active **as long as you remain a member of all required cha
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="https://files.catbox.moe/424au6.jpg" width="110" height="110" style="border-radius: 50%; border: 3px solid #FFD700; box-shadow: 0 0 20px #FFD700;" />
+      <img src="https://files.catbox.moe/424au6.jpg" width="130" height="130" style="border-radius: 50%; border: 4px solid #FFD700; box-shadow: 0 0 30px #FFD700, 0 0 60px #FFD700;" />
       <br/><br/>
       <img src="https://img.shields.io/badge/👑_Creator-FFD700?style=for-the-badge&labelColor=0D1117" />
       <br/>
@@ -1846,7 +1955,7 @@ Your clone bot stays active **as long as you remain a member of all required cha
       <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=14&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=300&lines=Visionary+%7C+Developer;Dream+Builder+%F0%9F%9A%80" />
     </td>
     <td align="center" width="50%">
-      <img src="https://files.catbox.moe/4ris71.jpg" width="110" height="110" style="border-radius: 50%; border: 3px solid #A78BFA; box-shadow: 0 0 20px #A78BFA;" />
+      <img src="https://files.catbox.moe/4ris71.jpg" width="130" height="130" style="border-radius: 50%; border: 4px solid #A78BFA; box-shadow: 0 0 30px #A78BFA, 0 0 60px #A78BFA;" />
       <br/><br/>
       <img src="https://img.shields.io/badge/⭐_Co--Creator-A78BFA?style=for-the-badge&labelColor=0D1117" />
       <br/>
@@ -1873,7 +1982,9 @@ Your clone bot stays active **as long as you remain a member of all required cha
 
 <div align="center">
 
-# 🤝 ᴄᴏɴᴛʀɪʙᴜᴛɪɴɢ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=22C55E&center=true&vCenter=true&width=900&height=70&lines=🤝+CONTRIBUTING+🤝;⚡+JOIN+THE+MOVEMENT+⚡" alt="Contributing Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=22C55E&center=true&vCenter=true&width=700&lines=Contributions+are+Always+Welcome!+%F0%9F%8E%89;Let's+Build+Together+%F0%9F%9A%80;Every+PR+Makes+a+Difference+%E2%9C%A8" />
 
@@ -1919,7 +2030,9 @@ git push origin feature/AmazingFeature
 
 <div align="center">
 
-# 📜 ʟɪᴄᴇɴꜱᴇ
+<h1>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=42&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=900&height=70&lines=📜+LICENSE+📜;⚡+MIT+OPEN+SOURCE+⚡" alt="License Title" />
+</h1>
 
 <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=MIT+License+%F0%9F%93%9C;Free+to+Use+%26+Modify+%E2%9C%A8;Open+Source+Forever+%F0%9F%92%9C" />
 
@@ -1953,6 +2066,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 <br/><br/>
 
+<!-- ═══ FINAL WAVE ═══ -->
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20,24,30&height=220&section=footer&animation=twinkling&text=See%20You%20in%20the%20Stars!&fontSize=42&fontColor=ffffff&fontAlignY=72" width="100%" />
 
 <br/>
@@ -1984,6 +2098,15 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 </p>
 
 <br/>
+
+<!-- ═══ FINAL PARROT SALUTE ═══ -->
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="40" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="40" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="40" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="40" />
+<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="40" />
+
+<br/><br/>
 
 </div>
 
