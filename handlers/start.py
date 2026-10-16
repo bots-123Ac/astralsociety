@@ -1,6 +1,7 @@
 """
 handlers/start.py — /start + welcome message.
 Uses shared welcome text so back button shows the same thing.
+NO credits here — credits live only in /about.
 """
 
 from aiogram import Router
