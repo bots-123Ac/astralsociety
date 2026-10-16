@@ -1,6 +1,7 @@
 """
 handlers/menu.py — /help, /about, and menu navigation.
 Back button returns the SAME welcome text as /start.
+About section contains all credits.
 """
 
 from aiogram import Router, F
@@ -16,9 +17,6 @@ from utils.welcome import build_welcome_text, build_about_text
 router = Router()
 
 
-# ═══════════════════════════════════════════════
-# /help
-# ═══════════════════════════════════════════════
 HELP_TEXT = (
     "🆘 <b>ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅꜱ</b>\n"
     "━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -46,6 +44,9 @@ HELP_TEXT = (
 )
 
 
+# ═══════════════════════════════════════════════
+# /help
+# ═══════════════════════════════════════════════
 @router.message(Command("help"))
 async def cmd_help(message: Message):
     await message.answer(
