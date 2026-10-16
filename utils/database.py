@@ -1556,3 +1556,38 @@ async def inc_bombdefuse_play(user_id) -> int:
         new_count, user_id, today
     )
     return new_count
+# ═══════════════════════════════════════════════
+# GROUP AUTO-REGISTRATION (NEW)
+# ═══════════════════════════════════════════════
+async def auto_register_group_from_message(chat_id: int, title: str):
+    """Called on every group message — ensures group is tracked."""
+    try:
+        pool = await get_pool()
+        await pool.execute(
+            """INSERT INTO active_groups (chat_id, title, added_at)
+               VALUES ($1, $2, $3)
+               ON CONFLICT (chat_id) DO UPDATE SET title = $2""",
+            chat_id, title or "", _to_str(_now())
+        )
+    except Exception:
+        pass
+
+
+async def get_dead_users_list(user_ids: list) -> int:
+    """Remove dead users (blocked/deleted) from DB. Returns count deleted."""
+    if not user_ids:
+        return 0
+    pool = await get_pool()
+    result = await pool.execute(
+        "DELETE FROM users WHERE user_id = ANY($1::bigint[])", user_ids
+    )
+    try:
+        return int(result.split()[-1])
+    except Exception:
+        return 0
+
+
+async def get_all_registered_groups_count() -> int:
+    pool = await get_pool()
+    val = await pool.fetchval("SELECT COUNT(*) FROM active_groups")
+    return val or 0
