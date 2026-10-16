@@ -7,19 +7,21 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.types import ErrorEvent
 
-from config import BOT_TOKEN, BOT_NAME, OWNER_ID
+from config import (
+    BOT_TOKEN, BOT_NAME, BOT_USERNAME, OWNER_ID,
+    CREATOR_1_NAME, CREATOR_1_ID, CREATOR_2_NAME, CREATOR_2_ID,
+)
 from utils.logger import setup_logger
 from utils.database import init_db, close_pool, get_pool, log_user_activity
 from utils.quiz_loader import background_load
 from utils import clone_db
 from utils import clone_manager
 from utils.clone_middleware import CloneAccessMiddleware
-from utils.permissions import set_current_bot_context
+from utils.bot_context import set_bot_context
 
 
 # ═══════════════════════════════════════════════
 # HANDLER MODULE LIST (order matters)
-# admin MUST be last (has wildcard handler)
 # ═══════════════════════════════════════════════
 HANDLER_MODULE_NAMES = [
     "handlers.start",
@@ -69,17 +71,11 @@ class ActivityMiddleware(BaseMiddleware):
 # BOT-CONTEXT MIDDLEWARE
 # ═══════════════════════════════════════════════
 class BotContextMiddleware(BaseMiddleware):
-    """
-    Sets the current bot's owner id in a contextvar so that
-    utils.permissions.is_owner / is_bot_admin return the correct
-    value for the bot that is currently handling the update.
-    """
-    def __init__(self, bot_owner_id: int, is_clone: bool = False):
-        self.bot_owner_id = bot_owner_id
-        self.is_clone = is_clone
+    def __init__(self, bot_info: dict):
+        self.bot_info = bot_info
 
     async def __call__(self, handler, event, data):
-        set_current_bot_context(self.bot_owner_id, self.is_clone)
+        set_bot_context(self.bot_info)
         return await handler(event, data)
 
 
@@ -87,17 +83,6 @@ class BotContextMiddleware(BaseMiddleware):
 # FRESH ROUTER LOADER
 # ═══════════════════════════════════════════════
 def _load_fresh_routers():
-    """
-    Reload all handler modules and return fresh Router instances.
-
-    aiogram v3 Router objects cannot be attached to multiple Dispatchers.
-    To build a Dispatcher for a clone bot, we reload every handler module
-    so each gets a brand-new Router instance.
-
-    NOTE: reloading resets module-level state (like ACTIVE_GAMES in the
-    game handlers). This only affects mid-game sessions running on the
-    main bot while a new clone is being created — acceptable trade-off.
-    """
     routers = []
     for mod_name in HANDLER_MODULE_NAMES:
         mod = importlib.import_module(mod_name)
@@ -109,37 +94,67 @@ def _load_fresh_routers():
 # ═══════════════════════════════════════════════
 # DISPATCHER FACTORY
 # ═══════════════════════════════════════════════
-def build_dispatcher(bot_owner_id: int, is_clone: bool = False,
-                     clone_id: int | None = None) -> Dispatcher:
-    """
-    Build a fully configured Dispatcher for either the main bot or a clone.
-    Uses freshly-reloaded Router instances so each Dispatcher is independent.
-    """
+def build_dispatcher(bot_info: dict, main_bot: Bot | None = None) -> Dispatcher:
     dp = Dispatcher()
 
-    # ── Middlewares (order matters) ──
     dp.message.middleware(ActivityMiddleware())
     dp.callback_query.middleware(ActivityMiddleware())
 
-    dp.message.middleware(BotContextMiddleware(bot_owner_id, is_clone))
-    dp.callback_query.middleware(BotContextMiddleware(bot_owner_id, is_clone))
+    dp.message.middleware(BotContextMiddleware(bot_info))
+    dp.callback_query.middleware(BotContextMiddleware(bot_info))
 
-    if is_clone and clone_id is not None:
-        cam = CloneAccessMiddleware(clone_id)
+    if bot_info.get("is_clone"):
+        cam = CloneAccessMiddleware(bot_info["clone_id"], main_bot)
         dp.message.middleware(cam)
         dp.callback_query.middleware(cam)
 
-    # ── Global error handler ──
     @dp.errors()
     async def on_error(event: ErrorEvent):
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    # ── Attach routers (order preserved from HANDLER_MODULE_NAMES) ──
     for router in _load_fresh_routers():
         dp.include_router(router)
 
     return dp
+
+
+# ═══════════════════════════════════════════════
+# MAIN BOT INFO
+# ═══════════════════════════════════════════════
+def _main_bot_info() -> dict:
+    return {
+        "is_clone": False,
+        "bot_name": BOT_NAME,
+        "bot_username": BOT_USERNAME,
+        "owner_id": OWNER_ID,
+        "owner_name": CREATOR_1_NAME,
+        "owner_username": "",
+        "original_owner_1_name": CREATOR_1_NAME,
+        "original_owner_1_id": CREATOR_1_ID,
+        "original_owner_2_name": CREATOR_2_NAME,
+        "original_owner_2_id": CREATOR_2_ID,
+    }
+
+
+# ═══════════════════════════════════════════════
+# CLONE BOT INFO
+# ═══════════════════════════════════════════════
+def _clone_bot_info(clone_record) -> dict:
+    return {
+        "is_clone": True,
+        "clone_id": clone_record["id"],
+        "bot_id": clone_record["bot_id"],
+        "bot_name": clone_record["bot_name"] or "",
+        "bot_username": clone_record["bot_username"] or "",
+        "owner_id": clone_record["owner_user_id"],
+        "owner_name": clone_record["owner_first_name"] or "User",
+        "owner_username": clone_record["owner_username"] or "",
+        "original_owner_1_name": CREATOR_1_NAME,
+        "original_owner_1_id": CREATOR_1_ID,
+        "original_owner_2_name": CREATOR_2_NAME,
+        "original_owner_2_id": CREATOR_2_ID,
+    }
 
 
 # ═══════════════════════════════════════════════
@@ -152,35 +167,24 @@ async def main():
     if not BOT_TOKEN:
         raise RuntimeError("❌ BOT_TOKEN missing!")
 
-    # ── DB init ──
     await init_db()
     await clone_db.init_clone_tables()
     await get_pool()
 
-    # ── Main bot ──
     bot = Bot(
         token=BOT_TOKEN,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
-    dp = build_dispatcher(bot_owner_id=OWNER_ID, is_clone=False)
+    dp = build_dispatcher(_main_bot_info(), main_bot=bot)
 
-    # ── Wire clone dispatcher factory ──
     def _factory(clone_record):
-        return build_dispatcher(
-            bot_owner_id=clone_record["owner_user_id"],
-            is_clone=True,
-            clone_id=clone_record["id"],
-        )
+        return build_dispatcher(_clone_bot_info(clone_record), main_bot=bot)
 
     clone_manager.set_dispatcher_factory(_factory)
 
-    # ── Background tasks ──
     asyncio.create_task(background_load())
 
-    # ── Load all active clones ──
     await clone_manager.load_all_clones()
-
-    # ── Start membership checker ──
     clone_manager.start_membership_checker(bot)
 
     logging.info("✅ Bot is running.")
