@@ -1,14 +1,11 @@
 """
 utils/clone_middleware.py — Block clone bot updates when the clone owner
 has left one of the required chats.
-
-This middleware is attached ONLY to clone-bot dispatchers (not the main bot).
-The main bot always runs regardless of its admins' membership.
 """
 
 from typing import Any, Awaitable, Callable
 
-from aiogram import BaseMiddleware
+from aiogram import BaseMiddleware, Bot
 from aiogram.types import Update, Message, CallbackQuery
 
 from utils import clone_manager
@@ -30,8 +27,9 @@ class CloneAccessMiddleware(BaseMiddleware):
     Blocks updates if the clone owner is not in all required chats.
     """
 
-    def __init__(self, clone_id: int):
+    def __init__(self, clone_id: int, main_bot: Bot | None = None):
         self.clone_id = clone_id
+        self.main_bot = main_bot
 
     async def __call__(
         self,
@@ -39,9 +37,8 @@ class CloneAccessMiddleware(BaseMiddleware):
         event: Update,
         data: dict[str, Any],
     ) -> Any:
-        # Fast in-memory check
+        # Fast in-memory check first
         if not clone_manager.is_clone_allowed(self.clone_id):
-            # Reply with the block message (only once per update)
             try:
                 if isinstance(event, Message):
                     await event.answer(BLOCK_TEXT)
@@ -52,6 +49,6 @@ class CloneAccessMiddleware(BaseMiddleware):
                     )
             except Exception:
                 pass
-            return  # 🚫 do not process the update
+            return
 
         return await handler(event, data)
