@@ -1,10 +1,9 @@
 """
-utils/welcome.py — Shared welcome/credits text builder.
+utils/welcome.py — Shared welcome & about text builder.
 
-Used by both `/start` handler and the `menu:main` callback so the
-same exact message appears in both places.
-
-Handles main bot vs clone bot dynamically.
+Welcome text: NO credits (both main & clone bots show the same layout,
+only the bot name at the top differs).
+About text: Contains full attribution (credits only here).
 """
 
 from config import (
@@ -16,7 +15,7 @@ from utils.bot_context import get_bot_context
 
 
 # ═══════════════════════════════════════════════
-# CREATOR LINKS
+# LINKS
 # ═══════════════════════════════════════════════
 def _creators_links() -> str:
     """Clickable links to BOTH original creators."""
@@ -35,14 +34,13 @@ def _main_bot_link() -> str:
 
 
 # ═══════════════════════════════════════════════
-# WELCOME TEXT (shared by /start + menu:main)
+# WELCOME TEXT — NO credits (both main & clone)
 # ═══════════════════════════════════════════════
 def build_welcome_text(user_first_name: str) -> str:
     ctx = get_bot_context()
 
-    # Bot display title
     if ctx.get("is_clone", False):
-        display_title = ctx.get("bot_name") or "Clone Bot"
+        display_title = ctx.get("bot_name") or "Bot"
     else:
         display_title = MAIN_BOT_NAME
 
@@ -56,15 +54,12 @@ def build_welcome_text(user_first_name: str) -> str:
         f"💰 ᴇᴄᴏɴᴏᴍʏ ꜱʏꜱᴛᴇᴍ\n"
         f"⭐ xᴘ & ʟᴇᴠᴇʟꜱ\n"
         f"🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅꜱ\n\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"⚡ ᴘᴏᴡᴇʀᴇᴅ ʙʏ: {_creators_links()}\n"
-        f"🤖 ᴄʟᴏɴᴇᴅ ʙʏ: {_main_bot_link()}\n\n"
         f"🎯 ᴛᴀᴘ ᴀ ʙᴜᴛᴛᴏɴ ᴛᴏ ʙᴇɢɪɴ 👇"
     )
 
 
 # ═══════════════════════════════════════════════
-# ABOUT TEXT
+# ABOUT TEXT — credits live HERE only
 # ═══════════════════════════════════════════════
 def build_about_text() -> str:
     ctx = get_bot_context()
@@ -76,7 +71,6 @@ def build_about_text() -> str:
         owner_username = ctx.get("owner_username") or ""
         owner_id = ctx.get("owner_id")
 
-        # Owner clickable link (username preferred, else user id)
         if owner_username:
             owner_line = (
                 f"<a href='https://t.me/{owner_username.lstrip('@')}'>"
@@ -92,13 +86,12 @@ def build_about_text() -> str:
             f"━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"🤖 ɴᴀᴍᴇ: <b>{bot_name}</b>\n"
             f"🆔 ᴜꜱᴇʀɴᴀᴍᴇ: @{bot_username}\n\n"
-            f"👤 <b>ᴛʜɪꜱ ʙᴏᴛ ᴡᴀꜱ ᴍᴀᴅᴇ ʙʏ:</b>\n"
+            f"👤 ᴛʜɪꜱ ʙᴏᴛ ᴡᴀꜱ ᴍᴀᴅᴇ ʙʏ:\n"
             f"{owner_line}\n\n"
             f"🤖 ᴄʟᴏɴᴇᴅ ʙʏ: {_main_bot_link()}\n"
             f"⚡ ᴘᴏᴡᴇʀᴇᴅ ʙʏ: {_creators_links()}"
         )
 
-    # Main bot about
     return (
         f"ℹ️ <b>ᴀʙᴏᴜᴛ ᴀꜱᴛʀᴀʟ ᴇᴍᴘɪʀᴇ</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━\n\n"
