@@ -1,11 +1,5 @@
 """
 utils/clone_manager.py — Spawn, manage and monitor clone bot instances.
-
-Each clone runs its own aiogram Bot + Dispatcher in a background asyncio task
-inside the same Python process as the main bot.
-
-The dispatcher factory is injected from main.py at boot to avoid circular
-imports (main imports handlers, handlers import clone_manager).
 """
 
 import asyncio
@@ -26,26 +20,13 @@ from utils import clone_db
 # IN-MEMORY STATE
 # ═══════════════════════════════════════════════
 _active_clones: dict[int, dict] = {}
-# clone_id -> {
-#     "bot": Bot,
-#     "task": asyncio.Task,
-#     "record": asyncpg.Record,
-#     "allowed_until": float,
-#     "allowed": bool,
-# }
 
 _dispatcher_factory: Optional[Callable[[object], Dispatcher]] = None
 _membership_task: Optional[asyncio.Task] = None
 
 
 def set_dispatcher_factory(factory: Callable[[object], Dispatcher]):
-    """
-    Called from main.py at boot.
-
-    The factory receives the FULL clone record (asyncpg.Record)
-    and returns a fully configured Dispatcher with all routers
-    and clone-specific middlewares registered.
-    """
+    """Called from main.py at boot. Factory receives the clone record."""
     global _dispatcher_factory
     _dispatcher_factory = factory
 
@@ -54,19 +35,13 @@ def set_dispatcher_factory(factory: Callable[[object], Dispatcher]):
 # START / STOP A SINGLE CLONE
 # ═══════════════════════════════════════════════
 async def start_clone(clone_record) -> bool:
-    """
-    Start a single clone bot.
-
-    clone_record: asyncpg.Record from clone_bots table.
-    Returns True on success, False on failure.
-    """
     clone_id = clone_record["id"]
 
     if clone_id in _active_clones:
-        return True  # already running
+        return True
 
     if _dispatcher_factory is None:
-        print("❌ Clone dispatcher factory not set. Call set_dispatcher_factory() first.")
+        print("❌ Clone dispatcher factory not set.")
         return False
 
     try:
@@ -87,7 +62,6 @@ async def start_clone(clone_record) -> bool:
         await clone_db.set_clone_active(clone_id, False, f"get_me: {e}")
         return False
 
-    # Build dispatcher with FULL clone record injected
     try:
         dp = _dispatcher_factory(clone_record)
     except Exception as e:
@@ -96,7 +70,6 @@ async def start_clone(clone_record) -> bool:
         await clone_db.set_clone_active(clone_id, False, f"build: {e}")
         return False
 
-    # Start polling in a background task
     task = asyncio.create_task(
         _run_polling(dp, bot, clone_id),
         name=f"clone_polling_{clone_id}",
@@ -115,7 +88,6 @@ async def start_clone(clone_record) -> bool:
 
 
 async def _run_polling(dp: Dispatcher, bot: Bot, clone_id: int):
-    """Background task that runs the clone's polling loop."""
     try:
         await dp.start_polling(bot, handle_signals=False)
     except asyncio.CancelledError:
@@ -132,7 +104,6 @@ async def _run_polling(dp: Dispatcher, bot: Bot, clone_id: int):
 
 
 async def stop_clone(clone_id: int):
-    """Stop a running clone bot."""
     info = _active_clones.pop(clone_id, None)
     if not info:
         return
@@ -150,7 +121,6 @@ async def stop_clone(clone_id: int):
 
 
 async def stop_all_clones():
-    """Stop every running clone. Called on shutdown."""
     for cid in list(_active_clones.keys()):
         await stop_clone(cid)
 
@@ -159,7 +129,6 @@ async def stop_all_clones():
 # BOOT LOADER
 # ═══════════════════════════════════════════════
 async def load_all_clones():
-    """Load and start every active clone from the DB. Called at boot."""
     records = await clone_db.get_all_active_clones()
     if not records:
         print("ℹ️ No active clones to load")
@@ -176,21 +145,16 @@ async def load_all_clones():
 
 
 # ═══════════════════════════════════════════════
-# MEMBERSHIP CHECKER (background)
+# MEMBERSHIP CHECKER
 # ═══════════════════════════════════════════════
 def is_clone_allowed(clone_id: int) -> bool:
-    """Fast in-memory check — is this clone currently allowed to operate?"""
     info = _active_clones.get(clone_id)
     if not info:
         return False
-    if time.time() > info["allowed_until"]:
-        # cache expired — default to last known value
-        return info["allowed"]
     return info["allowed"]
 
 
 def get_clone_record_by_bot_id(bot_id: int):
-    """Find the in-memory clone record by the bot's numeric id."""
     for cid, info in _active_clones.items():
         rec = info["record"]
         if rec["bot_id"] == bot_id:
@@ -199,12 +163,6 @@ def get_clone_record_by_bot_id(bot_id: int):
 
 
 async def _verify_membership_for_clone(clone_record, main_bot: Bot):
-    """
-    Check if the clone owner is still in all required chats.
-    Uses the MAIN bot to query chat membership (clones may not be in those chats).
-
-    Returns (all_joined: bool, missing_chat_ids: list)
-    """
     required = await clone_db.get_all_required_chats()
     if not required:
         return True, []
@@ -220,18 +178,13 @@ async def _verify_membership_for_clone(clone_record, main_bot: Bot):
             if status in ("left", "kicked"):
                 missing.append(chat_id)
         except Exception:
-            # Can't check (bot not admin, or chat gone) — be lenient
-            # Don't mark as missing to avoid false positives
-            pass
+            # Can't check — treat as missing (safe default)
+            missing.append(chat_id)
 
     return len(missing) == 0, missing
 
 
 async def membership_check_loop(main_bot: Bot):
-    """
-    Background loop: every N seconds, re-verify each active clone's owner.
-    Updates the in-memory 'allowed' flag.
-    """
     while True:
         try:
             await asyncio.sleep(CLONE_MEMBERSHIP_CHECK_INTERVAL)
@@ -239,7 +192,6 @@ async def membership_check_loop(main_bot: Bot):
             if not _active_clones:
                 continue
 
-            # Snapshot current clones
             for clone_id, info in list(_active_clones.items()):
                 rec = info["record"]
                 try:
@@ -267,7 +219,6 @@ async def membership_check_loop(main_bot: Bot):
 
 
 def start_membership_checker(main_bot: Bot):
-    """Start the background membership verification loop."""
     global _membership_task
     if _membership_task is None or _membership_task.done():
         _membership_task = asyncio.create_task(
