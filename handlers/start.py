@@ -1,127 +1,91 @@
-import logging
-from aiogram import Router, F
-from aiogram.filters import CommandStart
-from aiogram.types import (
-    Message, LinkPreviewOptions, ChatMemberUpdated,
-)
+"""
+handlers/start.py — /start + welcome + dynamic credits for main & clone bots.
+"""
 
-from config import BOT_NAME, CREDIT_HTML
+from aiogram import Router
+from aiogram.filters import CommandStart, Command
+from aiogram.types import Message, LinkPreviewOptions
+
 from keyboards.main_menu import main_menu_kb
-from utils.database import get_or_create_user, register_group
+from utils.database import get_or_create_user
+from utils.bot_context import get_bot_context
 
 router = Router()
-logger = logging.getLogger(__name__)
-
-NO_PREVIEW = LinkPreviewOptions(is_disabled=True)
 
 
-def welcome_text(first_name: str) -> str:
+# ═══════════════════════════════════════════════
+# DYNAMIC CREDITS
+# ═══════════════════════════════════════════════
+def _credits_line() -> str:
+    ctx = get_bot_context()
+
+    if ctx.get("is_clone", False):
+        owner_name = ctx.get("owner_name") or "User"
+        owner_username = ctx.get("owner_username") or ""
+        if owner_username:
+            owner_link = f"<a href='https://t.me/{owner_username.lstrip('@')}'>{owner_name}</a>"
+        else:
+            owner_link = owner_name
+
+        # Cloned by → main bot clickable
+        from config import MAIN_BOT_NAME, MAIN_BOT_USERNAME
+        cloned_by = (
+            f"<a href='https://t.me/{MAIN_BOT_USERNAME.lstrip('@')}'>"
+            f"{MAIN_BOT_NAME}</a>"
+        )
+
+        return (
+            "━━━━━━━━━━━━━━━━━━━━━\n"
+            f"⚡ ᴘᴏᴡᴇʀᴇᴅ ʙʏ: {owner_link}\n"
+            f"🤖 ᴄʟᴏɴᴇᴅ ʙʏ: {cloned_by}"
+        )
+
+    # Main bot
     return (
-        f"👋 ʜɪ, <b>{first_name}</b>!\n\n"
-        f"ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ <b>{BOT_NAME}</b> 🌌\n\n"
-        f"ʏᴏᴜʀ ᴀʟʟ-ɪɴ-ᴏɴᴇ ᴛᴇʟᴇɢʀᴀᴍ ᴄᴏᴍᴘᴀɴɪᴏɴ ғᴏʀ\n"
-        f"ꜱᴛᴜᴅʏ, ɢᴀᴍᴇꜱ ᴀɴᴅ ᴍᴏʀᴇ.\n\n"
-        f"ᴄʜᴏᴏꜱᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ 👇\n\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"👨‍💻 {CREDIT_HTML}"
+        "━━━━━━━━━━━━━━━━━━━━━\n"
+        "ᴘᴏᴡᴇʀᴇᴅ ʙʏ "
+        "<a href='tg://user?id=7790607144'>⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐</a> & "
+        "<a href='tg://user?id=8165863254'>𝓚𝓪𝓷𝓷𝓪࿐✨🤟</a>"
     )
 
 
+def _bot_title() -> str:
+    ctx = get_bot_context()
+    if ctx.get("is_clone", False):
+        return ctx.get("bot_name") or "ᴄʟᴏɴᴇ ʙᴏᴛ"
+    return "˹𝐀𝐬𝐭𝐫𝐚𝐥 ꭙ 𝐄𝐦𝐩𝐢𝐫𝐞˼"
+
+
 # ═══════════════════════════════════════════════
-# /start — DM + GC
+# /start
 # ═══════════════════════════════════════════════
 @router.message(CommandStart())
 async def cmd_start(message: Message):
-    try:
-        user = message.from_user
-        await get_or_create_user(user.id, user.username, user.first_name)
+    await get_or_create_user(
+        message.from_user.id,
+        message.from_user.username,
+        message.from_user.first_name,
+    )
 
-        # ═══ Group me /start ═══
-        if message.chat.type in ("group", "supergroup"):
-            # Group ko register karo
-            try:
-                await register_group(message.chat.id, message.chat.title or "")
-            except Exception as e:
-                logger.warning(f"Group register failed: {e}")
-            return
+    name = message.from_user.first_name or "User"
+    title = _bot_title()
 
-        # ═══ DM me /start ═══
-        text = welcome_text(user.first_name)
-        kb = main_menu_kb()
+    text = (
+        f"🌌 <b>ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ {title}</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ʜᴇʏ <b>{name}</b>! 👋\n\n"
+        f"ᴛʜɪꜱ ɪꜱ ᴀɴ ᴀʟʟ-ɪɴ-ᴏɴᴇ ᴛᴇʟᴇɢʀᴀᴍ ʙᴏᴛ ᴡɪᴛʜ:\n\n"
+        f"📚 ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ\n"
+        f"🎮 ɢᴀᴍᴇꜱ & ǫᴜɪᴢᴢᴇꜱ\n"
+        f"💰 ᴇᴄᴏɴᴏᴍʏ ꜱʏꜱᴛᴇᴍ\n"
+        f"⭐ xᴘ & ʟᴇᴠᴇʟꜱ\n"
+        f"🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅꜱ\n\n"
+        f"{_credits_line()}\n\n"
+        f"🎯 ᴛᴀᴘ ᴀ ʙᴜᴛᴛᴏɴ ᴛᴏ ʙᴇɢɪɴ 👇"
+    )
 
-        # PFP try karo
-        try:
-            photos = await message.bot.get_user_profile_photos(user.id, limit=1)
-            if photos.total_count > 0:
-                file_id = photos.photos[0][-1].file_id
-                await message.answer_photo(
-                    photo=file_id,
-                    caption=text,
-                    reply_markup=kb,
-                )
-                return
-        except Exception:
-            pass
-
-        await message.answer(
-            text,
-            reply_markup=kb,
-            link_preview_options=NO_PREVIEW,
-        )
-    except Exception as e:
-        logger.error(f"/start err: {e}")
-
-
-# ═══════════════════════════════════════════════
-# 🆕 BOT ADDED TO GROUP — Auto Register
-# ═══════════════════════════════════════════════
-@router.my_chat_member()
-async def on_bot_chat_member(event: ChatMemberUpdated):
-    """
-    Fire jab bhi bot ka status change ho (add, remove, promote, demote).
-    Isse hum group auto-register karte hain.
-    """
-    try:
-        chat = event.chat
-        if chat.type not in ("group", "supergroup"):
-            return
-
-        new_status = event.new_chat_member.status
-        old_status = event.old_chat_member.status
-
-        # ═══ Bot ko group me ADD kiya gaya ═══
-        if (
-            new_status in ("member", "administrator")
-            and old_status in ("left", "kicked")
-        ):
-            await register_group(chat.id, chat.title or "")
-            logger.info(f"✅ Group registered: {chat.title} ({chat.id})")
-            try:
-                await event.bot.send_message(
-                    chat.id,
-                    "🤖 <b>ᴛʜᴀɴᴋꜱ ꜰᴏʀ ᴀᴅᴅɪɴɢ ᴍᴇ!</b>\n\n"
-                    "ᴜꜱᴇ /help ᴛᴏ ꜱᴇᴇ ᴀʟʟ ᴄᴏᴍᴍᴀɴᴅꜱ.\n"
-                    "ᴜꜱᴇ /start ᴛᴏ ᴏᴩᴇɴ ᴛʜᴇ ᴍᴇɴᴜ."
-                )
-            except Exception:
-                pass
-
-        # ═══ Bot ko REMOVE kiya gaya ═══
-        elif (
-            new_status in ("left", "kicked")
-            and old_status in ("member", "administrator")
-        ):
-            logger.info(f"❌ Bot removed from group: {chat.title} ({chat.id})")
-            # Optional: delete from active_groups
-            try:
-                from utils.database import get_pool
-                pool = await get_pool()
-                await pool.execute(
-                    "DELETE FROM active_groups WHERE chat_id = $1",
-                    chat.id
-                )
-            except Exception:
-                pass
-
-    except Exception as e:
-        logger.error(f"my_chat_member error: {e}")
+    await message.answer(
+        text,
+        reply_markup=main_menu_kb(),
+        link_preview_options=LinkPreviewOptions(is_disabled=True),
+    )
