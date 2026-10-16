@@ -1,4 +1,5 @@
 import asyncio
+import importlib
 import logging
 
 from aiogram import Bot, Dispatcher, BaseMiddleware
@@ -7,11 +8,6 @@ from aiogram.enums import ParseMode
 from aiogram.types import ErrorEvent
 
 from config import BOT_TOKEN, BOT_NAME, OWNER_ID
-from handlers import (
-    start, menu, profile, robs, leaderboard, daily, study, mission,
-    shop, powers, quiz, premium, tgames, treasure, luckydoor,
-    bombdefuse, botstats, admin, clone, required_chat, broadcast,
-)
 from utils.logger import setup_logger
 from utils.database import init_db, close_pool, get_pool, log_user_activity
 from utils.quiz_loader import background_load
@@ -19,6 +15,35 @@ from utils import clone_db
 from utils import clone_manager
 from utils.clone_middleware import CloneAccessMiddleware
 from utils.permissions import set_current_bot_context
+
+
+# ═══════════════════════════════════════════════
+# HANDLER MODULE LIST (order matters)
+# admin MUST be last (has wildcard handler)
+# ═══════════════════════════════════════════════
+HANDLER_MODULE_NAMES = [
+    "handlers.start",
+    "handlers.menu",
+    "handlers.profile",
+    "handlers.robs",
+    "handlers.leaderboard",
+    "handlers.daily",
+    "handlers.study",
+    "handlers.mission",
+    "handlers.shop",
+    "handlers.powers",
+    "handlers.quiz",
+    "handlers.premium",
+    "handlers.clone",
+    "handlers.required_chat",
+    "handlers.broadcast",
+    "handlers.botstats",
+    "handlers.treasure",
+    "handlers.luckydoor",
+    "handlers.bombdefuse",
+    "handlers.tgames",
+    "handlers.admin",       # MUST BE LAST
+]
 
 
 # ═══════════════════════════════════════════════
@@ -59,13 +84,36 @@ class BotContextMiddleware(BaseMiddleware):
 
 
 # ═══════════════════════════════════════════════
+# FRESH ROUTER LOADER
+# ═══════════════════════════════════════════════
+def _load_fresh_routers():
+    """
+    Reload all handler modules and return fresh Router instances.
+
+    aiogram v3 Router objects cannot be attached to multiple Dispatchers.
+    To build a Dispatcher for a clone bot, we reload every handler module
+    so each gets a brand-new Router instance.
+
+    NOTE: reloading resets module-level state (like ACTIVE_GAMES in the
+    game handlers). This only affects mid-game sessions running on the
+    main bot while a new clone is being created — acceptable trade-off.
+    """
+    routers = []
+    for mod_name in HANDLER_MODULE_NAMES:
+        mod = importlib.import_module(mod_name)
+        importlib.reload(mod)
+        routers.append(mod.router)
+    return routers
+
+
+# ═══════════════════════════════════════════════
 # DISPATCHER FACTORY
 # ═══════════════════════════════════════════════
 def build_dispatcher(bot_owner_id: int, is_clone: bool = False,
                      clone_id: int | None = None) -> Dispatcher:
     """
-    Build a fully configured Dispatcher.
-    Used for BOTH main bot and every clone bot.
+    Build a fully configured Dispatcher for either the main bot or a clone.
+    Uses freshly-reloaded Router instances so each Dispatcher is independent.
     """
     dp = Dispatcher()
 
@@ -87,31 +135,9 @@ def build_dispatcher(bot_owner_id: int, is_clone: bool = False,
         logging.error(f"⚠️ Error: {event.exception}")
         return True
 
-    # ═══════════════════════════════════════════════
-    # ROUTER ORDER — VERY IMPORTANT
-    # admin.router MUST be LAST (has wildcard handler)
-    # ═══════════════════════════════════════════════
-    dp.include_router(start.router)          # 1.  /start + my_chat_member
-    dp.include_router(menu.router)           # 2.  /help, /about
-    dp.include_router(profile.router)        # 3.  /balance, /profile, /convert
-    dp.include_router(robs.router)           # 4.  /gives, /robs, /shield, /shieldcheck
-    dp.include_router(leaderboard.router)    # 5.  /aleaderboard
-    dp.include_router(daily.router)          # 6.  /daily, /performance
-    dp.include_router(study.router)          # 7.  /study
-    dp.include_router(mission.router)        # 8.  /mission
-    dp.include_router(shop.router)           # 9.  /shop
-    dp.include_router(powers.router)         # 10. /powers
-    dp.include_router(quiz.router)           # 11. /quiz
-    dp.include_router(premium.router)        # 12. /premium, /premiumstatus, /setemoji
-    dp.include_router(clone.router)          # 13. /clone, /myclone, /deleteclone + FSM
-    dp.include_router(required_chat.router)  # 14. /addrequired, /removerequired, /listrequired
-    dp.include_router(broadcast.router)      # 15. /broadcast, /broadcast_users, ...
-    dp.include_router(botstats.router)       # 16. /botstatus, /users
-    dp.include_router(treasure.router)       # 17. /treasure
-    dp.include_router(luckydoor.router)      # 18. /luckydoor
-    dp.include_router(bombdefuse.router)     # 19. /defuse
-    dp.include_router(tgames.router)         # 20. /tgames, /h
-    dp.include_router(admin.router)          # 21. LAST — /admin + wildcard
+    # ── Attach routers (order preserved from HANDLER_MODULE_NAMES) ──
+    for router in _load_fresh_routers():
+        dp.include_router(router)
 
     return dp
 
@@ -154,7 +180,7 @@ async def main():
     # ── Load all active clones ──
     await clone_manager.load_all_clones()
 
-    # ── Start membership checker (uses MAIN bot to verify join status) ──
+    # ── Start membership checker ──
     clone_manager.start_membership_checker(bot)
 
     logging.info("✅ Bot is running.")
