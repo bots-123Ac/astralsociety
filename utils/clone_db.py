@@ -1,10 +1,7 @@
 """
 utils/clone_db.py — All database operations for the Clone Bot System.
 
-Keeps clone-related tables and queries separate from utils/database.py
-so the main database module stays clean.
-
-Tables created:
+Tables:
   • clone_bots         — registered clone bot tokens + owners
   • required_chats     — mandatory channels/groups
   • clone_join_cache   — cached join verification (anti rate-limit)
@@ -34,12 +31,10 @@ def _get_fernet() -> Fernet:
 
 
 def encrypt_token(token: str) -> str:
-    """Encrypt a bot token for storage."""
     return _get_fernet().encrypt(token.encode()).decode()
 
 
 def decrypt_token(enc: str) -> str:
-    """Decrypt a stored bot token."""
     return _get_fernet().decrypt(enc.encode()).decode()
 
 
@@ -47,10 +42,8 @@ def decrypt_token(enc: str) -> str:
 # SCHEMA
 # ═══════════════════════════════════════════════
 async def init_clone_tables():
-    """Create all clone-related tables. Idempotent."""
     pool = await get_pool()
     async with pool.acquire() as conn:
-        # ═══ CLONE BOTS ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS clone_bots (
                 id SERIAL PRIMARY KEY,
@@ -75,7 +68,6 @@ async def init_clone_tables():
             "ON clone_bots(is_active)"
         )
 
-        # ═══ REQUIRED CHATS ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS required_chats (
                 chat_id BIGINT PRIMARY KEY,
@@ -87,7 +79,6 @@ async def init_clone_tables():
             )
         """)
 
-        # ═══ JOIN VERIFICATION CACHE ═══
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS clone_join_cache (
                 user_id BIGINT PRIMARY KEY,
@@ -174,7 +165,6 @@ async def create_clone(
     bot_name: str,
     bot_id: int,
 ) -> int:
-    """Insert a new clone record. Returns new clone id."""
     pool = await get_pool()
     enc = encrypt_token(bot_token)
     row = await pool.fetchrow(
@@ -188,6 +178,18 @@ async def create_clone(
         enc, bot_username, bot_name, bot_id, _to_str(_now())
     )
     return row["id"]
+
+
+async def update_owner_info(clone_id: int, username: Optional[str],
+                            first_name: Optional[str]):
+    """Refresh cached owner info from the latest Telegram data."""
+    pool = await get_pool()
+    await pool.execute(
+        """UPDATE clone_bots
+           SET owner_username = $1, owner_first_name = $2
+           WHERE id = $3""",
+        username, first_name, clone_id
+    )
 
 
 async def get_clone_by_owner(owner_user_id: int):
@@ -254,14 +256,12 @@ async def delete_clone(clone_id: int) -> bool:
 # ALL USERS / GROUPS (for broadcast)
 # ═══════════════════════════════════════════════
 async def get_all_user_ids():
-    """All user_ids who started the main bot (or any clone)."""
     pool = await get_pool()
     rows = await pool.fetch("SELECT user_id FROM users")
     return [r["user_id"] for r in rows]
 
 
 async def get_all_group_ids():
-    """All group IDs (active_groups table) + clone-bot-added groups."""
     pool = await get_pool()
     rows = await pool.fetch("SELECT chat_id FROM active_groups")
     return [r["chat_id"] for r in rows]
