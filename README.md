@@ -1,25 +1,25 @@
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!--                                                                         -->
-<!--              🌌  ASTRAL EMPIRE BOT — OFFICIAL README  🌌                -->
+<!--          🌌  ASTRAL EMPIRE BOT — OFFICIAL README  🌌                    -->
 <!--                                                                         -->
-<!--                     Version 5.5 • Enhanced Edition                      -->
+<!--              Version 6.0 • Clone Empire Edition                         -->
 <!--                                                                         -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20,24,30&height=300&section=header&text=Astral%20Empire&fontSize=100&fontAlignY=32&animation=twinkling&fontColor=ffffff&desc=The%20Ultimate%20All-in-One%20Telegram%20Bot&descAlignY=55&descSize=24&descColor=A78BFA" width="100%" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=6,11,20,24,30&height=320&section=header&text=Astral%20Empire&fontSize=110&fontAlignY=32&animation=twinkling&fontColor=ffffff&desc=The%20Ultimate%20All-in-One%20Telegram%20Bot%20Empire&descAlignY=58&descSize=22&descColor=A78BFA" width="100%" />
 
 <br/>
 
 <a href="https://t.me/AstralEmpireRobot">
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=32&duration=2800&pause=700&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=%F0%9F%8C%8C+Welcome+to+Astral+Empire;%F0%9F%93%9A+Study+%7C+Quiz+%7C+Games+%7C+Economy;%E2%AD%90+XP+%26+Level+System;%F0%9F%9A%80+Built+with+%E2%9D%A4%EF%B8%8F+by+Astral+Society" alt="Typing 1" />
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=32&duration=2800&pause=700&color=A78BFA&center=true&vCenter=true&width=900&height=70&lines=%F0%9F%8C%8C+Welcome+to+Astral+Empire;%F0%9F%93%9A+Study+%7C+Quiz+%7C+Games+%7C+Economy;%E2%AD%90+XP+%26+Level+System;%F0%9F%A4%96+Clone+Bot+System+v6.0;%F0%9F%9A%80+Built+with+%E2%9D%A4%EF%B8%8F+by+Astral+Society" alt="Typing 1" />
 </a>
 
 <br/>
 
 <a href="https://t.me/AstralEmpireRobot">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=22&duration=2500&pause=600&color=FFD700&center=true&vCenter=true&width=800&height=50&lines=%F0%9F%8E%B0+Lucky+Door+%7C+%F0%9F%92%8E+Treasure+Hunt+%7C+%F0%9F%92%A3+Bomb+Defuse;%F0%9F%8F%86+4-Tier+Global+Leaderboards;%F0%9F%91%91+Premium+%7C+Protection+Checker+%7C+XP+Boost;%F0%9F%8C%A0+Learn+%E2%80%A2+Play+%E2%80%A2+Compete+%E2%80%A2+Rise" alt="Typing 2" />
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=22&duration=2500&pause=600&color=FFD700&center=true&vCenter=true&width=800&height=50&lines=%F0%9F%8E%B0+Lucky+Door+%7C+%F0%9F%92%8E+Treasure+Hunt+%7C+%F0%9F%92%A3+Bomb+Defuse;%F0%9F%8F%86+4-Tier+Global+Leaderboards;%F0%9F%91%91+Premium+%7C+Protection+Checker+%7C+XP+Boost;%F0%9F%A4%96+Make+Your+Own+Clone+Bot+Today;%F0%9F%8C%A0+Learn+%E2%80%A2+Play+%E2%80%A2+Compete+%E2%80%A2+Rise" alt="Typing 2" />
 </a>
 
 <br/><br/>
@@ -46,6 +46,7 @@
   <img src="https://img.shields.io/badge/aiogram-v3.13+-00A8E8?style=for-the-badge&logo=python&logoColor=white&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/PostgreSQL-Neon-336791?style=for-the-badge&logo=postgresql&logoColor=white&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/asyncpg-Driver-FF6B6B?style=for-the-badge&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/cryptography-Fernet-A78BFA?style=for-the-badge&labelColor=0D1117" />
 </p>
 
 <p align="center">
@@ -59,7 +60,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-🟢_Online-22C55E?style=for-the-badge&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/Version-5.5.0-A78BFA?style=for-the-badge&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/Version-6.0.0-A78BFA?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/Uptime-24/7-00D9FF?style=for-the-badge&labelColor=0D1117" />
@@ -79,6 +80,7 @@
   <img src="https://img.shields.io/badge/🚀_PRO-FF6B6B?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/⭐_LEGEND-A78BFA?style=for-the-badge&labelColor=0D1117" />
   <img src="https://img.shields.io/badge/🎖️_ELITE-22C55E?style=for-the-badge&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/🤖_CLONE-FF6B6B?style=for-the-badge&labelColor=0D1117" />
 </p>
 
 <br/>
@@ -88,6 +90,104 @@
 <br/>
 
 </div>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        NEW: CLONE BOT HIGHLIGHT                          -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+# 🤖 ɴᴇᴡ ɪɴ ᴠ6.0 — ᴄʟᴏɴᴇ ʙᴏᴛ ꜱʏꜱᴛᴇᴍ
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=20&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=800&lines=Make+Your+Own+Astral+Empire+Clone+%F0%9F%A4%96;Same+Features+%7C+Your+Own+Owner;100%25+Encrypted+%26+Safe+%F0%9F%94%92;Launch+in+Under+60+Seconds+%E2%9A%A1" />
+
+<br/>
+
+> ### 🌟 *"Why use only one bot, when you can rule your own empire?"*
+
+</div>
+
+<br/>
+
+<table align="center" width="100%">
+<tr>
+<td width="50%" valign="top">
+
+<div align="center">
+
+### 🎯 **ᴏɴᴇ-ᴄʟɪᴄᴋ ᴄʟᴏɴᴇ**
+
+</div>
+
+- 🤖 **Create your own bot** using @BotFather token
+- 🔐 **AES encrypted** token storage (Fernet)
+- ⚡ **Live in under 60 seconds**
+- 👑 **You own it** — full admin control
+- 🔒 **Max 1 clone per user**
+- 🌐 **Runs in same Railway worker**
+
+<br/>
+
+</td>
+<td width="50%" valign="top">
+
+<div align="center">
+
+### 📢 **ᴍᴀɴᴅᴀᴛᴏʀʏ ᴊᴏɪɴ ꜱʏꜱᴛᴇᴍ**
+
+</div>
+
+- ✅ **Must join** required channels & GCs
+- 🔄 **Auto re-check** every 10 minutes
+- 🚫 **Auto-block** if user leaves
+- 🔓 **Auto-restore** on rejoin
+- 🛡️ **Anti-spam** middleware
+
+<br/>
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+<div align="center">
+
+### 👑 **ᴘᴇʀ-ᴄʟᴏɴᴇ ᴀᴅᴍɪɴꜱ**
+
+</div>
+
+- 👤 **Clone creator** = clone owner
+- 🎓 **Upload notes** to their clone
+- 🛒 **Manage their own economy**
+- 🚫 **No cross-clone control**
+- ⭐ **Global admins stay global**
+
+<br/>
+
+</td>
+<td width="50%" valign="top">
+
+<div align="center">
+
+### 📡 **ᴏᴡɴᴇʀ ʙʀᴏᴀᴅᴄᴀꜱᴛ**
+
+</div>
+
+- 💬 **Reply to any message** with `/broadcast`
+- 👥 **All users + groups** targeted
+- 📸 **Supports** text, photo, video, GIF, sticker
+- 📊 **Detailed stats** — success/fail counts
+- 🕒 **Live progress** during send
+
+<br/>
+
+</td>
+</tr>
+</table>
+
+<br/>
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
@@ -224,13 +324,13 @@
 
 <div align="center">
 
-> ### 🌟 *"One Bot. Infinite Possibilities."*
+> ### 🌟 *"One Bot. Infinite Possibilities. Endless Empires."*
 
 </div>
 
-**˹𝐀𝐬𝐭𝐫𝐚𝐥 ꭙ 𝐄𝐦𝐩𝐢𝐫𝐞˼** is a premium, feature-rich **All-in-One Telegram Bot** that blends **Study Material**, **Quiz Systems**, **Economy**, **Interactive Gaming**, **Premium Memberships**, **Level Progression** and **Group Management** into a single, elegant ecosystem.
+**˹𝐀𝐬𝐭𝐫𝐚𝐥 ꭙ 𝐄𝐦𝐩𝐢𝐫𝐞˼** is a premium, feature-rich **All-in-One Telegram Bot** that blends **Study Material**, **Quiz Systems**, **Economy**, **Interactive Gaming**, **Premium Memberships**, **Level Progression**, **Group Management**, and a **full Clone Bot System** into a single, elegant ecosystem.
 
-Whether you're a **student** looking for curated study resources, an **admin** managing a growing community, or a **gamer** hunting for jackpots — this bot was made for you.
+Whether you're a **student** looking for curated study resources, an **admin** managing a growing community, a **gamer** hunting for jackpots, or a **creator** wanting your own branded bot — Astral Empire was made for you.
 
 <br/>
 
@@ -239,11 +339,11 @@ Whether you're a **student** looking for curated study resources, an **admin** m
 ### 🚀 ᴠɪꜱɪᴏɴ
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                                                     │
-│   📚 Learn   →   🎮 Play   →   🏆 Compete   →   🌠 Rise   │
-│                                                     │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   📚 Learn  →  🎮 Play  →  🏆 Compete  →  🤖 Clone  →  🌠 Rise │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 </div>
@@ -258,32 +358,39 @@ Whether you're a **student** looking for curated study resources, an **admin** m
 
 <table align="center" width="100%">
 <tr>
-<td align="center" width="25%">
+<td align="center" width="20%">
 
 ### 🎓
 **For Students**
 > Curated notes, DPP, PYQ & books across all boards
 
 </td>
-<td align="center" width="25%">
+<td align="center" width="20%">
 
 ### 🎮
 **For Gamers**
 > 5 unique games with jackpots, XP & coins
 
 </td>
-<td align="center" width="25%">
+<td align="center" width="20%">
 
 ### 🛡️
 **For Admins**
 > Full community management + premium tools
 
 </td>
-<td align="center" width="25%">
+<td align="center" width="20%">
 
 ### 👑
 **For Everyone**
 > Levels, achievements, leaderboards & rewards
+
+</td>
+<td align="center" width="20%">
+
+### 🤖
+**For Creators**
+> Clone your own branded bot in 60 seconds
 
 </td>
 </tr>
@@ -301,7 +408,7 @@ Whether you're a **student** looking for curated study resources, an **admin** m
 
 # ✨ ᴋᴇʏ ꜰᴇᴀᴛᴜʀᴇꜱ
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=22C55E&center=true&vCenter=true&width=700&lines=Explore+Everything+Astral+Empire+Has+To+Offer;7+Major+Systems+%C2%B7+30%2B+Commands;Built+with+Passion+%E2%9D%A4%EF%B8%8F" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=22C55E&center=true&vCenter=true&width=700&lines=Explore+Everything+Astral+Empire+Has+To+Offer;8+Major+Systems+%C2%B7+40%2B+Commands;Built+with+Passion+%E2%9D%A4%EF%B8%8F" />
 
 </div>
 
@@ -517,6 +624,109 @@ Earn → Spend → Upgrade → Dominate
 </td>
 </tr>
 </table>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                       CLONE BOT SYSTEM — DETAILED                        -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+# 🤖 ᴄʟᴏɴᴇ ʙᴏᴛ ꜱʏꜱᴛᴇᴍ ᴅᴇᴇᴘ ᴅɪᴠᴇ
+
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FF6B6B&center=true&vCenter=true&width=800&lines=Your+Own+Branded+Bot+%F0%9F%A4%96;Full+Feature+Parity+with+Main+Bot;Independent+Owner+%26+Admins" />
+
+</div>
+
+<br/>
+
+### 🎬 ʜᴏᴡ ɪᴛ ᴡᴏʀᴋꜱ
+
+```plaintext
+┌────────────────────────────────────────────────────────────────┐
+│                                                                │
+│  1. User → Taps "🎯 Clone Bot" button in main menu             │
+│                                                                │
+│  2. Bot → Checks: Joined all required channels & GCs?          │
+│                                                                │
+│  3. ✅ Join verified → Prompt: "Send me your bot token"         │
+│                                                                │
+│  4. User → Creates bot via @BotFather, sends token             │
+│                                                                │
+│  5. Bot → Verifies token via get_me()                          │
+│                                                                │
+│  6. Bot → Encrypts (Fernet AES) & saves to DB                  │
+│                                                                │
+│  7. Bot → Starts clone in background (same Railway worker)     │
+│                                                                │
+│  8. 🎉 Clone bot is LIVE → user is its owner                   │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+```
+
+<br/>
+
+### 🔐 ꜱᴇᴄᴜʀɪᴛʏ ꜰᴇᴀᴛᴜʀᴇꜱ
+
+<table align="center" width="100%">
+<tr>
+<td align="center" width="25%">
+
+### 🔒
+**Fernet Encryption**
+> Tokens encrypted with AES-128 via `cryptography` library
+
+</td>
+<td align="center" width="25%">
+
+### 🚫
+**Join Gate**
+> Must join required chats before creating clone
+
+</td>
+<td align="center" width="25%">
+
+### 🔄
+**Auto Re-Check**
+> Every 10 min — checks if owner left
+
+</td>
+<td align="center" width="25%">
+
+### 🛡️
+**Clone Access Middleware**
+> Blocked clones reply with friendly message
+
+</td>
+</tr>
+</table>
+
+<br/>
+
+### 📢 ᴏᴡɴᴇʀ ʙʀᴏᴀᴅᴄᴀꜱᴛ ꜱʏꜱᴛᴇᴍ
+
+```plaintext
+┌──────────────────────────────────────────────────────────┐
+│                                                          │
+│  Owner → Replies to any message with /broadcast          │
+│                                                          │
+│  Bot → Broadcasts to:                                    │
+│    • All users (from users table)                        │
+│    • All active groups (from active_groups table)        │
+│                                                          │
+│  Bot → Shows live progress + final detailed report       │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+```
+
+**Broadcast Commands:**
+- `/broadcast` — users + groups
+- `/broadcast_users` — users only
+- `/broadcast_groups` — groups only
+- `/broadcast_stats` — last broadcast stats
 
 <br/>
 
@@ -812,10 +1022,10 @@ Earn → Spend → Upgrade → Dominate
 
 <div align="center">
 
-| <img src="https://img.shields.io/badge/🐍-3776AB?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/🤖-00A8E8?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/🐘-336791?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/⚡-FF6B6B?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/🚂-0B0D0E?style=for-the-badge&labelColor=0D1117" /> |
-|:---:|:---:|:---:|:---:|:---:|
-| **Python 3.11+** | **aiogram v3** | **PostgreSQL** | **asyncpg** | **Railway** |
-| Core Language | Async Framework | Neon Database | DB Driver | Deployment |
+| <img src="https://img.shields.io/badge/🐍-3776AB?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/🤖-00A8E8?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/🐘-336791?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/⚡-FF6B6B?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/🔒-A78BFA?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/🚂-0B0D0E?style=for-the-badge&labelColor=0D1117" /> |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Python 3.11+** | **aiogram v3** | **PostgreSQL** | **asyncpg** | **cryptography** | **Railway** |
+| Core Language | Async Framework | Neon Database | DB Driver | Token Encryption | Deployment |
 
 </div>
 
@@ -838,6 +1048,7 @@ aiogram==3.13.1         # Telegram Bot Framework
 asyncpg==0.29.0         # PostgreSQL Async Driver
 python-dotenv==1.0.1    # Environment Variables
 aiohttp==3.9.5          # HTTP Client for OpenTDB
+cryptography>=42.0.0    # Fernet Token Encryption (v6.0+)
 ```
 
 <br/>
@@ -852,7 +1063,7 @@ aiohttp==3.9.5          # HTTP Client for OpenTDB
 
 # 🎯 ᴄᴏᴍᴍᴀɴᴅ ᴄᴇɴᴛᴇʀ
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=30%2B+Commands+at+Your+Fingertips;Organized+%26+Easy+to+Use+%E2%9C%A8;Everything+Just+a+Click+Away+%F0%9F%8E%AF" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=FFD700&center=true&vCenter=true&width=700&lines=40%2B+Commands+at+Your+Fingertips;Organized+%26+Easy+to+Use+%E2%9C%A8;Everything+Just+a+Click+Away+%F0%9F%8E%AF" />
 
 </div>
 
@@ -867,6 +1078,31 @@ aiohttp==3.9.5          # HTTP Client for OpenTDB
 | `/start` | 🌌 Start bot & main menu | 👤 All |
 | `/help` | 🆘 View all commands | 👤 All |
 | `/about` | ℹ️ About + live stats | 👤 All |
+
+### 🤖 **ᴄʟᴏɴᴇ ʙᴏᴛ** *(v6.0 NEW)*
+
+| Command | Description | Where |
+|:---:|:---|:---:|
+| `/clone` | 🎯 Create your own clone bot | 💬 DM |
+| `/myclone` | 📊 View your clone bot | 💬 DM |
+| `/deleteclone` | 🗑️ Delete your clone bot | 💬 DM |
+
+### 📢 **ʙʀᴏᴀᴅᴄᴀꜱᴛ** *(Owner only)*
+
+| Command | Description | Where |
+|:---:|:---|:---:|
+| `/broadcast` | 📢 Broadcast to users + groups | 💬 DM |
+| `/broadcast_users` | 👥 Broadcast to users only | 💬 DM |
+| `/broadcast_groups` | 💬 Broadcast to groups only | 💬 DM |
+| `/broadcast_stats` | 📊 Last broadcast stats | 💬 DM |
+
+### 📢 **ʀᴇQᴜɪʀᴇᴅ ᴄʜᴀᴛꜱ** *(Owner only)*
+
+| Command | Description | Where |
+|:---:|:---|:---:|
+| `/addrequired` | ➕ Add required channel/GC | 💬 DM |
+| `/removerequired` | ➖ Remove required chat | 💬 DM |
+| `/listrequired` | 📋 List required chats | 💬 DM |
 
 ### 📚 **ꜱᴛᴜᴅʏ**
 
@@ -912,16 +1148,11 @@ aiohttp==3.9.5          # HTTP Client for OpenTDB
 | `/premiumstatus` | 📅 Check premium status | 💬 DM |
 | `/setemoji` | 🎨 Custom leaderboard emoji | 💬 DM |
 
-### 🛒 **ꜱʜᴏᴘ**
+### 🛒 **ꜱʜᴏᴘ & ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ**
 
 | Command | Description | Where |
 |:---:|:---|:---:|
 | `/shop` | 🛒 Open shop | 💬 DM |
-
-### 🏆 **ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ**
-
-| Command | Description | Where |
-|:---:|:---|:---:|
 | `/aleaderboard` | 🏆 Global leaderboard | 👤 All |
 | `/performance` | 📊 Your stats | 💬 DM |
 
@@ -964,6 +1195,16 @@ aiohttp==3.9.5          # HTTP Client for OpenTDB
 
 <br/>
 
+### 🔐 ɢᴇɴᴇʀᴀᴛᴇ ᴄʟᴏɴᴇ ᴇɴᴄʀʏᴘᴛɪᴏɴ ᴋᴇʏ
+
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+Save the output — you'll need it as `CLONE_ENCRYPT_KEY` environment variable.
+
+<br/>
+
 ### ⚙️ ʟᴏᴄᴀʟ ꜱᴇᴛᴜᴘ
 
 ```bash
@@ -980,7 +1221,7 @@ pip install -r requirements.txt
 
 # 4️⃣ Configure environment
 cp .env.example .env
-# Edit .env → add BOT_TOKEN and DATABASE_URL
+# Edit .env → add BOT_TOKEN, DATABASE_URL, CLONE_ENCRYPT_KEY
 
 # 5️⃣ Run the bot
 python main.py
@@ -1007,6 +1248,7 @@ python main.py
 4. 🔐 Add Variables:
    - BOT_TOKEN=your_bot_token
    - DATABASE_URL=postgres_connection_url
+   - CLONE_ENCRYPT_KEY=your_fernet_key
 5. 🚀 Deploy!
 ```
 
@@ -1031,8 +1273,8 @@ python main.py
 ```plaintext
 astral-empire-bot/
 │
-├── 🐍 main.py                    # Entry point + background tasks
-├── ⚙️  config.py                  # Bot config, IDs, economy values
+├── 🐍 main.py                    # Entry point + dispatcher factory + clone loader
+├── ⚙️  config.py                  # Bot config, IDs, economy values, clone limits
 ├── 📦 requirements.txt           # Python dependencies
 ├── 📝 Procfile                   # Railway process
 ├── 🐍 runtime.txt                # Python version
@@ -1051,6 +1293,9 @@ astral-empire-bot/
 │   ├── ⚡ powers.py              # /powers
 │   ├── 📝 quiz.py                # /quiz
 │   ├── ⭐ premium.py             # /premium, /premiumstatus, /setemoji
+│   ├── 🤖 clone.py               # ⭐ NEW v6.0 — Clone bot creation flow
+│   ├── 📢 required_chat.py       # ⭐ NEW v6.0 — Manage required chats
+│   ├── 📡 broadcast.py           # ⭐ NEW v6.0 — Owner broadcast system
 │   ├── 💎 treasure.py            # /treasure game
 │   ├── 🚪 luckydoor.py           # /luckydoor game
 │   ├── 💣 bombdefuse.py          # /defuse game
@@ -1059,12 +1304,15 @@ astral-empire-bot/
 │   └── 👑 admin.py               # /admin upload flow
 │
 ├── 📂 keyboards/                 # Inline keyboards
-│   └── 🎯 main_menu.py
+│   └── 🎯 main_menu.py           # All inline menus
 │
 ├── 📂 utils/                     # Utilities
 │   ├── 🗄️ database.py            # PostgreSQL operations
+│   ├── 🤖 clone_db.py            # ⭐ NEW v6.0 — Clone bot DB ops
+│   ├── 🚀 clone_manager.py       # ⭐ NEW v6.0 — Clone lifecycle
+│   ├── 🛡️ clone_middleware.py    # ⭐ NEW v6.0 — Clone access control
 │   ├── 🎨 styler.py              # Fancy font transformation
-│   ├── 🔐 permissions.py         # Admin checks
+│   ├── 🔐 permissions.py         # Admin checks (clone-aware)
 │   ├── 💫 ui.py                  # Smart edit + safe UI
 │   ├── 📝 logger.py              # Logging setup
 │   ├── ✅ checks.py              # DM-only decorator
@@ -1125,6 +1373,10 @@ astral-empire-bot/
 | ✅ | DM-only decorator for games |
 | ✅ | Rob amount validation |
 | ✅ | Shield re-activation block |
+| ✅ | **Clone Bot System** (v6.0) |
+| ✅ | **Mandatory Join Verification** (v6.0) |
+| ✅ | **Auto Clone Access Control** (v6.0) |
+| ✅ | **Owner Broadcast System** (v6.0) |
 | 🔄 | Multi-language support |
 | 🔄 | Web dashboard |
 | 🔄 | Tournament mode |
@@ -1133,6 +1385,8 @@ astral-empire-bot/
 | 🔄 | Achievement badges |
 | 🔄 | Voice commands |
 | 🔄 | AI-powered chatbots |
+| 🔄 | **Clone bot analytics dashboard** |
+| 🔄 | **Clone bot custom branding** |
 
 </div>
 
@@ -1160,7 +1414,7 @@ astral-empire-bot/
 
 ### ⚡
 **Lightning Fast**
-> Async everywhere + Redis cache + Pool warm-up
+> Async everywhere + cache + Pool warm-up
 
 </td>
 <td align="center" width="25%">
@@ -1174,14 +1428,14 @@ astral-empire-bot/
 
 ### 🛡️
 **Secure**
-> Anti-exploit checks + Rate limiting + Permission system
+> Anti-exploit checks + Rate limiting + Fernet-encrypted tokens
 
 </td>
 <td align="center" width="25%">
 
 ### 📈
 **Scalable**
-> PostgreSQL + Async + Railway ready
+> PostgreSQL + Async + Railway ready + Clone-capable
 
 </td>
 </tr>
@@ -1209,9 +1463,9 @@ astral-empire-bot/
 </td>
 <td align="center">
 
-### 🌐
-**Multi-Purpose**
-> Study + Games + Management
+### 🤖
+**Clone Empire**
+> Every user can have their own branded bot
 
 </td>
 </tr>
@@ -1278,6 +1532,23 @@ astral-empire-bot/
 <br/>
 
 Simply search for **@AstralEmpireRobot** on Telegram and hit **Start**. You'll be greeted with the main menu — pick any option to begin!
+
+</details>
+
+<br/>
+
+<details>
+<summary><b>🎯 How do I create my own clone bot?</b></summary>
+<br/>
+
+1. Join all required channels & GCs (listed by the bot).
+2. In the main bot DM, tap **🎯 ᴄʟᴏɴᴇ ʙᴏᴛ** or use `/clone`.
+3. Create a new bot on **@BotFather** using `/newbot`.
+4. Copy the token BotFather gives you.
+5. Send that token back to the main bot.
+6. That's it — your clone is live in seconds! 🚀
+
+**Note:** You can have **only 1 clone per user**.
 
 </details>
 
@@ -1402,6 +1673,20 @@ Buy an **Extra Play** from `/shop` for **15 gems**. It gives you **+1 game attem
 
 <br/>
 
+<details>
+<summary><b>🤖 Can I lose my clone bot?</b></summary>
+<br/>
+
+Your clone bot stays active **as long as you remain a member of all required channels/GCs**. If you leave any of them:
+- The bot checks every 10 minutes.
+- Your clone gets **temporarily disabled**.
+- Users see a friendly "ᴛᴇᴍᴘᴏʀᴀʀɪʟʏ ᴅɪꜱᴀʙʟᴇᴅ" message.
+- Rejoin all required chats → clone automatically resumes. ✅
+
+</details>
+
+<br/>
+
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
@@ -1412,13 +1697,26 @@ Buy an **Extra Play** from `/shop` for **15 gems**. It gives you **+1 game attem
 
 # 📅 ᴄʜᴀɴɢᴇʟᴏɢ
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=700&lines=What's+New+in+Version+5.5;Stay+Updated+%F0%9F%94%94;Fresh+Features+%F0%9F%8E%81" />
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=500&color=A78BFA&center=true&vCenter=true&width=700&lines=What's+New+in+Version+6.0;Stay+Updated+%F0%9F%94%94;Fresh+Features+%F0%9F%8E%81" />
 
 </div>
 
 <br/>
 
-### 🎉 v5.5.0 — Current Version
+### 🎉 v6.0.0 — Clone Empire Edition *(Current)*
+
+- 🤖 **Clone Bot System** — full clone creation flow
+- 🔐 **Fernet AES encryption** for bot tokens
+- 📢 **Mandatory Join System** — before clone creation
+- 🔄 **Auto-recheck** every 10 minutes for owner's membership
+- 🛡️ **Clone Access Middleware** — blocks disabled clones
+- 👑 **Per-clone owner permissions** via contextvars
+- 📡 **Owner Broadcast** — users + groups with live stats
+- 📊 **Broadcast Statistics** — success/fail counts
+- 📝 **/addrequired, /removerequired, /listrequired** commands
+- 🎯 **Clone Bot button** in main menu
+
+### 🎉 v5.5.0
 
 - 🎨 Added **/setemoji** (Premium custom leaderboard emoji)
 - 🎟️ Fixed **Extra Play** integration with games
@@ -1647,7 +1945,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 <br/>
 
-<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=26&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=60&lines=Thank+You+for+Visiting+%F0%9F%92%9C;Built+with+%E2%9D%A4%EF%B8%8F+by+Astral+Society;%F0%9F%8C%9F+Learn+%E2%80%A2+Play+%E2%80%A2+Compete+%E2%80%A2+Rise+%F0%9F%8C%9F" />
+<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=26&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=60&lines=Thank+You+for+Visiting+%F0%9F%92%9C;Built+with+%E2%9D%A4%EF%B8%8F+by+Astral+Society;%F0%9F%8C%9F+Learn+%E2%80%A2+Play+%E2%80%A2+Compete+%E2%80%A2+Clone+%E2%80%A2+Rise+%F0%9F%8C%9F" />
 
 <br/><br/>
 
@@ -1682,7 +1980,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 <br/>
 
 <p>
-  <b>🌌 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ʀɪꜱᴇ 🌌</b>
+  <b>🌌 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ᴄʟᴏɴᴇ • ʀɪꜱᴇ 🌌</b>
 </p>
 
 <br/>
