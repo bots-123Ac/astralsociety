@@ -1,171 +1,184 @@
-from aiogram import Router, F
-from aiogram.types import CallbackQuery, Message, LinkPreviewOptions
+"""
+handlers/menu.py — /help, /about, and menu navigation.
+Dynamic credits for main bot vs clone bot.
+"""
 
-from config import BOT_NAME, BOT_USERNAME, CREDIT_HTML
-from keyboards.main_menu import main_menu_kb, back_main_kb
+from aiogram import Router, F
+from aiogram.filters import Command
+from aiogram.types import (
+    Message, CallbackQuery, LinkPreviewOptions,
+)
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+from config import (
+    CREATOR_1_NAME, CREATOR_1_ID,
+    CREATOR_2_NAME, CREATOR_2_ID,
+    MAIN_BOT_NAME, MAIN_BOT_USERNAME,
+)
+from keyboards.main_menu import main_menu_kb
+from utils.bot_context import get_bot_context
+from utils.database import (
+    get_total_users, get_daily_active_users, get_quiz_count,
+)
 
 router = Router()
 
-NO_PREVIEW = LinkPreviewOptions(is_disabled=True)
+
+# ═══════════════════════════════════════════════
+# /help
+# ═══════════════════════════════════════════════
+HELP_TEXT = (
+    "🆘 <b>ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅꜱ</b>\n"
+    "━━━━━━━━━━━━━━━━━━━━━\n\n"
+    "🏠 <b>ᴄᴏʀᴇ</b>\n"
+    "/start /help /about\n\n"
+    "👤 <b>ᴘʀᴏꜰɪʟᴇ</b>\n"
+    "/balance /profile /convert 100c\n\n"
+    "🪙 <b>ᴇᴄᴏɴᴏᴍʏ (ɢᴄ)</b>\n"
+    "/gives 10000 /robs 5000\n"
+    "/shield 2 /shieldcheck\n\n"
+    "🎮 <b>ɢᴀᴍᴇꜱ</b>\n"
+    "/treasure /luckydoor /defuse\n"
+    "/tgames /quiz /h 250\n\n"
+    "🚀 <b>ᴅᴀɪʟʏ</b>\n"
+    "/daily /mission /performance\n\n"
+    "⭐ <b>ᴘʀᴇᴍɪᴜᴍ & ꜱʜᴏᴘ</b>\n"
+    "/premium /premiumstatus /setemoji\n"
+    "/shop /powers\n\n"
+    "🏆 <b>ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n"
+    "/aleaderboard\n\n"
+    "🤖 <b>ᴄʟᴏɴᴇ</b>\n"
+    "/clone /myclone /deleteclone\n\n"
+    "📚 <b>ꜱᴛᴜᴅʏ</b>\n"
+    "/study"
+)
 
 
-def help_text() -> str:
-    return (
-        f"🆘 <b>{BOT_NAME} — ʜᴇʟᴘ</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"<b>📚 ꜱᴛᴜᴅʏ</b>\n"
-        f"/study — ʙʀᴏᴡꜱᴇ ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ (ᴅᴍ)\n\n"
-        f"<b>🎮 ɢᴀᴍᴇꜱ (ᴅᴍ ᴏɴʟʏ)</b>\n"
-        f"/treasure — ᴛʀᴇᴀꜱᴜʀᴇ ʜᴜɴᴛ (ᴅᴍ)\n"
-        f"/tgames — ǫᴜɪᴢ + ɴᴜᴍʙᴇʀ ɢᴀᴍᴇ (ᴅᴍ)\n"
-        f"/quiz — ꜱᴛᴀʀᴛ ᴀ ǫᴜɪᴢ (ᴅᴍ)\n"
-        f"/h 250 — ɢᴜᴇꜱꜱ ᴛʜᴇ ɴᴜᴍʙᴇʀ (ᴅᴍ)\n\n"
-        f"<b>🚀 ᴅᴀɪʟʏ</b>\n"
-        f"/daily — ᴄʟᴀɪᴍ ᴅᴀɪʟʏ ʀᴇᴡᴀʀᴅ (ᴅᴍ)\n"
-        f"/mission — ᴅᴀɪʟʏ ᴍɪꜱꜱɪᴏɴ\n\n"
-        f"<b>🪙 ᴇᴄᴏɴᴏᴍʏ</b>\n"
-        f"/balance — ᴠɪᴇᴡ ʙᴀʟᴀɴᴄᴇ\n"
-        f"/convert 100c — ᴄᴏɪɴꜱ → ɢᴇᴍꜱ\n"
-        f"/gives 10000 — ꜱᴇɴᴅ ᴄᴏɪɴꜱ (ʀᴇᴘʟʏ, ɢᴄ)\n"
-        f"/robs 5000 — ʀᴏʙ ᴀ ᴜꜱᴇʀ (ʀᴇᴘʟʏ, ɢᴄ)\n"
-        f"/shield 2 — ᴀᴄᴛɪᴠᴀᴛᴇ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ\n"
-        f"/shieldcheck — ᴄʜᴇᴄᴋ ꜱʜɪᴇʟᴅ (ᴘʀᴇᴍɪᴜᴍ ᴏɴʟʏ)\n"
-        f"/powers — ᴀᴄᴛɪᴠᴇ ᴘᴏᴡᴇʀꜱ\n\n"
-        f"<b>⭐ ᴘʀᴇᴍɪᴜᴍ</b>\n"
-        f"/premium — ᴘʀᴇᴍɪᴜᴍ ꜱʜᴏᴘ (ɢᴇᴍꜱ)\n"
-        f"/premiumstatus — ᴄʜᴇᴄᴋ ꜱᴛᴀᴛᴜꜱ\n\n"
-        f"<b>🛒 ꜱʜᴏᴘ (ᴅᴍ)</b>\n"
-        f"/shop — ᴏᴘᴇɴ ꜱʜᴏᴘ\n\n"
-        f"<b>🏆 ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ</b>\n"
-        f"/aleaderboard — ɢʟᴏʙᴀʟ ʀᴀɴᴋɪɴɢ\n"
-        f"/performance — ʏᴏᴜʀ ꜱᴛᴀᴛꜱ (ᴅᴍ)\n\n"
-        f"<b>👑 ᴀᴅᴍɪɴ</b>\n"
-        f"/admin — ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ\n"
-        f"/botstatus — ʙᴏᴛ ꜱᴛᴀᴛᴜꜱ\n"
-        f"/users — ᴜꜱᴇʀ ꜱᴛᴀᴛꜱ\n\n"
-        f"🌠 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ʀɪꜱᴇ"
+@router.message(Command("help"))
+async def cmd_help(message: Message):
+    await message.answer(
+        HELP_TEXT,
+        link_preview_options=LinkPreviewOptions(is_disabled=True),
     )
 
 
-async def get_about_text() -> str:
-    try:
-        from utils.database import get_total_users, get_monthly_active_users
-        total_users = await get_total_users()
-        monthly_users = await get_monthly_active_users()
-    except Exception:
-        total_users = 0
-        monthly_users = 0
+# ═══════════════════════════════════════════════
+# /about
+# ═══════════════════════════════════════════════
+def _about_text() -> str:
+    ctx = get_bot_context()
 
+    if ctx.get("is_clone", False):
+        bot_name = ctx.get("bot_name") or "Clone Bot"
+        bot_username = ctx.get("bot_username") or ""
+        owner_name = ctx.get("owner_name") or "User"
+        owner_username = ctx.get("owner_username") or ""
+
+        if owner_username:
+            owner_line = (
+                f"<a href='https://t.me/{owner_username.lstrip('@')}'>"
+                f"{owner_name}</a>"
+            )
+        else:
+            owner_line = owner_name
+
+        cloned_by = (
+            f"<a href='https://t.me/{MAIN_BOT_USERNAME.lstrip('@')}'>"
+            f"{MAIN_BOT_NAME}</a>"
+        )
+
+        owner_1 = f"<a href='tg://user?id={CREATOR_1_ID}'>{CREATOR_1_NAME}</a>"
+        owner_2 = f"<a href='tg://user?id={CREATOR_2_ID}'>{CREATOR_2_NAME}</a>"
+
+        return (
+            f"ℹ️ <b>ᴀʙᴏᴜᴛ ᴛʜɪꜱ ʙᴏᴛ</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"🤖 ɴᴀᴍᴇ: <b>{bot_name}</b>\n"
+            f"🆔 ᴜꜱᴇʀɴᴀᴍᴇ: @{bot_username}\n\n"
+            f"👤 <b>ᴛʜɪꜱ ʙᴏᴛ ᴡᴀꜱ ᴍᴀᴅᴇ ʙʏ:</b>\n"
+            f"{owner_line}\n\n"
+            f"⚡ ᴘᴏᴡᴇʀᴇᴅ ʙʏ: {owner_line}\n"
+            f"🤖 ᴄʟᴏɴᴇᴅ ʙʏ: {cloned_by}\n\n"
+            f"👑 <b>ᴏʀɪɢɪɴᴀʟ ʙᴏᴛ ᴏᴡɴᴇʀꜱ:</b>\n"
+            f"• {owner_1}\n"
+            f"• {owner_2}"
+        )
+
+    # Main bot about
     return (
-        f"ℹ️ <b>ᴀʙᴏᴜᴛ {BOT_NAME}</b>\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🤖 <b>ʙᴏᴛ ɴᴀᴍᴇ:</b> {BOT_NAME}\n"
-        f"🔗 <b>ᴜꜱᴇʀɴᴀᴍᴇ:</b> {BOT_USERNAME}\n\n"
-        f"📊 <b>ʟɪᴠᴇ ꜱᴛᴀᴛꜱ:</b>\n"
-        f"👥 ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ   : <b>{total_users:,}</b>\n"
-        f"📅 ᴍᴏɴᴛʜʟʏ ᴀᴄᴛɪᴠᴇ: <b>{monthly_users:,}</b>\n\n"
-        f"<b>✨ ꜰᴇᴀᴛᴜʀᴇꜱ:</b>\n"
-        f"📚 ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ\n"
-        f"📝 ǫᴜɪᴢ (15 ᴄᴀᴛᴇɢᴏʀɪᴇꜱ)\n"
-        f"🎮 ᴛʀᴇᴀꜱᴜʀᴇ + ʟᴜᴄᴋʏ ᴅᴏᴏʀ + ɴᴜᴍʙᴇʀ ɢᴀᴍᴇ\n"
-        f"🪙 ᴄᴏɪɴꜱ & ɢᴇᴍꜱ ᴇᴄᴏɴᴏᴍʏ\n"
-        f"🏆 ɢʟᴏʙᴀʟ ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅꜱ\n"
-        f"⭐ ᴘʀᴇᴍɪᴜᴍ (ᴠɪᴀ ɢᴇᴍꜱ)\n"
-        f"🛡️ ꜱʜɪᴇʟᴅ ᴘʀᴏᴛᴇᴄᴛɪᴏɴ\n\n"
-        f"⚠️ <b>ᴅɪꜱᴄʟᴀɪᴍᴇʀ:</b>\n"
-        f"ᴀʟʟ ʀᴇᴡᴀʀᴅꜱ ᴀʀᴇ ᴠɪʀᴛᴜᴀʟ. ɴᴏ ʀᴇᴀʟ-ᴡᴏʀʟᴅ ᴠᴀʟᴜᴇ.\n\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"👨‍💻 <b>ᴘᴏᴡᴇʀᴇᴅ ʙʏ:</b>\n"
-        f"{CREDIT_HTML}\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"🌠 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ʀɪꜱᴇ"
+        "ℹ️ <b>ᴀʙᴏᴜᴛ ᴀꜱᴛʀᴀʟ ᴇᴍᴘɪʀᴇ</b>\n"
+        "━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"🤖 ɴᴀᴍᴇ: <b>{MAIN_BOT_NAME}</b>\n"
+        f"🆔 ᴜꜱᴇʀɴᴀᴍᴇ: @{MAIN_BOT_USERNAME}\n\n"
+        "ᴛʜᴇ ᴜʟᴛɪᴍᴀᴛᴇ ᴀʟʟ-ɪɴ-ᴏɴᴇ ᴛᴇʟᴇɢʀᴀᴍ ʙᴏᴛ\n"
+        "ᴡɪᴛʜ ꜱᴛᴜᴅʏ, ɢᴀᴍᴇꜱ, ᴇᴄᴏɴᴏᴍʏ ᴀɴᴅ ᴍᴏʀᴇ.\n\n"
+        "👑 <b>ᴏᴡɴᴇʀꜱ:</b>\n"
+        f"• <a href='tg://user?id={CREATOR_1_ID}'>{CREATOR_1_NAME}</a>\n"
+        f"• <a href='tg://user?id={CREATOR_2_ID}'>{CREATOR_2_NAME}</a>"
     )
 
 
+@router.message(Command("about"))
+async def cmd_about(message: Message):
+    await message.answer(
+        _about_text(),
+        link_preview_options=LinkPreviewOptions(is_disabled=True),
+    )
+
+
+# ═══════════════════════════════════════════════
+# MENU CALLBACKS
+# ═══════════════════════════════════════════════
 @router.callback_query(F.data == "menu:main")
-async def back_main(cb: CallbackQuery):
+async def cb_menu_main(cb: CallbackQuery):
+    name = cb.from_user.first_name or "User"
+    title = get_bot_context().get("bot_name") or "˹𝐀𝐬𝐭𝐫𝐚𝐥 ꭙ 𝐄𝐦𝐩𝐢ʀᴇ˼"
     text = (
-        f"👋 ʜɪ, <b>{cb.from_user.first_name}</b>!\n\n"
-        f"ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ <b>{BOT_NAME}</b> 🌌\n\n"
-        f"ʏᴏᴜʀ ᴀʟʟ-ɪɴ-ᴏɴᴇ ᴛᴇʟᴇɢʀᴀᴍ ᴄᴏᴍᴘᴀɴɪᴏɴ ғᴏʀ\n"
-        f"ꜱᴛᴜᴅʏ, ɢᴀᴍᴇꜱ ᴀɴᴅ ᴍᴏʀᴇ.\n\n"
-        f"ᴄʜᴏᴏꜱᴇ ᴀɴ ᴏᴘᴛɪᴏɴ ʙᴇʟᴏᴡ 👇\n\n"
-        f"━━━━━━━━━━━━━━━━━━━━━\n"
-        f"👨‍💻 {CREDIT_HTML}"
+        f"🌌 <b>{title}</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"ʜᴇʏ <b>{name}</b>! 👋\n\n"
+        f"🎯 ᴛᴀᴘ ᴀ ʙᴜᴛᴛᴏɴ ᴛᴏ ʙᴇɢɪɴ 👇"
     )
     try:
         await cb.message.edit_text(
             text,
             reply_markup=main_menu_kb(),
-            link_preview_options=NO_PREVIEW,
+            link_preview_options=LinkPreviewOptions(is_disabled=True),
         )
     except Exception:
-        try:
-            await cb.message.answer(
-                text,
-                reply_markup=main_menu_kb(),
-                link_preview_options=NO_PREVIEW,
-            )
-        except Exception:
-            pass
+        await cb.message.answer(
+            text,
+            reply_markup=main_menu_kb(),
+            link_preview_options=LinkPreviewOptions(is_disabled=True),
+        )
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:help")
-async def cb_help(cb: CallbackQuery):
+async def cb_menu_help(cb: CallbackQuery):
+    kb = InlineKeyboardBuilder()
+    kb.button(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")
     try:
         await cb.message.edit_text(
-            help_text(),
-            reply_markup=back_main_kb(),
-            link_preview_options=NO_PREVIEW,
+            HELP_TEXT,
+            reply_markup=kb.as_markup(),
+            link_preview_options=LinkPreviewOptions(is_disabled=True),
         )
     except Exception:
-        try:
-            await cb.message.answer(
-                help_text(),
-                reply_markup=back_main_kb(),
-                link_preview_options=NO_PREVIEW,
-            )
-        except Exception:
-            pass
+        await cb.message.answer(HELP_TEXT)
     await cb.answer()
 
 
 @router.callback_query(F.data == "menu:about")
-async def cb_about(cb: CallbackQuery):
-    text = await get_about_text()
+async def cb_menu_about(cb: CallbackQuery):
+    kb = InlineKeyboardBuilder()
+    kb.button(text="↩️ ʙᴀᴄᴋ", callback_data="menu:main")
     try:
         await cb.message.edit_text(
-            text,
-            reply_markup=back_main_kb(),
-            link_preview_options=NO_PREVIEW,
+            _about_text(),
+            reply_markup=kb.as_markup(),
+            link_preview_options=LinkPreviewOptions(is_disabled=True),
         )
     except Exception:
-        try:
-            await cb.message.answer(
-                text,
-                reply_markup=back_main_kb(),
-                link_preview_options=NO_PREVIEW,
-            )
-        except Exception:
-            pass
+        await cb.message.answer(_about_text())
     await cb.answer()
-
-
-@router.message(F.text.regexp(r"^/help(\s|$)"))
-async def cmd_help(message: Message):
-    await message.answer(
-        help_text(),
-        reply_markup=back_main_kb(),
-        link_preview_options=NO_PREVIEW,
-    )
-
-
-@router.message(F.text.regexp(r"^/about(\s|$)"))
-async def cmd_about(message: Message):
-    text = await get_about_text()
-    await message.answer(
-        text,
-        reply_markup=back_main_kb(),
-        link_preview_options=NO_PREVIEW,
-    )
