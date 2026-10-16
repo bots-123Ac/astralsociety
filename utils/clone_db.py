@@ -265,3 +265,16 @@ async def get_all_group_ids():
     pool = await get_pool()
     rows = await pool.fetch("SELECT chat_id FROM active_groups")
     return [r["chat_id"] for r in rows]
+async def remove_dead_users(user_ids: list) -> int:
+    """Delete user rows for confirmed-dead accounts (bot-blocked/deleted)."""
+    if not user_ids:
+        return 0
+    pool = await get_pool()
+    result = await pool.execute(
+        "DELETE FROM users WHERE user_id = ANY($1::bigint[])", user_ids
+    )
+    # result is like "DELETE 45"
+    try:
+        return int(result.split()[-1])
+    except Exception:
+        return 0
