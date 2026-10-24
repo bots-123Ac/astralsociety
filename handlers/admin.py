@@ -1,3 +1,15 @@
+"""
+handlers/admin.py — Admin panel with multi-file study material upload.
+
+Flow:
+  1. Class → Section → Subject → Chapter
+  2. User sends ANY number of files/videos/photos/links
+  3. User sends /done when finished
+  4. All files are saved together
+
+Files can be mixed (PDF + video + photo + link) — anything goes.
+"""
+
 import logging
 from aiogram import Router, F
 from aiogram.filters import Command
@@ -7,14 +19,12 @@ from aiogram.types import (
 
 from config import BOT_NAME
 from utils.permissions import is_bot_admin
-from utils.database import save_study_material
+from utils.database import save_study_material_bulk
 
 router = Router()
 logger = logging.getLogger(__name__)
 
-# ═══════════════════════════════════════════════
-# SESSIONS — user_id -> {step, data}
-# ═══════════════════════════════════════════════
+# user_id -> {step, data, files:[...]}
 SESSIONS = {}
 
 
@@ -22,6 +32,9 @@ def _clear(user_id):
     SESSIONS.pop(user_id, None)
 
 
+# ═══════════════════════════════════════════════
+# KEYBOARDS
+# ═══════════════════════════════════════════════
 def admin_panel_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📤 ᴀᴅᴅ ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ", callback_data="adm:add")],
@@ -59,6 +72,13 @@ def section_1112_kb():
     ])
 
 
+def content_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✅ ꜰɪɴɪꜱʜ & ꜱᴀᴠᴇ (/done)", callback_data="adm:done")],
+        [InlineKeyboardButton(text="❌ ᴄᴀɴᴄᴇʟ", callback_data="adm:panel")],
+    ])
+
+
 # ═══════════════════════════════════════════════
 # /admin
 # ═══════════════════════════════════════════════
@@ -91,7 +111,7 @@ async def adm_panel(cb: CallbackQuery):
 async def adm_add(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
         return await cb.answer("❌", show_alert=True)
-    SESSIONS[cb.from_user.id] = {"step": "class", "data": {}}
+    SESSIONS[cb.from_user.id] = {"step": "class", "data": {}, "files": []}
     await cb.message.edit_text(
         "📤 <b>ᴀᴅᴅ ꜱᴛᴜᴅʏ ᴍᴀᴛᴇʀɪᴀʟ</b>\n"
         "━━━━━━━━━━━━━━━━━━━━━\n\nꜱᴛᴇᴘ 1/5 — ᴄʜᴏᴏꜱᴇ ᴄʟᴀꜱꜱ:",
@@ -105,20 +125,17 @@ async def adm_class(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
         return await cb.answer("❌", show_alert=True)
     cls = cb.data.split(":")[2]
-    sess = SESSIONS.setdefault(cb.from_user.id, {"step": "class", "data": {}})
+    sess = SESSIONS.setdefault(
+        cb.from_user.id, {"step": "class", "data": {}, "files": []}
+    )
     sess["data"]["class_name"] = cls
     sess["step"] = "section"
 
-    if cls == "10":
-        await cb.message.edit_text(
-            f"📤 <b>ᴄʟᴀꜱꜱ 10</b>\n\nꜱᴛᴇᴘ 2/5 — ᴄʜᴏᴏꜱᴇ ꜱᴇᴄᴛɪᴏɴ:",
-            reply_markup=section_10_kb()
-        )
-    else:
-        await cb.message.edit_text(
-            f"📤 <b>ᴄʟᴀꜱꜱ {cls}</b>\n\nꜱᴛᴇᴘ 2/5 — ᴄʜᴏᴏꜱᴇ ꜱᴇᴄᴛɪᴏɴ:",
-            reply_markup=section_1112_kb()
-        )
+    kb = section_10_kb() if cls == "10" else section_1112_kb()
+    await cb.message.edit_text(
+        f"📤 <b>ᴄʟᴀꜱꜱ {cls}</b>\n\nꜱᴛᴇᴘ 2/5 — ᴄʜᴏᴏꜱᴇ ꜱᴇᴄᴛɪᴏɴ:",
+        reply_markup=kb
+    )
     await cb.answer()
 
 
@@ -127,7 +144,9 @@ async def adm_section(cb: CallbackQuery):
     if not is_bot_admin(cb.from_user.id):
         return await cb.answer("❌", show_alert=True)
     section = cb.data.split(":")[2]
-    sess = SESSIONS.setdefault(cb.from_user.id, {"step": "section", "data": {}})
+    sess = SESSIONS.setdefault(
+        cb.from_user.id, {"step": "section", "data": {}, "files": []}
+    )
     sess["data"]["section"] = section
     cls = sess["data"].get("class_name")
 
@@ -148,17 +167,14 @@ async def adm_section(cb: CallbackQuery):
 
 
 # ═══════════════════════════════════════════════
-# TEXT / FILE — Only process if user in SESSIONS
-# (checks SESSIONS dict directly, no filter needed)
+# TEXT/FILE HANDLER (multi-file accumulation)
 # ═══════════════════════════════════════════════
 @router.message(F.text | F.photo | F.document | F.video)
 async def adm_content_handler(message: Message):
     user_id = message.from_user.id if message.from_user else 0
 
-    # ⚠️ CRITICAL: If user NOT in SESSIONS, silently skip
     if user_id not in SESSIONS:
         return
-
     if not is_bot_admin(user_id):
         _clear(user_id)
         return
@@ -166,6 +182,7 @@ async def adm_content_handler(message: Message):
     sess = SESSIONS[user_id]
     step = sess.get("step")
 
+    # ── SUBJECT step ──
     if step == "subject":
         if not message.text:
             return await message.reply("❌ ꜱᴇɴᴅ ᴛᴇxᴛ ᴏɴʟʏ.")
@@ -176,51 +193,136 @@ async def adm_content_handler(message: Message):
             "ᴇxᴀᴍᴘʟᴇ: <code>Chapter 1: Life Processes</code>"
         )
 
+    # ── CHAPTER step ──
     if step == "chapter":
         if not message.text:
             return await message.reply("❌ ꜱᴇɴᴅ ᴛᴇxᴛ ᴏɴʟʏ.")
         sess["data"]["chapter"] = message.text.strip()
         sess["step"] = "content"
         return await message.answer(
-            "📤 <b>ꜱᴛᴇᴘ 5/5</b> — ꜱᴇɴᴅ ᴛʜᴇ ᴍᴀᴛᴇʀɪᴀʟ:\n"
-            "📄 PDF | 🎥 ᴠɪᴅᴇᴏ | 🖼️ ᴘʜᴏᴛᴏ | 🔗 ʟɪɴᴋ"
+            "📤 <b>ꜱᴛᴇᴘ 5/5</b> — ꜱᴇɴᴅ ᴏɴᴇ ᴏʀ ᴍᴏʀᴇ ꜰɪʟᴇꜱ:\n"
+            "📄 PDFs | 🎥 Videos | 🖼️ Photos | 🔗 Links\n\n"
+            "✅ Send <code>/done</code> when finished.\n"
+            "❌ Send /admin to cancel.",
+            reply_markup=content_kb(),
         )
 
+    # ── CONTENT step ──
     if step == "content":
         ctype, content = None, None
+
         if message.document:
             ctype, content = "document", message.document.file_id
         elif message.video:
             ctype, content = "video", message.video.file_id
         elif message.photo:
             ctype, content = "photo", message.photo[-1].file_id
-        elif message.text and (message.text.startswith("http") or "t.me/" in message.text):
+        elif message.text and (
+            message.text.startswith("http") or "t.me/" in message.text
+        ):
             ctype, content = "link", message.text.strip()
 
         if not content:
-            return await message.reply("❌ ꜱᴇɴᴅ PDF/ᴠɪᴅᴇᴏ/ᴘʜᴏᴛᴏ ᴏʀ ᴠᴀʟɪᴅ ʟɪɴᴋ.")
+            return await message.reply(
+                "❌ ꜱᴇɴᴅ PDF/ᴠɪᴅᴇᴏ/ᴘʜᴏᴛᴏ ᴏʀ ᴠᴀʟɪᴅ ʟɪɴᴋ.\n"
+                "✅ Send <code>/done</code> when finished."
+            )
 
-        data = sess["data"]
-        subj = data.get("subject", "")
-        chapter_final = f"{subj} — {data['chapter']}" if subj else data["chapter"]
-
-        await save_study_material(
-            data["class_name"],
-            data["section"],
-            "",
-            chapter_final,
-            ctype,
-            content,
-            message.caption or "",
-            user_id,
-        )
-        _clear(user_id)
+        sess["files"].append({
+            "content_type": ctype,
+            "content": content,
+            "caption": message.caption or "",
+        })
+        count = len(sess["files"])
         return await message.answer(
-            f"✅ <b>ᴍᴀᴛᴇʀɪᴀʟ ꜱᴀᴠᴇᴅ!</b>\n"
-            f"━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"📘 ᴄʟᴀꜱꜱ: <b>{data['class_name']}</b>\n"
-            f"📂 ꜱᴇᴄᴛɪᴏɴ: <b>{data['section']}</b>\n"
-            f"📄 ᴄʜᴀᴘᴛᴇʀ: <b>{chapter_final}</b>\n\n"
-            f"ᴜꜱᴇʀꜱ ᴄᴀɴ ɴᴏᴡ ᴀᴄᴄᴇꜱꜱ ᴠɪᴀ /study.",
-            reply_markup=admin_panel_kb()
+            f"✅ ꜰɪʟᴇ #{count} ᴀᴅᴅᴇᴅ.\n\n"
+            f"📦 ᴛᴏᴛᴀʟ: <b>{count}</b> ꜰɪʟᴇ(ꜱ)\n\n"
+            f"Send more, or <code>/done</code> to save.",
         )
+
+
+# ═══════════════════════════════════════════════
+# /done — finalize multi-upload
+# ═══════════════════════════════════════════════
+@router.message(Command("done"))
+async def cmd_done(message: Message):
+    user_id = message.from_user.id
+    sess = SESSIONS.get(user_id)
+    if not sess:
+        return await message.reply(
+            "❌ ɴᴏ ᴀᴄᴛɪᴠᴇ ꜱᴇꜱꜱɪᴏɴ.\nᴜꜱᴇ /admin ᴛᴏ ꜱᴛᴀʀᴛ."
+        )
+    if sess.get("step") != "content":
+        return await message.reply("❌ ꜱᴛɪʟʟ ꜰɪʟʟɪɴɢ ꜱᴛᴇᴘꜱ. ᴄᴏᴍᴘʟᴇᴛᴇ ᴛʜᴇᴍ ꜰɪʀꜱᴛ.")
+
+    if not sess["files"]:
+        return await message.reply(
+            "❌ ɴᴏ ꜰɪʟᴇꜱ ᴀᴅᴅᴇᴅ ʏᴇᴛ.\nꜱᴇɴᴅ ᴀᴛ ʟᴇᴀꜱᴛ ᴏɴᴇ ꜰɪʟᴇ, ᴛʜᴇɴ /done."
+        )
+
+    data = sess["data"]
+    subj = data.get("subject", "")
+    chapter_final = (
+        f"{subj} — {data['chapter']}" if subj else data["chapter"]
+    )
+
+    count = await save_study_material_bulk(
+        data["class_name"],
+        data["section"],
+        "",
+        chapter_final,
+        sess["files"],
+        user_id,
+    )
+
+    _clear(user_id)
+
+    await message.answer(
+        f"✅ <b>ᴍᴀᴛᴇʀɪᴀʟ ꜱᴀᴠᴇᴅ!</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"📘 ᴄʟᴀꜱꜱ: <b>{data['class_name']}</b>\n"
+        f"📂 ꜱᴇᴄᴛɪᴏɴ: <b>{data['section']}</b>\n"
+        f"📄 ᴄʜᴀᴘᴛᴇʀ: <b>{chapter_final}</b>\n"
+        f"📦 ꜰɪʟᴇꜱ: <b>{count}</b>\n\n"
+        f"ᴜꜱᴇʀꜱ ᴄᴀɴ ɴᴏᴡ ᴀᴄᴄᴇꜱꜱ ᴠɪᴀ /study.",
+        reply_markup=admin_panel_kb(),
+    )
+
+
+# ═══════════════════════════════════════════════
+# adm:done callback (inline button alternative)
+# ═══════════════════════════════════════════════
+@router.callback_query(F.data == "adm:done")
+async def cb_done(cb: CallbackQuery):
+    if not is_bot_admin(cb.from_user.id):
+        return await cb.answer("❌", show_alert=True)
+    sess = SESSIONS.get(cb.from_user.id)
+    if not sess or not sess.get("files"):
+        return await cb.answer("❌ ɴᴏ ꜰɪʟᴇꜱ ᴀᴅᴅᴇᴅ.", show_alert=True)
+
+    data = sess["data"]
+    subj = data.get("subject", "")
+    chapter_final = (
+        f"{subj} — {data['chapter']}" if subj else data["chapter"]
+    )
+
+    count = await save_study_material_bulk(
+        data["class_name"],
+        data["section"],
+        "",
+        chapter_final,
+        sess["files"],
+        cb.from_user.id,
+    )
+
+    _clear(cb.from_user.id)
+
+    await cb.message.edit_text(
+        f"✅ <b>ᴍᴀᴛᴇʀɪᴀʟ ꜱᴀᴠᴇᴅ!</b>\n"
+        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+        f"📘 ᴄʟᴀꜱꜱ: <b>{data['class_name']}</b>\n"
+        f"📂 ꜱᴇᴄᴛɪᴏɴ: <b>{data['section']}</b>\n"
+        f"📄 ᴄʜᴀᴘᴛᴇʀ: <b>{chapter_final}</b>\n"
+        f"📦 ꜰɪʟᴇꜱ: <b>{count}</b>"
+    )
+    await cb.answer("✅ ꜱᴀᴠᴇᴅ")
