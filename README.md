@@ -1,633 +1,461 @@
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <!--                                                                         -->
-<!--       🌌  ASTRAL EMPIRE BOT — NEBULA EDITION README  🌌                 -->
+<!--       ◈  ASTRAL EMPIRE  ◈   Minimalist Glass Edition                    -->
 <!--                                                                         -->
-<!--              Version 6.1 • Clone System • Hyper-Animated                -->
+<!--       v6.1  ·  Calm. Sharp. Powerful.                                   -->
 <!--                                                                         -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <div align="center">
 
-<!-- ═══ CINEMATIC HEADER ═══ -->
-<img src="https://capsule-render.vercel.app/api?type=venom&color=gradient&customColorList=0,2,2,5,30&height=340&section=header&text=⛧%20ASTRAL%20EMPIRE%20⛧&fontSize=120&fontAlignY=35&animation=twinkling&fontColor=A78BFA&desc=NEBULA%20EDITION%20•%20v6.1&descAlignY=58&descSize=28&descColor=00D9FF&stroke=00D9FF&strokeWidth=2" width="100%" />
+<!-- ═══ GLASS HERO ═══ -->
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=0,1,3,6&height=260&section=header&text=Astral%20Empire&fontSize=90&fontAlignY=45&fontColor=E5E7EB&desc=◈%20Minimalist%20Glass%20Edition%20◈&descAlignY=72&descSize=18&descColor=A78BFA" width="100%" />
 
 <br/>
 
-<!-- ═══ GLITCH TITLE ═══ -->
-<a href="https://t.me/AstralEmpireRobot">
-  <img src="https://readme-typing-svg.demolab.com?font=Press+Start+2P&size=42&duration=2500&pause=600&color=FF6B6B&center=true&vCenter=true&width=900&height=90&lines=%E2%9B%A7+ENTER+THE+EMPIRE+%E2%9B%A7" alt="Glitch Title" />
-</a>
-
-<br/>
-
-<!-- ═══ NEBULA GIF ═══ -->
-<img src="https://media.giphy.com/media/3o7TKMt1VVNkHV2PaE/giphy.gif" width="500" />
+<img src="https://readme-typing-svg.demolab.com?font=Inter&weight=300&size=22&duration=3500&pause=800&color=A78BFA&center=true&vCenter=true&width=800&height=50&lines=Learn.+Play.+Compete.+Clone.;The+quiet+revolution+of+Telegram+bots.;v6.1+%E2%80%94+Built+for+builders." alt="Tagline" />
 
 <br/><br/>
 
-<!-- ═══ 3 ROTATING TAGLINES ═══ -->
-<a href="https://t.me/AstralEmpireRobot">
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=800&size=26&duration=2000&pause=400&color=A78BFA&center=true&vCenter=true&width=900&height=60&lines=%F0%9F%8C%8C+STUDY+%C2%B7+PLAY+%C2%B7+COMPETE+%C2%B7+CLONE;%F0%9F%A4%96+MAKE+YOUR+OWN+BOT+EMPIRE;%E2%9A%A1+50%2B+COMMANDS+%C2%B7+8+SYSTEMS" alt="Taglines" />
-</a>
-
-<br/>
-
-<!-- ═══ STATS ROW ═══ -->
+<!-- ═══ PILL BADGES ═══ -->
 <p align="center">
-  <img src="https://img.shields.io/badge/⚡_STATUS-ONLINE-22C55E?style=for-the-badge&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/📦_VERSION-6.1.0-A78BFA?style=for-the-badge&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/⚙️_COMMANDS-50+-FF6B6B?style=for-the-badge&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/👥_CLONES-20_MAX-00D9FF?style=for-the-badge&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/🔒_SECURITY-FERNET-FFD700?style=for-the-badge&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/◉_Status-Online-22C55E?style=flat-square&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/◈_Version-6.1-A78BFA?style=flat-square&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/◇_Commands-50+-FFD700?style=flat-square&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/▣_Clones-20_Max-00D9FF?style=flat-square&labelColor=0D1117" />
 </p>
 
 <br/>
 
-<!-- ═══ CTA BUTTONS ═══ -->
+<!-- ═══ ACTION BUTTONS ═══ -->
 <p align="center">
   <a href="https://t.me/AstralEmpireRobot">
-    <img src="https://img.shields.io/badge/⚡_USE_BOT-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="50" />
+    <img src="https://img.shields.io/badge/Open_the_Bot_→-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="42" />
   </a>
+  &nbsp;
   <a href="https://t.me/+-j8FiVjAUXExMmM1">
-    <img src="https://img.shields.io/badge/👥_JOIN_GC-5865F2?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="50" />
-  </a>
-  <a href="https://t.me/Astral_study_chest">
-    <img src="https://img.shields.io/badge/📚_STUDY_CHANNEL-9B59B6?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="50" />
-  </a>
-  <a href="https://crazycore.vercel.app/">
-    <img src="https://img.shields.io/badge/🌐_WEBSITE-A78BFA?style=for-the-badge&labelColor=0D1117" height="50" />
+    <img src="https://img.shields.io/badge/Join_Community_→-5865F2?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="42" />
   </a>
 </p>
 
 <br/>
 
-<!-- ═══ PARTY PARROTS ═══ -->
-<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="45" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="45" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="45" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="45" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="45" />
+<!-- ═══ SUBTLE DIVIDER ═══ -->
+<svg width="400" height="1">
+  <line x1="0" y1="0" x2="400" y2="0" stroke="#A78BFA" stroke-width="1" opacity="0.3" stroke-dasharray="2 4"/>
+</svg>
 
-<br/><br/>
+<br/>
 
-<!-- ═══ TECH BADGES ═══ -->
+<!-- ═══ MANIFESTO ═══ -->
+<h3><i>"One bot. Twenty empires."</i></h3>
+
+<p><sub>Most Telegram bots are tools. Astral Empire is a platform.</sub></p>
+
+</div>
+
+<br/>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        PHILOSOPHY                                        -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ◈ ᴘʜɪʟᴏꜱᴏᴘʜʏ
+
+</div>
+
+<br/>
+
+<table align="center" width="80%">
+<tr>
+<td align="center" width="33%">
+
+### ◉
+**Quiet**
+> No noise. No clutter. Every pixel earns its place.
+
+</td>
+<td align="center" width="33%">
+
+### ◇
+**Sharp**
+> Async everywhere. Sub-100ms responses. Zero fluff.
+
+</td>
+<td align="center" width="33%">
+
+### ▣
+**Yours**
+> Your bot, your rules, your empire — fully independent.
+
+</td>
+</tr>
+</table>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        THE CLONE SYSTEM                                  -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ◈ ᴛʜᴇ ᴄʟᴏɴᴇ ꜱʏꜱᴛᴇᴍ
+
+<img src="https://readme-typing-svg.demolab.com?font=Inter&weight=400&size=16&duration=3000&pause=700&color=FFD700&center=true&vCenter=true&width=600&height=40&lines=Your+own+bot+in+under+60+seconds.;Full+features.+Zero+compromise." />
+
+</div>
+
+<br/>
+
+<!-- ═══ CLONE FLOW — HORIZONTAL ═══ -->
+<table align="center" width="95%">
+<tr>
+<td align="center" width="20%">
+  <div style="padding: 20px; border: 1px solid #A78BFA; border-radius: 8px;">
+
+  **01**
+  <br/><br/>
+  <sub>Tap **Clone Bot**<br/>in main menu</sub>
+
+  </div>
+</td>
+<td align="center" width="5%">
+  <img src="https://img.shields.io/badge/→-A78BFA?style=flat-square&labelColor=0D1117" />
+</td>
+<td align="center" width="20%">
+  <div style="padding: 20px; border: 1px solid #FFD700; border-radius: 8px;">
+
+  **02**
+  <br/><br/>
+  <sub>Join required<br/>channels & GCs</sub>
+
+  </div>
+</td>
+<td align="center" width="5%">
+  <img src="https://img.shields.io/badge/→-FFD700?style=flat-square&labelColor=0D1117" />
+</td>
+<td align="center" width="20%">
+  <div style="padding: 20px; border: 1px solid #00D9FF; border-radius: 8px;">
+
+  **03**
+  <br/><br/>
+  <sub>Create bot on<br/>@BotFather</sub>
+
+  </div>
+</td>
+<td align="center" width="5%">
+  <img src="https://img.shields.io/badge/→-00D9FF?style=flat-square&labelColor=0D1117" />
+</td>
+<td align="center" width="20%">
+  <div style="padding: 20px; border: 1px solid #22C55E; border-radius: 8px;">
+
+  **04**
+  <br/><br/>
+  <sub>Send token<br/>— done</sub>
+
+  </div>
+</td>
+</tr>
+</table>
+
+<br/>
+
+<!-- ═══ CLONE BENEFITS ═══ -->
+<table align="center" width="90%">
+<thead>
+<tr>
+<th align="left">◇ Component</th>
+<th align="center">Main Bot</th>
+<th align="center">Your Clone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All games & quizzes</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Economy & levels</td>
+<td align="center">✓</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Own admin panel</td>
+<td align="center">—</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Independent branding</td>
+<td align="center">—</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>AES-encrypted token</td>
+<td align="center">—</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td>Broadcast system</td>
+<td align="center">✓</td>
+<td align="center">—</td>
+</tr>
+<tr>
+<td>Auto-disable on leave</td>
+<td align="center">—</td>
+<td align="center">✓</td>
+</tr>
+</tbody>
+</table>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        SUBSYSTEMS                                        -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ◈ ꜱᴜʙꜱʏꜱᴛᴇᴍꜱ
+
+</div>
+
+<br/>
+
+<!-- ═══ SUBSYSTEM CARDS — 2x4 GRID ═══ -->
+<table align="center" width="100%">
+<tr>
+<td align="center" width="25%" style="padding: 25px;">
+
+<img src="https://img.shields.io/badge/Ⅰ-FF6B6B?style=for-the-badge&labelColor=0D1117" />
+
+### ◈ Study
+<sub>Class 10 · 11 · 12<br/>JEE · NEET · CBSE · ICSE<br/>PDF · Video · Link · Photo</sub>
+
+</td>
+<td align="center" width="25%" style="padding: 25px;">
+
+<img src="https://img.shields.io/badge/Ⅱ-A78BFA?style=for-the-badge&labelColor=0D1117" />
+
+### ◈ Games
+<sub>Lucky Door · Treasure<br/>Bomb Defuse · Quiz<br/>Guess Number</sub>
+
+</td>
+<td align="center" width="25%" style="padding: 25px;">
+
+<img src="https://img.shields.io/badge/Ⅲ-FFD700?style=for-the-badge&labelColor=0D1117" />
+
+### ◈ Economy
+<sub>Coins · Gems · XP<br/>Daily · Missions<br/>Rob · Shield</sub>
+
+</td>
+<td align="center" width="25%" style="padding: 25px;">
+
+<img src="https://img.shields.io/badge/Ⅳ-22C55E?style=for-the-badge&labelColor=0D1117" />
+
+### ◈ Levels
+<sub>50 levels<br/>Astral Rookie → Astral Deity<br/>Unique rewards per tier</sub>
+
+</td>
+</tr>
+<tr>
+<td align="center" style="padding: 25px;">
+
+<img src="https://img.shields.io/badge/Ⅴ-00D9FF?style=for-the-badge&labelColor=0D1117" />
+
+### ◈ Premium
+<sub>1 Week · 1 Month · 1 Year<br/>Shield boost · XP boost<br/>Custom emoji</sub>
+
+</td>
+<td align="center" style="padding: 25px;">
+
+<img src="https://img.shields.io/badge/Ⅵ-FF6B6B?style=for-the-badge&labelColor=0D1117" />
+
+### ◈ Leaderboard
+<sub>Today · Weekly<br/>Monthly · All-Time<br/>Top 10 + your rank</sub>
+
+</td>
+<td align="center" style="padding: 25px;">
+
+<img src="https://img.shields.io/badge/Ⅶ-A78BFA?style=for-the-badge&labelColor=0D1117" />
+
+### ◈ Admin
+<sub>Upload materials<br/>Multi-file support<br/>Class-aware FSM</sub>
+
+</td>
+<td align="center" style="padding: 25px;">
+
+<img src="https://img.shields.io/badge/Ⅷ-FFD700?style=for-the-badge&labelColor=0D1117" />
+
+### ◈ Clone
+<sub>Create your bot<br/>Full features<br/>AES encrypted</sub>
+
+</td>
+</tr>
+</table>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        ARCHITECTURE                                      -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ◈ ᴀʀᴄʜɪᴛᴇᴄᴛᴜʀᴇ
+
+</div>
+
+<br/>
+
+```plaintext
+                    ┌──────────────────────────┐
+                    │      Railway Worker      │
+                    │    (single process)      │
+                    └───────────┬──────────────┘
+                                │
+                    ┌───────────┴────────────┐
+                    │                        │
+              ┌─────▼─────┐          ┌───────▼────────┐
+              │ Main Bot  │          │  Clone Manager │
+              │           │          │                │
+              │ 1 Dispatcher         │ N Dispatchers   │
+              │ 21 Routers│          │ (rel dynamic)   │
+              └─────┬─────┘          └───────┬────────┘
+                    │                        │
+                    │                        │
+              ┌─────▼────────────────────────▼─────┐
+              │         PostgreSQL (Neon)           │
+              │                                     │
+              │  users · clone_bots · study         │
+              │  powers · extra_plays · quiz        │
+              │  leaderboards · transactions        │
+              └─────────────────────────────────────┘
+```
+
+<br/>
+
+<div align="center">
+
+**Key invariant:** Every clone shares the same DB connection pool but has its own `Dispatcher`, `Bot`, `Router` instances. Updated via `importlib.reload` on boot.
+
+</div>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        COMMANDS                                          -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ◈ ᴄᴏᴍᴍᴀɴᴅꜱ
+
+</div>
+
+<br/>
+
+<table align="center" width="90%">
+<thead>
+<tr>
+<th align="left">◈ Category</th>
+<th align="left">Commands</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><b>Core</b></td>
+<td><code>/start</code> · <code>/help</code> · <code>/about</code></td>
+</tr>
+<tr>
+<td><b>Profile</b></td>
+<td><code>/balance</code> · <code>/profile</code> · <code>/convert</code> · <code>/daily</code> · <code>/performance</code></td>
+</tr>
+<tr>
+<td><b>Games</b></td>
+<td><code>/luckydoor</code> · <code>/defuse</code> · <code>/treasure</code> · <code>/tgames</code> · <code>/quiz</code> · <code>/h</code></td>
+</tr>
+<tr>
+<td><b>Economy (GC)</b></td>
+<td><code>/gives</code> · <code>/robs</code> · <code>/shield</code> · <code>/shieldcheck</code> · <code>/powers</code></td>
+</tr>
+<tr>
+<td><b>Premium</b></td>
+<td><code>/premium</code> · <code>/premiumstatus</code> · <code>/setemoji</code> · <code>/shop</code></td>
+</tr>
+<tr>
+<td><b>Leaderboard</b></td>
+<td><code>/aleaderboard</code></td>
+</tr>
+<tr>
+<td><b>Study</b></td>
+<td><code>/study</code></td>
+</tr>
+<tr>
+<td><b>Clone</b></td>
+<td><code>/clone</code> · <code>/myclone</code> · <code>/deleteclone</code></td>
+</tr>
+<tr>
+<td><b>Owner</b></td>
+<td><code>/addrequired</code> · <code>/removerequired</code> · <code>/listrequired</code> · <code>/broadcast</code> · <code>/broadcast_users</code> · <code>/broadcast_groups</code> · <code>/broadcast_stats</code></td>
+</tr>
+<tr>
+<td><b>Admin</b></td>
+<td><code>/admin</code> · <code>/done</code> · <code>/botstatus</code> · <code>/users</code></td>
+</tr>
+</tbody>
+</table>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        TECH STACK                                        -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ◈ ꜱᴛᴀᴄᴋ
+
+</div>
+
+<br/>
+
 <p align="center">
-  <img src="https://img.shields.io/badge/Python_3.11+-3776AB?style=flat-square&logo=python&logoColor=white&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/aiogram_3.13-00A8E8?style=flat-square&logo=python&logoColor=white&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/asyncpg-FF6B6B?style=flat-square&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/Fernet-A78BFA?style=flat-square&labelColor=0D1117" />
-  <img src="https://img.shields.io/badge/Railway-0B0D0E?style=flat-square&logo=railway&logoColor=white&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/Python_3.11-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=0D1117" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/aiogram_3.13-00A8E8?style=for-the-badge&logo=python&logoColor=white&labelColor=0D1117" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white&labelColor=0D1117" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/asyncpg-FF6B6B?style=for-the-badge&labelColor=0D1117" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Fernet-A78BFA?style=for-the-badge&labelColor=0D1117" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white&labelColor=0D1117" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/Neon.tech-00E599?style=for-the-badge&labelColor=0D1117" />
 </p>
 
 <br/>
 
-<!-- ═══ SNAKE ANIMATION ═══ -->
-<img src="https://raw.githubusercontent.com/platane/snk/output/github-contribution-grid-snake-dark.svg" width="100%" />
-
-</div>
-
-<!-- ═══ RAINBOW DIVIDER ═══ -->
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                     NEW: CLONE SYSTEM SPOTLIGHT                          -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
 <div align="center">
 
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=50&duration=2200&pause=400&color=FFD700&center=true&vCenter=true&width=900&height=80&lines=🤖+CLONE+BOT+SYSTEM+🤖;⚡+YOUR+OWN+EMPIRE+⚡" alt="Clone Title" />
-</h1>
-
-<img src="https://media.giphy.com/media/l0HlPystfePnAI3G8/giphy.gif" width="280" />
-
-<br/>
-
-> ### 🌟 *"Why settle for one bot, when you can rule your own empire?"*
-
-</div>
-
-<br/>
-
-<!-- ═══ MAIN vs CLONE COMPARISON TABLE ═══ -->
-<table align="center" width="100%">
-<thead>
-<tr>
-<th align="center">🔮 Feature</th>
-<th align="center">🌌 Main Bot</th>
-<th align="center">🤖 Clone Bot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>📚 Study Material</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-</tr>
-<tr>
-<td>🎮 All 5 Games</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-</tr>
-<tr>
-<td>💰 Economy System</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-</tr>
-<tr>
-<td>⭐ XP & Levels</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-</tr>
-<tr>
-<td>🏆 Leaderboards</td>
-<td align="center">✅</td>
-<td align="center">✅</td>
-</tr>
-<tr>
-<td>👑 Own Admin Panel</td>
-<td align="center">Original</td>
-<td align="center">✅</td>
-</tr>
-<tr>
-<td>🎨 Independent Branding</td>
-<td align="center">—</td>
-<td align="center">✅</td>
-</tr>
-<tr>
-<td>🔒 Encrypted Token</td>
-<td align="center">—</td>
-<td align="center">✅ Fernet</td>
-</tr>
-<tr>
-<td>📡 Broadcast System</td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-</tr>
-<tr>
-<td>🎯 Clone Creation</td>
-<td align="center">✅</td>
-<td align="center">❌</td>
-</tr>
-</tbody>
-</table>
-
-<br/>
-
-<!-- ═══ HOW IT WORKS ═══ -->
-<div align="center">
-
-### 🎬 **ʜᴏᴡ ɪᴛ ᴡᴏʀᴋꜱ**
-
-</div>
-
-```plaintext
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│  Step 1 →  Tap "Clone Bot" in main menu                     │
-│              ↓                                              │
-│  Step 2 →  Verify required channels & groups                │
-│              ↓                                              │
-│  Step 3 →  Create bot via @BotFather, get token             │
-│              ↓                                              │
-│  Step 4 →  Send token (AES encrypted, stored safely)        │
-│              ↓                                              │
-│  Step 5 →  🎉 Your clone is LIVE in under 60 seconds!       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
-
-<br/>
-
-<!-- ═══ SECURITY FEATURES ═══ -->
-<table align="center" width="100%">
-<tr>
-<td align="center" width="25%">
-
-### 🔐
-**Fernet AES**
-> Tokens encrypted with `cryptography` library before DB storage
-
-</td>
-<td align="center" width="25%">
-
-### 🚫
-**Join Gate**
-> Must join required channels/GCs before creating clone
-
-</td>
-<td align="center" width="25%">
-
-### 🔄
-**Live Re-check**
-> Every 10 min — if owner leaves, clone pauses automatically
-
-</td>
-<td align="center" width="25%">
-
-### 🛡️
-**Access Middleware**
-> Blocked clones reply with a friendly disabled message
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          SYSTEM OVERVIEW                                 -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=80&lines=⚙️+SYSTEM+OVERVIEW+⚙️;⚡+8+MAJOR+SUBSYSTEMS+⚡" alt="Systems Title" />
-</h1>
-
-</div>
-
-<br/>
-
-<!-- ═══ 8 SYSTEMS GRID ═══ -->
-<table align="center" width="100%">
-<tr>
-<td align="center" width="25%">
-
-### 📚
-**STUDY**
-> Class 10/11/12
-> JEE · NEET · CBSE
-> PDF · Video · Notes
-
-</td>
-<td align="center" width="25%">
-
-### 🎮
-**GAMES**
-> Lucky Door
-> Treasure Hunt
-> Bomb Defuse · Quiz
-
-</td>
-<td align="center" width="25%">
-
-### 💰
-**ECONOMY**
-> Coins · Gems · XP
-> Daily rewards
-> Missions
-
-</td>
-<td align="center" width="25%">
-
-### ⭐
-**PREMIUM**
-> 3 tiers via Gems
-> Shield · XP Boost
-> Custom emoji
-
-</td>
-</tr>
-<tr>
-<td align="center">
-
-### 🏆
-**LEADERBOARD**
-> Today / Weekly
-> Monthly / All-Time
-> Top 10 + Your Rank
-
-</td>
-<td align="center">
-
-### 👑
-**LEVELS**
-> 50 Levels
-> Unique titles
-> Level rewards
-
-</td>
-<td align="center">
-
-### 🛡️
-**MANAGEMENT**
-> Robs · Gives
-> Shield system
-> Anti-exploit checks
-
-</td>
-<td align="center">
-
-### 🤖
-**CLONE**
-> Create your bot
-> Independent owner
-> AES encrypted
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          GAMES SHOWCASE                                  -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=500&color=22C55E&center=true&vCenter=true&width=900&height=80&lines=🎮+GAMES+SHOWCASE+🎮;⚡+PLAY+%26+WIN+BIG+⚡" alt="Games Title" />
-</h1>
-
-</div>
-
-<br/>
-
-<!-- ═══ GAME CARDS ═══ -->
-<table align="center" width="100%">
-<tr>
-<td align="center" width="33%" style="border: 2px solid #FF6B6B; border-radius: 15px; padding: 20px;">
-
-### 🚪 **LUCKY DOOR**
-
-<img src="https://img.shields.io/badge/DAILY-2_PLAYS-FF6B6B?style=flat-square&labelColor=0D1117" />
-<img src="https://img.shields.io/badge/DOORS-25-FFD700?style=flat-square&labelColor=0D1117" />
-
-<br/><br/>
-
-**How to play:**
-> Open 4 out of 25 doors
-> Match rewards, avoid zeros
-
-<br/>
-
-**💰 Rewards:**
-- Common: 200 – 5,000
-- Jackpot: 🪙 **40,000** + 📈 **400 XP**
-
-</td>
-<td align="center" width="33%" style="border: 2px solid #A78BFA; border-radius: 15px; padding: 20px;">
-
-### 💎 **TREASURE HUNT**
-
-<img src="https://img.shields.io/badge/DAILY-3_PLAYS-A78BFA?style=flat-square&labelColor=0D1117" />
-<img src="https://img.shields.io/badge/BOXES-16-FFD700?style=flat-square&labelColor=0D1117" />
-
-<br/><br/>
-
-**How to play:**
-> Pick 1 of 16 boxes
-> One special box has jackpot
-
-<br/>
-
-**💰 Rewards:**
-- Normal: 500 – 1,000
-- Jackpot: 🪙 **15,000** + 📈 **100 XP**
-
-</td>
-<td align="center" width="33%" style="border: 2px solid #00D9FF; border-radius: 15px; padding: 20px;">
-
-### 💣 **BOMB DEFUSE**
-
-<img src="https://img.shields.io/badge/DAILY-3_PLAYS-00D9FF?style=flat-square&labelColor=0D1117" />
-<img src="https://img.shields.io/badge/BOXES-12-FFD700?style=flat-square&labelColor=0D1117" />
-
-<br/><br/>
-
-**How to play:**
-> 12 boxes, up to 2 picks
-> Bomb loses, treasure wins
-
-<br/>
-
-**💰 Rewards:**
-- 💣 Bomb: **-10,000**
-- 🍀 Lucky: **+15,000**
-- 💰 Treasure: **+5,000–7,000**
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-<table align="center" width="60%">
-<tr>
-<td align="center" width="50%" style="border: 2px solid #FFD700; border-radius: 15px; padding: 20px;">
-
-### 🧠 **QUIZ**
-
-<img src="https://img.shields.io/badge/CATEGORIES-15-FFD700?style=flat-square&labelColor=0D1117" />
-<img src="https://img.shields.io/badge/QUESTIONS-5000+-22C55E?style=flat-square&labelColor=0D1117" />
-
-<br/>
-
-> 5 / 10 / 15 / 20 questions
-> **+40 Coins** per correct answer
-> XP rewards included
-
-</td>
-<td align="center" width="50%" style="border: 2px solid #22C55E; border-radius: 15px; padding: 20px;">
-
-### 🔢 **GUESS NUMBER**
-
-<img src="https://img.shields.io/badge/RANGE-100_–_500-22C55E?style=flat-square&labelColor=0D1117" />
-<img src="https://img.shields.io/badge/ATTEMPTS-12-FFD700?style=flat-square&labelColor=0D1117" />
-
-<br/>
-
-> 12 attempts to guess
-> **+80 Coins** on correct
-> Quick thinking wins
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          XP & LEVEL ROADMAP                              -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=900&height=80&lines=⭐+LEVEL+SYSTEM+⭐;⚡+FROM+ROOKIE+TO+DEITY+⚡" alt="Levels Title" />
-</h1>
-
-</div>
-
-<br/>
-
-<!-- ═══ LEVEL PROGRESSION ═══ -->
-<table align="center" width="100%">
-<thead>
-<tr>
-<th align="center">Level Range</th>
-<th align="center">Title</th>
-<th align="center">Badge</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="center">1 – 4</td>
-<td align="center">Rookie · Novice · Apprentice</td>
-<td align="center">🌱</td>
-</tr>
-<tr>
-<td align="center">5 – 9</td>
-<td align="center">Adventurer · Fighter · Warrior</td>
-<td align="center">🚀</td>
-</tr>
-<tr>
-<td align="center">10 – 19</td>
-<td align="center">Champion · Knight · Legend</td>
-<td align="center">⭐</td>
-</tr>
-<tr>
-<td align="center">20 – 29</td>
-<td align="center">Overlord · Immortal · Divine Emperor</td>
-<td align="center">👑</td>
-</tr>
-<tr>
-<td align="center">30 – 39</td>
-<td align="center">Cosmic Knight · Nebula Lord · Void Walker</td>
-<td align="center">💫</td>
-</tr>
-<tr>
-<td align="center">40 – 49</td>
-<td align="center">Divine Overlord · Eternal God · Omniversal Ruler</td>
-<td align="center">🌠</td>
-</tr>
-<tr>
-<td align="center">50</td>
-<td align="center"><b>Astral Deity</b></td>
-<td align="center">⚡</td>
-</tr>
-</tbody>
-</table>
-
-<br/>
-
-<!-- ═══ XP PROGRESS BAR ═══ -->
-<div align="center">
-
-### 📊 **ᴘʀᴏɢʀᴇꜱꜱ ᴠɪꜱᴜᴀʟɪᴢᴀᴛɪᴏɴ**
-
-</div>
-
-```plaintext
-┌──────────────────────────────────────────────┐
-│  ⭐ Level: 42 — Divine Overlord              │
-│  ⚡ XP: 8,250 / 42,000                        │
-│  ▰▰▰▰▰░░░░░░░░░░░░░░░░░░  (19.6%)            │
-└──────────────────────────────────────────────┘
-```
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          COMMAND ARSENAL                                 -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=500&color=FF6B6B&center=true&vCenter=true&width=900&height=80&lines=⚡+COMMAND+ARSENAL+⚡;🎯+50%2B+COMMANDS+⚡" alt="Commands Title" />
-</h1>
-
-</div>
-
-<br/>
-
-<!-- ═══ COMMAND TICKER ═══ -->
-<div align="center">
-
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=18&duration=2000&pause=200&color=00D9FF&center=true&vCenter=true&width=900&height=40&lines=%2Fstart+%C2%B7+%2Fhelp+%C2%B7+%2Fabout+%C2%B7+%2Fbalance+%C2%B7+%2Fprofile;%2Fdaily+%C2%B7+%2Fmission+%C2%B7+%2Fperformance+%C2%B7+%2Fconvert;%2Ftreasure+%C2%B7+%2Fluckydoor+%C2%B7+%2Fdefuse+%C2%B7+%2Ftgames;%2Fquiz+%C2%B7+%2Fh+%C2%B7+%2Fstudy+%C2%B7+%2Fshop+%C2%B7+%2Fpremium;%2Faleaderboard+%C2%B7+%2Fclone+%C2%B7+%2Fmyclone" />
-
-</div>
-
-<br/>
-
-<!-- ═══ COMMAND CATEGORIES ═══ -->
-<table align="center" width="100%">
-<tr>
-<td width="50%" valign="top">
-
-### 🏠 **ᴄᴏʀᴇ**
-> `/start` — Start bot
-> `/help` — View all commands
-> `/about` — About & credits
-
-### 👤 **ᴘʀᴏꜰɪʟᴇ**
-> `/balance` — Balance & level
-> `/profile` — Full profile
-> `/convert` — Coins → Gems
-> `/daily` — Daily reward
-> `/performance` — Your stats
-
-### 🎮 **ɢᴀᴍᴇꜱ**
-> `/luckydoor` — Lucky Door
-> `/defuse` — Bomb Defuse
-> `/treasure` — Treasure Hunt
-> `/tgames` — Games menu
-> `/quiz` — Start a quiz
-> `/h 250` — Guess the number
-
-</td>
-<td width="50%" valign="top">
-
-### 🪙 **ᴇᴄᴏɴᴏᴍʏ (ɢᴄ)**
-> `/gives` — Give coins
-> `/robs` — Rob a user
-> `/shield` — Activate shield
-> `/shieldcheck` — Check shield
-> `/powers` — Active powers
-
-### ⭐ **ᴘʀᴇᴍɪᴜᴍ**
-> `/premium` — Premium shop
-> `/premiumstatus` — Status
-> `/setemoji` — Custom emoji
-> `/shop` — Item shop
-
-### 🤖 **ᴄʟᴏɴᴇ**
-> `/clone` — Create clone bot
-> `/myclone` — View your clone
-> `/deleteclone` — Delete clone
-
-### 🏆 **ʟᴇᴀᴅᴇʀʙᴏᴀʀᴅ**
-> `/aleaderboard` — 4-tab LB
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          TECH STACK                                      -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=500&color=00D9FF&center=true&vCenter=true&width=900&height=80&lines=🛠️+TECH+STACK+🛠️;⚡+POWERED+BY+MODERN+STACK+⚡" alt="Tech Title" />
-</h1>
+<img src="https://skillicons.dev/icons?i=python,postgres,git,github,docker,linux&theme=dark" />
 
 </div>
 
@@ -635,35 +463,82 @@
 
 <div align="center">
 
-| <img src="https://img.shields.io/badge/Python_3.11-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/aiogram_3.13-00A8E8?style=for-the-badge&logo=python&logoColor=white&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/asyncpg-FF6B6B?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/Fernet-A78BFA?style=for-the-badge&labelColor=0D1117" /> | <img src="https://img.shields.io/badge/Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white&labelColor=0D1117" /> |
-|:---:|:---:|:---:|:---:|:---:|:---:|
-| **Core Language** | **Async Framework** | **Database** | **DB Driver** | **Encryption** | **Deployment** |
-
-</div>
-
-<br/>
-
-<div align="center">
-
-<img src="https://skillicons.dev/icons?i=python,git,github,vscode,postgres,docker,linux&theme=dark" />
-
-</div>
-
-<br/>
-
-<!-- ═══ DEPENDENCIES ═══ -->
-<div align="center">
-
-### 📦 **ᴋᴇʏ ᴅᴇᴩᴇɴᴅᴇɴᴄɪᴇꜱ**
-
-</div>
+<sub><b>Core dependencies</b></sub>
 
 ```bash
-aiogram==3.13.1         # Telegram Bot Framework
-asyncpg==0.29.0         # PostgreSQL Async Driver
-python-dotenv==1.0.1    # Environment Variables
-aiohttp==3.9.5          # HTTP Client for OpenTDB
-cryptography>=42.0.0    # Fernet Token Encryption
+aiogram==3.13.1
+asyncpg==0.29.0
+cryptography>=42.0.0
+python-dotenv==1.0.1
+aiohttp==3.9.5
+```
+
+</div>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        QUICK START                                       -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ◈ ǫᴜɪᴄᴋ ꜱᴛᴀʀᴛ
+
+</div>
+
+<br/>
+
+### ◇ Prerequisites
+
+```
+→ Python 3.11+
+→ Bot token from @BotFather
+→ PostgreSQL (Neon.tech recommended)
+→ Fernet key (generated once)
+```
+
+<br/>
+
+### ◇ Setup
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/bots-123Ac/astralsociety.git
+cd astralsociety
+
+# 2. Create virtual environment
+python -m venv .venv
+source .venv/bin/activate          # Linux/Mac
+# .venv\Scripts\activate           # Windows
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Generate CLONE_ENCRYPT_KEY (once)
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+
+# 5. Configure .env
+#    BOT_TOKEN=<your bot token>
+#    DATABASE_URL=<postgres url>
+#    CLONE_ENCRYPT_KEY=<from step 4>
+
+# 6. Run
+python main.py
+```
+
+<br/>
+
+### ◇ Deploy on Railway
+
+```
+1.  Fork this repo
+2.  New Project → Deploy from GitHub
+3.  Add env vars: BOT_TOKEN, DATABASE_URL, CLONE_ENCRYPT_KEY
+4.  Service type: Worker  ·  Start: python main.py
+5.  Deploy → done
 ```
 
 <br/>
@@ -671,267 +546,312 @@ cryptography>=42.0.0    # Fernet Token Encryption
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                       DEVELOPMENT TIMELINE                               -->
+<!--                        FILES                                             -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <div align="center">
 
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=500&color=A78BFA&center=true&vCenter=true&width=900&height=80&lines=📅+ROADMAP+📅;⚡+WHAT'S+COMING+NEXT+⚡" alt="Roadmap Title" />
-</h1>
+## ◈ ᴘʀᴏᴊᴇᴄᴛ ꜱᴛʀᴜᴄᴛᴜʀᴇ
 
 </div>
 
 <br/>
 
-<table align="center" width="100%">
-<thead>
-<tr>
-<th align="center">Status</th>
-<th align="left">Feature</th>
-<th align="center">Phase</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td align="center">✅</td>
-<td>Full study system (10/11/12)</td>
-<td align="center">v1.0</td>
-</tr>
-<tr>
-<td align="center">✅</td>
-<td>Quiz system (5000+ questions)</td>
-<td align="center">v2.0</td>
-</tr>
-<tr>
-<td align="center">✅</td>
-<td>Economy + Premium + Robs</td>
-<td align="center">v3.0</td>
-</tr>
-<tr>
-<td align="center">✅</td>
-<td>5 games with jackpots</td>
-<td align="center">v4.0</td>
-</tr>
-<tr>
-<td align="center">✅</td>
-<td>XP & Level (50 levels)</td>
-<td align="center">v5.0</td>
-</tr>
-<tr>
-<td align="center">✅</td>
-<td>Premium custom emoji</td>
-<td align="center">v5.5</td>
-</tr>
-<tr>
-<td align="center">✅</td>
-<td><b>Clone Bot System</b></td>
-<td align="center"><b>v6.0</b></td>
-</tr>
-<tr>
-<td align="center">✅</td>
-<td><b>Broadcast + Auto-cleanup</b></td>
-<td align="center"><b>v6.1</b></td>
-</tr>
-<tr>
-<td align="center">🔄</td>
-<td>Multi-language (Hindi/English)</td>
-<td align="center">v6.2</td>
-</tr>
-<tr>
-<td align="center">🔄</td>
-<td>Web dashboard</td>
-<td align="center">v7.0</td>
-</tr>
-<tr>
-<td align="center">🔄</td>
-<td>Tournament mode</td>
-<td align="center">v7.5</td>
-</tr>
-<tr>
-<td align="center">🔄</td>
-<td>AI-powered chatbots</td>
-<td align="center">v8.0</td>
-</tr>
-</tbody>
-</table>
+```plaintext
+astral-empire-bot/
+│
+├── main.py                    ◈ Boot + dispatcher factory
+├── config.py                  ◈ Constants & env
+├── requirements.txt
+│
+├── handlers/                  ◈ 21 routers
+│   ├── start.py               ◈ /start · DM-only
+│   ├── menu.py                ◈ /help · /about
+│   ├── profile.py             ◈ /balance · /convert
+│   ├── robs.py                ◈ /gives · /robs · /shield
+│   ├── leaderboard.py         ◈ 4-tab global
+│   ├── daily.py               ◈ /daily · /performance
+│   ├── study.py               ◈ /study browser
+│   ├── mission.py             ◈ /mission
+│   ├── shop.py                ◈ /shop
+│   ├── powers.py              ◈ /powers
+│   ├── quiz.py                ◈ /quiz
+│   ├── premium.py             ◈ /premium · /setemoji
+│   ├── treasure.py            ◈ /treasure
+│   ├── luckydoor.py           ◈ /luckydoor
+│   ├── bombdefuse.py          ◈ /defuse
+│   ├── tgames.py              ◈ /tgames · /h
+│   ├── clone.py               ◈ /clone · /myclone
+│   ├── required_chat.py       ◈ Owner-only
+│   ├── broadcast.py           ◈ Owner-only
+│   ├── botstats.py            ◈ /botstatus · /users
+│   └── admin.py               ◈ Multi-file upload
+│
+├── keyboards/
+│   └── main_menu.py
+│
+├── utils/
+│   ├── database.py            ◈ PostgreSQL ops
+│   ├── clone_db.py            ◈ Clone-specific ops
+│   ├── clone_manager.py       ◈ Lifecycle
+│   ├── clone_middleware.py    ◈ Access gate
+│   ├── bot_context.py         ◈ Per-update identity
+│   ├── welcome.py             ◈ Welcome + about text
+│   ├── permissions.py         ◈ Admin checks
+│   ├── checks.py              ◈ @dm_only
+│   ├── quiz_seed.py           ◈ 225 seed Qs
+│   ├── quiz_loader.py         ◈ OpenTDB fetch
+│   ├── styler.py              ◈ Fancy font
+│   ├── ui.py                  ◈ Smart edit
+│   └── logger.py
+│
+└── data/
+```
 
 <br/>
 
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          FAQ                                            -->
+<!--                        ROADMAP                                           -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <div align="center">
 
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=900&height=80&lines=❓+FAQ+❓;⚡+YOUR+QUESTIONS+ANSWERED+⚡" alt="FAQ Title" />
-</h1>
+## ◈ ʀᴏᴀᴅᴍᴀᴘ
+
+</div>
+
+<br/>
+
+<table align="center" width="90%">
+<thead>
+<tr>
+<th align="center">Version</th>
+<th align="left">Milestone</th>
+<th align="center">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">v1.0</td>
+<td>Study system · basic economy</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td align="center">v2.0</td>
+<td>Quiz · number game · daily</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td align="center">v3.0</td>
+<td>Treasure · 4-tab leaderboard · premium</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td align="center">v4.0</td>
+<td>Lucky Door · Bomb Defuse</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td align="center">v5.0</td>
+<td>XP · Level · Shop · Level Rewards</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td align="center">v5.5</td>
+<td>Custom emoji · premium tweaks</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td align="center">v6.0</td>
+<td>Clone system · live verification</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td align="center">v6.1</td>
+<td>Broadcast auto-cleanup · multi-file upload</td>
+<td align="center">✓</td>
+</tr>
+<tr>
+<td align="center">v6.2</td>
+<td>Multi-language (Hindi / English)</td>
+<td align="center">◐</td>
+</tr>
+<tr>
+<td align="center">v7.0</td>
+<td>Web dashboard</td>
+<td align="center">◌</td>
+</tr>
+<tr>
+<td align="center">v7.5</td>
+<td>Tournament mode</td>
+<td align="center">◌</td>
+</tr>
+<tr>
+<td align="center">v8.0</td>
+<td>AI chatbot integration</td>
+<td align="center">◌</td>
+</tr>
+</tbody>
+</table>
+
+<br/>
+
+<div align="center">
+
+**Legend:** ✓ Shipped · ◐ In progress · ◌ Planned
+
+</div>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        FAQ                                               -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ◈ ꜰᴀǫ
 
 </div>
 
 <br/>
 
 <details>
-<summary><b>🤖 How do I create my own clone bot?</b></summary>
+<summary><b>◇ How do I create a clone bot?</b></summary>
 <br/>
 
-1. Join all required channels & GCs
-2. Tap **🎯 Clone Bot** in main menu or use `/clone`
-3. Create a bot on **@BotFather** using `/newbot`
-4. Copy the token BotFather gives you
-5. Send that token back to the main bot
-6. Your clone is live in seconds! 🚀
+Tap **Clone Bot** in main menu or send `/clone`. Then:
 
-**Limit:** 1 clone per user
+1. Verify you've joined required channels & GCs
+2. Create a bot on @BotFather
+3. Send its token to the main bot
+4. Your clone is live instantly
+
+Limit: **1 clone per user**.
+</details>
+
+<br/>
+
+<details>
+<summary><b>◇ What's the difference between main and clone?</b></summary>
+<br/>
+
+Both share the **same features** (games, economy, study, leaderboard). Differences:
+
+- **Main bot** has broadcast + clone creation
+- **Clone bot** has independent branding, its own admin panel
+- Each clone's data is stored in the same DB but under separate bot_id
 
 </details>
 
 <br/>
 
 <details>
-<summary><b>💎 How do I earn Gems?</b></summary>
+<summary><b>◇ Why won't games work in groups?</b></summary>
 <br/>
 
-- Convert 100 Coins = 1 Gem via `/convert 100c`
-- Win from **Mystery Chest** in `/shop`
-- Level rewards (level 3, 6, 11, 16...)
+Most games are **DM-only** to prevent spam. These work in GC:
+- `/luckydoor`
+- `/defuse`
+- `/mission`
+- `/aleaderboard`
+
+</details>
+
+<br/>
+
+<details>
+<summary><b>◇ What happens if I leave a required channel?</b></summary>
+<br/>
+
+Your clone auto-disables:
+- Every 10 min the system re-checks membership
+- If you left, the clone is disabled for all users
+- Rejoin the channel/GC → auto-restores
+</details>
+
+<br/>
+
+<details>
+<summary><b>◇ Is my bot token safe?</b></summary>
+<br/>
+
+Yes. Tokens are:
+- Encrypted with **AES-128 via Fernet** before DB storage
+- Decrypted only in memory when the clone is starting
+- Never logged or exposed
+
+</details>
+
+<br/>
+
+<details>
+<summary><b>◇ How do I earn gems?</b></summary>
+<br/>
+
+- `/convert 100c` → 100 coins = 1 gem
+- Mystery Chest from `/shop`
+- Level rewards (3, 6, 11, 16...)
 - Premium benefits
 
 </details>
 
 <br/>
 
-<details>
-<summary><b>⭐ What does Premium unlock?</b></summary>
-<br/>
-
-- **5% rob loss** (vs 10% normal)
-- **5000 daily coins** (vs 2000)
-- **350 daily XP** (vs 150)
-- **5-day shields** (vs 2)
-- `/shieldcheck` — peek at others' shields
-- `/setemoji` — custom leaderboard emoji
-- Higher rob limits (100k vs 15k)
-
-</details>
-
-<br/>
-
-<details>
-<summary><b>🎮 Why won't games work in groups?</b></summary>
-<br/>
-
-Most games are **DM only** for balance and to prevent spam. Only these work in both DM and GC:
-- `/luckydoor`
-- `/defuse`
-- `/mission`
-
-</details>
-
-<br/>
-
-<details>
-<summary><b>🛡️ How does shield protection work?</b></summary>
-<br/>
-
-Use `/shield 2` for 2 days (or 5 days for premium). While shielded:
-- Cannot be robbed
-- Shield time counts down automatically
-- Cannot re-activate while active
-
-</details>
-
-<br/>
-
-<details>
-<summary><b>🤖 Can my clone bot be disabled?</b></summary>
-<br/>
-
-Yes — if you **leave any required channel or GC**:
-- System checks every 10 minutes
-- Clone gets temporarily disabled
-- Users see "ᴛᴇᴍᴘᴏʀᴀʀɪʟʏ ᴅɪꜱᴀʙʟᴇᴅ" message
-- Rejoin all chats → clone auto-resumes ✅
-
-</details>
-
-<br/>
-
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          CREATORS SPOTLIGHT                              -->
+<!--                        CREATORS                                          -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 
 <div align="center">
 
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2200&pause=400&color=FFD700&center=true&vCenter=true&width=900&height=80&lines=👑+CREATORS+👑;⚡+THE+LEGENDS+⚡" alt="Creators Title" />
-</h1>
+## ◈ ᴄʀᴇᴀᴛᴏʀꜱ
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=3000&pause=600&color=A78BFA&center=true&vCenter=true&width=700&lines=Made+with+passion+%26+late+night+coffee+%E2%98%95;A+journey+of+%22just+one+more+feature%22" />
+<img src="https://readme-typing-svg.demolab.com?font=Inter&weight=300&size=16&duration=4000&pause=1000&color=A78BFA&center=true&vCenter=true&width=500&height=40&lines=Two+builders.+One+empire.;Quietly+making+things." />
 
 </div>
 
 <br/>
 
-<table align="center" width="100%">
+<table align="center" width="80%">
 <tr>
-<td align="center" width="50%">
+<td align="center" width="50%" style="padding: 30px;">
 
-<img src="https://files.catbox.moe/424au6.jpg" width="160" height="160" style="border-radius: 50%; border: 5px solid #FFD700; box-shadow: 0 0 40px #FFD700, 0 0 80px #FFD700, 0 0 120px #FFD700;" />
+<img src="https://files.catbox.moe/424au6.jpg" width="120" height="120" style="border-radius: 50%; border: 2px solid #FFD700;" />
 
 <br/><br/>
 
-<img src="https://img.shields.io/badge/👑_OWNER-FFD700?style=for-the-badge&labelColor=0D1117" />
+**⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐**
 
-<br/>
+<sub>Architect · Developer</sub>
 
-<h2>⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐</h2>
-
-<img src="https://readme-typing-svg.demolab.com?font=Orbitron&size=16&duration=2500&pause=400&color=FFD700&center=true&vCenter=true&width=350&lines=Visionary+Developer+%F0%9F%9A%80;Dream+Builder+%E2%9C%A8" />
-
-<br/>
+<br/><br/>
 
 <a href="https://t.me/OfficialCrazyBoy07">
-  <img src="https://img.shields.io/badge/📱_@OfficialCrazyBoy07-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/@OfficialCrazyBoy07-26A5E4?style=flat-square&logo=telegram&logoColor=white&labelColor=0D1117" />
 </a>
-
-<br/><br/>
-
-<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="55" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="55" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="55" />
 
 </td>
-<td align="center" width="50%">
+<td align="center" width="50%" style="padding: 30px;">
 
-<img src="https://files.catbox.moe/4ris71.jpg" width="160" height="160" style="border-radius: 50%; border: 5px solid #A78BFA; box-shadow: 0 0 40px #A78BFA, 0 0 80px #A78BFA, 0 0 120px #A78BFA;" />
+<img src="https://files.catbox.moe/4ris71.jpg" width="120" height="120" style="border-radius: 50%; border: 2px solid #A78BFA;" />
 
 <br/><br/>
 
-<img src="https://img.shields.io/badge/⭐_CO-OWNER-A78BFA?style=for-the-badge&labelColor=0D1117" />
+**𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟**
 
-<br/>
+<sub>Design · Innovation</sub>
 
-<h2>𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟</h2>
-
-<img src="https://readme-typing-svg.demolab.com?font=Orbitron&size=16&duration=2500&pause=400&color=A78BFA&center=true&vCenter=true&width=350&lines=Creative+Innovator+%F0%9F%92%A1;Idea+Generator+%F0%9F%8E%A8" />
-
-<br/>
+<br/><br/>
 
 <a href="https://t.me/Lunar_kanha_4572">
-  <img src="https://img.shields.io/badge/📱_@Lunar__kanha__4572-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/@Lunar__kanha__4572-26A5E4?style=flat-square&logo=telegram&logoColor=white&labelColor=0D1117" />
 </a>
-
-<br/><br/>
-
-<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="55" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="55" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="55" />
 
 </td>
 </tr>
@@ -939,218 +859,113 @@ Yes — if you **leave any required channel or GC**:
 
 <br/>
 
-<!-- ═══ CONNECT CARDS ═══ -->
-<table align="center" width="100%">
-<tr>
-<td align="center" width="33%">
+<div align="center">
 
-<img src="https://files.catbox.moe/pdpf7z.jpg" width="90" height="90" style="border-radius: 50%; border: 3px solid #A78BFA; box-shadow: 0 0 25px #A78BFA;" />
-
-<br/><br/>
-
-<img src="https://img.shields.io/badge/🤖_MAIN_BOT-26A5E4?style=for-the-badge&labelColor=0D1117" />
+### ◈ ᴄᴏɴɴᴇᴄᴛ
 
 <br/>
 
 <a href="https://t.me/AstralEmpireRobot">
-  <img src="https://img.shields.io/badge/▶_START_BOT-A78BFA?style=for-the-badge&labelColor=0D1117" />
+  <img src="https://img.shields.io/badge/Open_Bot-A78BFA?style=flat-square&logo=telegram&logoColor=white&labelColor=0D1117" />
 </a>
-
-</td>
-<td align="center" width="33%">
-
-<img src="https://files.catbox.moe/ho69iu.jpg" width="90" height="90" style="border-radius: 50%; border: 3px solid #22C55E; box-shadow: 0 0 25px #22C55E;" />
-
-<br/><br/>
-
-<img src="https://img.shields.io/badge/👥_SUPPORT_GC-5865F2?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
-
-<br/>
-
-<a href="https://t.me/+-j8FiVjAUXExMmM1">
-  <img src="https://img.shields.io/badge/▶_JOIN_NOW-22C55E?style=for-the-badge&labelColor=0D1117" />
-</a>
-
-</td>
-<td align="center" width="33%">
-
-<img src="https://files.catbox.moe/eju0lf.jpg" width="90" height="90" style="border-radius: 50%; border: 3px solid #00D9FF; box-shadow: 0 0 25px #00D9FF;" />
-
-<br/><br/>
-
-<img src="https://img.shields.io/badge/📚_STUDY_CHANNEL-9B59B6?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" />
-
-<br/>
-
-<a href="https://t.me/Astral_study_chest">
-  <img src="https://img.shields.io/badge/▶_JOIN_NOW-00D9FF?style=for-the-badge&labelColor=0D1117" />
-</a>
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          GITHUB STATS                                    -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=500&color=22C55E&center=true&vCenter=true&width=900&height=80&lines=📊+GITHUB+STATS+📊;⚡+LIVE+ANALYTICS+⚡" alt="GitHub Stats Title" />
-</h1>
-
-<img src="https://github-readme-stats.vercel.app/api?username=bots-123Ac&show_icons=true&theme=midnight-purple&hide_border=true&bg_color=0D1117&title_color=A78BFA&icon_color=FFD700&text_color=ffffff&border_radius=15" width="48%" />
-<img src="https://github-readme-streak-stats.herokuapp.com/?user=bots-123Ac&theme=midnight-purple&hide_border=true&background=0D1117&stroke=A78BFA&ring=FFD700&fire=FF6B6B&currStreakLabel=A78BFA&border_radius=15" width="48%" />
-
-<br/><br/>
-
-<img src="https://github-readme-activity-graph.vercel.app/graph?username=bots-123Ac&theme=react-dark&bg_color=0D1117&color=A78BFA&line=FFD700&point=ffffff&area=true&hide_border=true&radius=15" width="100%" />
-
-<br/><br/>
-
-<img src="https://github-profile-trophy.vercel.app/?username=bots-123Ac&theme=algolia&no-frame=true&no-bg=true&column=7&margin-w=10&margin-h=10" width="100%" />
-
-<br/><br/>
-
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=bots-123Ac&theme=midnight-purple&hide_border=true&bg_color=0D1117&title_color=A78BFA&text_color=ffffff&layout=compact&border_radius=15" width="50%" />
-
-</div>
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          CONTRIBUTING                                    -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=500&color=22C55E&center=true&vCenter=true&width=900&height=80&lines=🤝+CONTRIBUTE+🤝;⚡+JOIN+THE+EMPIRE+⚡" alt="Contributing Title" />
-</h1>
-
-</div>
-
-<br/>
-
-Contributions are always welcome! 🎉 Here's how to help:
-
-```bash
-# 1. 🍴 Fork the repository
-
-# 2. 🌿 Create a feature branch
-git checkout -b feature/AmazingFeature
-
-# 3. 💾 Commit your changes
-git commit -m 'Add some AmazingFeature'
-
-# 4. 📤 Push to the branch
-git push origin feature/AmazingFeature
-
-# 5. 🎯 Open a Pull Request
-```
-
-<br/>
-
-### 🎁 **ᴡᴀʏꜱ ᴛᴏ ᴄᴏɴᴛʀɪʙᴜᴛᴇ**
-
-- 🐛 **Report Bugs** — Found an issue? Open an issue
-- 💡 **Suggest Features** — Have an idea? Share it
-- 📝 **Improve Docs** — Better docs help everyone
-- 🎨 **UI/UX Design** — Design improvements always welcome
-- 🌍 **Translate** — Help us go multi-language
-- ⭐ **Star the Repo** — Show your support
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          LICENSE                                         -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-<h1>
-  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=48&duration=2500&pause=500&color=FFD700&center=true&vCenter=true&width=900&height=80&lines=📜+LICENSE+📜;⚡+MIT+OPEN+SOURCE+⚡" alt="License Title" />
-</h1>
-
-<br/>
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
-<br/>
-
-[![MIT License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge&labelColor=0D1117)](LICENSE)
-
-</div>
-
-<br/>
-
-<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
-
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                          FINAL FOOTER                                    -->
-<!-- ═══════════════════════════════════════════════════════════════════════ -->
-
-<div align="center">
-
-<br/>
-
-<!-- ═══ EPIC FINALE ═══ -->
-<img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=900&size=32&duration=2000&pause=300&color=A78BFA&center=true&vCenter=true&width=900&height=80&lines=Thank+You+for+Visiting;Built+with+%E2%9D%A4%EF%B8%8F+by+Astral+Society" />
-
-<br/>
-
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=18&duration=2200&pause=400&color=FFD700&center=true&vCenter=true&width=700&height=50&lines=⭐+Star+the+repo+if+you+enjoyed+it!;%F0%9F%9A%80+Join+our+growing+community;%F0%9F%92%9C+Your+support+means+everything" />
-
-<br/><br/>
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,2,2,5,30&height=220&section=footer&animation=twinkling&text=⛧%20SEE%20YOU%20IN%20THE%20STARS%20⛧&fontSize=38&fontColor=ffffff&fontAlignY=72" width="100%" />
-
-<br/>
-
-<img src="https://komarev.com/ghpvc/?username=bots-123Ac&label=Visitors&color=A78BFA&style=for-the-badge" />
 &nbsp;
-<img src="https://img.shields.io/badge/Uptime-24%2F7-brightgreen?style=for-the-badge&labelColor=0D1117" />
+<a href="https://t.me/+-j8FiVjAUXExMmM1">
+  <img src="https://img.shields.io/badge/Join_GC-22C55E?style=flat-square&logo=telegram&logoColor=white&labelColor=0D1117" />
+</a>
+&nbsp;
+<a href="https://t.me/Astral_study_chest">
+  <img src="https://img.shields.io/badge/Study_Channel-9B59B6?style=flat-square&logo=telegram&logoColor=white&labelColor=0D1117" />
+</a>
+&nbsp;
+<a href="https://crazycore.vercel.app/">
+  <img src="https://img.shields.io/badge/Website-00D9FF?style=flat-square&labelColor=0D1117" />
+</a>
+
+</div>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        STATS                                             -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ◈ ꜱᴛᴀᴛꜱ
+
+<br/>
+
+<img src="https://github-readme-stats.vercel.app/api?username=bots-123Ac&show_icons=true&theme=dark&hide_border=true&bg_color=0D1117&title_color=A78BFA&icon_color=FFD700&text_color=E5E7EB&border_radius=8" width="47%" />
+&nbsp;
+<img src="https://github-readme-streak-stats.herokuapp.com/?user=bots-123Ac&theme=dark&hide_border=true&background=0D1117&stroke=A78BFA&ring=FFD700&fire=FF6B6B&currStreakLabel=A78BFA&border_radius=8" width="47%" />
+
+<br/><br/>
+
+<img src="https://github-readme-activity-graph.vercel.app/graph?username=bots-123Ac&theme=react-dark&bg_color=0D1117&color=A78BFA&line=FFD700&point=E5E7EB&area=true&hide_border=true&radius=8" width="100%" />
+
+</div>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        LICENSE                                           -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+## ◈ ʟɪᴄᴇɴꜱᴇ
+
+<br/>
+
+This project is licensed under the **MIT License**.
+<br/>
+See [LICENSE](LICENSE) for details.
+
+<br/>
+
+[![MIT](https://img.shields.io/badge/MIT-Open_Source-A78BFA?style=for-the-badge&labelColor=0D1117)](LICENSE)
+
+</div>
+
+<br/>
+
+<img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" width="100%" />
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!--                        FINAL                                             -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+
+<div align="center">
+
+<br/>
+
+<img src="https://capsule-render.vercel.app/api?type=rect&color=gradient&customColorList=0,1,3,6&height=140&section=footer&text=◈%20Astral%20Empire%20◈&fontSize=40&fontColor=E5E7EB&fontAlignY=55" width="100%" />
+
+<br/>
+
+<sub><i>Quiet. Sharp. Yours.</i></sub>
+
+<br/><br/>
+
+<img src="https://komarev.com/ghpvc/?username=bots-123Ac&label=Visitors&color=A78BFA&style=flat-square" />
+&nbsp;
+<img src="https://img.shields.io/badge/Uptime-24%2F7-22C55E?style=flat-square&labelColor=0D1117" />
 &nbsp;
 <a href="https://github.com/bots-123Ac/astralsociety/stargazers">
-  <img src="https://img.shields.io/github/stars/bots-123Ac/astralsociety?style=for-the-badge&color=FFD700&labelColor=0D1117" />
+  <img src="https://img.shields.io/github/stars/bots-123Ac/astralsociety?style=flat-square&color=FFD700&labelColor=0D1117" />
 </a>
 
 <br/><br/>
 
-<p>
-  <a href="https://t.me/AstralEmpireRobot">
-    <img src="https://img.shields.io/badge/Made_with_Love_for_Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=0D1117" height="45" />
-  </a>
-</p>
-
-<br/>
-
-<p>
-  <b>🌌 ʟᴇᴀʀɴ • ᴘʟᴀʏ • ᴄᴏᴍᴘᴇᴛᴇ • ᴄʟᴏɴᴇ • ʀɪꜱᴇ 🌌</b>
-</p>
-
-<br/>
-
-<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="45" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="45" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="45" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/dealwithitparrot.gif" width="45" />
-<img src="https://cultofthepartyparrot.com/parrots/hd/partyparrot.gif" width="45" />
-
-<br/><br/>
+<sub>Made with ❤️ by Astral Society</sub>
 
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
-<!--                  🌌 END OF README • NEBULA EDITION 🌌                   -->
-<!--              ⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐  ×  𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟                 -->
+<!--                  ◈ END OF README ◈                                      -->
+<!--               ⏤͟͞ 𝐂𝐑𝐀𝐙𝐘 𝐁𝐎𝐘 ᭄࿐  ×  𝓚𝓪𝓷𝓷𝓱𝓪࿐✨🤟                 -->
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
