@@ -1,3 +1,7 @@
+"""
+handlers/leaderboard.py — 4-tab global leaderboard (works in DM + GC).
+"""
+
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
@@ -32,13 +36,13 @@ def _format_lb(rows, period: str, rank) -> str:
             astral_id = row["astral_id"]
             coins = row["coins"] or 0
 
-            # ═══ Custom emoji (if set) ═══
+            # Custom emoji may not exist in every DB row — safe access
             try:
                 emoji = row["custom_emoji"] or ""
             except Exception:
                 emoji = ""
 
-            if emoji == "∅" or emoji == "none":
+            if emoji in ("∅", "none"):
                 emoji = ""
 
             prefix = f"{emoji} " if emoji else ""
@@ -61,10 +65,17 @@ async def _build_lb_text(period: str, user_id: int) -> str:
     return _format_lb(rows, period, rank)
 
 
+# ═══════════════════════════════════════════════
+# COMMANDS — work in DM + GC (NO dm_only decorator)
+# ═══════════════════════════════════════════════
 @router.message(Command("aleaderboard"))
 async def cmd_aleaderboard(message: Message):
     text = await _build_lb_text("alltime", message.from_user.id)
-    await message.answer(text, reply_markup=leaderboard_kb())
+    try:
+        await message.answer(text, reply_markup=leaderboard_kb())
+    except Exception:
+        # Fallback if message.answer fails (rare)
+        pass
 
 
 @router.message(Command("leaderboard"))
