@@ -1591,3 +1591,44 @@ async def get_all_registered_groups_count() -> int:
     pool = await get_pool()
     val = await pool.fetchval("SELECT COUNT(*) FROM active_groups")
     return val or 0
+
+# ═══════════════════════════════════════════════
+# STUDY — MULTI-FILE SUPPORT
+# ═══════════════════════════════════════════════
+async def save_study_material_bulk(
+    class_name: str,
+    section: str,
+    subject: str,
+    chapter: str,
+    items: list,     # list of {"content_type", "content", "caption"}
+    uploaded_by: int,
+):
+    """Save multiple study materials in one transaction."""
+    if not items:
+        return 0
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            for item in items:
+                await conn.execute(
+                    """INSERT INTO study_materials
+                    (class_name, section, subject, chapter,
+                     content_type, content, caption, uploaded_by, uploaded_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)""",
+                    class_name, section, subject, chapter,
+                    item["content_type"], item["content"],
+                    item.get("caption", ""), uploaded_by, _to_str(_now())
+                )
+    return len(items)
+
+
+async def count_study_material(
+    class_name: str, section: str, chapter: str
+) -> int:
+    pool = await get_pool()
+    val = await pool.fetchval(
+        """SELECT COUNT(*) FROM study_materials
+           WHERE class_name = $1 AND section = $2 AND chapter = $3""",
+        class_name, section, chapter
+    )
+    return val or 0
